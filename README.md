@@ -87,7 +87,10 @@ npx serve .
 ![Wallet connected](screenshots/wallet-connected.png)
 
 ### 2. Balance Displayed
+Wallet XLM balances verified on Stellar Expert (Testnet):
+
 ![Balance displayed](screenshots/balance-displayed.png)
+![Balance displayed 2](screenshots/balance-displayed-2.png)
 
 ### 3. Successful Testnet Transaction
 ![Successful transaction](screenshots/successful-transaction.png)
