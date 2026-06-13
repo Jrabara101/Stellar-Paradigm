@@ -84,10 +84,11 @@ npx serve .
 ## 📸 Screenshots
 
 ### 1. Wallet Connected (Multi-Wallet)
-The multi-wallet picker (Stellar Wallets Kit) lets players choose any supported wallet, then authorize the app:
+The multi-wallet picker (Stellar Wallets Kit) lets players choose any supported wallet, then authorize the app. Works with both browser-extension wallets (Freighter) and web wallets (Albedo):
 
 ![Wallet picker](screenshots/wallet-picker.png)
-![Wallet authorization](screenshots/wallet-approval.png)
+![Freighter connection request](screenshots/wallet-approval-freighter.png)
+![Albedo authorization](screenshots/wallet-approval.png)
 
 ### 2. Balance Displayed
 The connected wallet's XLM balance, and the same balances verified on Stellar Expert (Testnet):
