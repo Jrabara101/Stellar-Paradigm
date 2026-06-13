@@ -83,14 +83,18 @@ npx serve .
 
 ## 📸 Screenshots
 
-### 1. Wallet Connected
-![Wallet connected](screenshots/wallet-connected.png)
+### 1. Wallet Connected (Multi-Wallet)
+The multi-wallet picker (Stellar Wallets Kit) lets players choose any supported wallet, then authorize the app:
+
+![Wallet picker](screenshots/wallet-picker.png)
+![Wallet authorization](screenshots/wallet-approval.png)
 
 ### 2. Balance Displayed
-Wallet XLM balances verified on Stellar Expert (Testnet):
+The connected wallet's XLM balance, and the same balances verified on Stellar Expert (Testnet):
 
-![Balance displayed](screenshots/balance-displayed.png)
-![Balance displayed 2](screenshots/balance-displayed-2.png)
+![In-wallet balance](screenshots/wallet-balance.png)
+![Balance on Stellar Expert](screenshots/balance-displayed.png)
+![Balance on Stellar Expert 2](screenshots/balance-displayed-2.png)
 
 ### 3. Successful Testnet Transaction
 ![Successful transaction](screenshots/successful-transaction.png)
