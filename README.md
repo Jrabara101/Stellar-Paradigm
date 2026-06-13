@@ -97,10 +97,16 @@ The connected wallet's XLM balance, and the same balances verified on Stellar Ex
 ![Balance on Stellar Expert 2](screenshots/balance-displayed-2.png)
 
 ### 3. Successful Testnet Transaction
+`submit_score` transactions confirmed on Testnet (with fees charged), viewed on Stellar Expert:
+
 ![Successful transaction](screenshots/successful-transaction.png)
+![Successful transaction 2](screenshots/successful-transaction-2.png)
 
 ### 4. Transaction Result Shown to the User
-![Transaction result](screenshots/transaction-result.png)
+The on-chain result — the contract's invocation history and the player's account activity on Stellar Expert:
+
+![Transaction result — contract](screenshots/transaction-result.png)
+![Transaction result — account](screenshots/transaction-result-2.png)
 
 ---
 
