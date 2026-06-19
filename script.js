@@ -477,6 +477,57 @@ class TeakScrambleGame {
         this.runLoadingScreen(this.initLevel());
     }
 
+    // --- Hybrid localStorage / on-chain save helpers ---
+    _progressKey(addr) { return addr ? `ws_prog_${addr}` : 'ws_prog_anon'; }
+    _pbKey(addr)       { return addr ? `ws_pb_${addr}` : 'word_scramble_high_score'; }
+    _pbLevelKey(addr)  { return addr ? `ws_pb_level_${addr}` : 'word_scramble_max_level'; }
+
+    saveProgress() {
+        const addr = window.stellarWallet?.address || null;
+        localStorage.setItem(this._progressKey(addr), JSON.stringify({
+            score: this.score,
+            level: this.level,
+            category: this.currentCategory,
+            winStreak: this.winStreak,
+        }));
+    }
+
+    async onWalletConnected(address) {
+        try {
+            const raw = localStorage.getItem(this._progressKey(address));
+            if (!raw) return;
+            const progress = JSON.parse(raw);
+
+            this.score = progress.score ?? 0;
+            this.level = progress.level ?? 1;
+            this.winStreak = progress.winStreak ?? 0;
+            this.scoreElement.innerText = this.score.toString().padStart(3, '0');
+            this.levelElement.innerText = this.level;
+            if (this.streakElement) this.streakElement.innerText = this.winStreak;
+
+            if (progress.category) {
+                this.currentCategory = progress.category;
+                const prettyNames = { general: 'General', science: 'Science', math: 'Mathematics', history: 'History', anime: 'Anime Series', technology: 'Technology', novel: 'Novels', 'filipino-movies': 'Filipino Movies' };
+                const tagBtn = document.getElementById('category-tag-btn');
+                if (tagBtn) tagBtn.innerText = `Category: ${prettyNames[progress.category] || progress.category}`;
+            }
+
+            // Reset per-level state so the restored level starts clean
+            this.clueLevel = 1;
+            this.clue3Exhausted = false;
+            this.showingPureDefinition = false;
+            this.prefetchedData = null;
+            this.isEntranceLoad = false;
+
+            // Remove existing tiles and reload the board for the restored level
+            this.tilesData.forEach(t => t.element.remove());
+            this.tilesData = [];
+
+            window.stellarWallet._showStatus(`Session resumed — Level ${this.level}, Score ${this.score}`, 'success');
+            this.runLoadingScreen(this.initLevel());
+        } catch (_) {}
+    }
+
     buildCheckerboard() {
         this.boardGrid.innerHTML = '';
         for (let r = 0; r < 10; r++) {
@@ -1137,6 +1188,16 @@ class TeakScrambleGame {
             if (this.streakElement) this.streakElement.innerText = this.winStreak;
             this.updateVictoryBreakdown(100, streakBonus);
 
+            // Save personal best (address-keyed when wallet connected)
+            const _pbAddr = window.stellarWallet?.address || null;
+            const localPBScore = localStorage.getItem(this._pbKey(_pbAddr)) || 0;
+            if (this.score > parseInt(localPBScore)) {
+                localStorage.setItem(this._pbKey(_pbAddr), this.score);
+                localStorage.setItem(this._pbLevelKey(_pbAddr), this.level);
+            }
+            // Autosave in-progress state to localStorage
+            this.saveProgress();
+
             // Submit score to Stellar leaderboard (non-blocking)
             if (window.stellarWallet && window.stellarWallet.connected) {
                 window.stellarWallet.submitScore(this.score, this.level);
@@ -1420,9 +1481,10 @@ class TeakScrambleGame {
     async nextLevel() {
         this.victoryScreen.classList.remove('active');
         this.particles.stop();
-        
+
         this.level++;
         this.levelElement.innerText = this.level;
+        this.saveProgress();
         
         document.getElementById('clue-text').innerText = "Preparing next scramble...";
         
@@ -1638,6 +1700,162 @@ class TeakScrambleGame {
         setTimeout(() => {
             this.syncViewPositions(animate);
         }, 120);
+    }
+
+    openLeaderboardModal() {
+        this.sound.play('select');
+        document.getElementById('leaderboard-modal-backdrop').classList.add('active');
+        this.refreshLeaderboard();
+    }
+
+    closeLeaderboardModal(event) {
+        if (!event || event.target === document.getElementById('leaderboard-modal-backdrop')) {
+            this.sound.play('select');
+            document.getElementById('leaderboard-modal-backdrop').classList.remove('active');
+        }
+    }
+
+    async refreshLeaderboard() {
+        // Show loading state
+        const loadingEl = document.getElementById('leaderboard-loading');
+        const errorEl = document.getElementById('leaderboard-error');
+        const emptyEl = document.getElementById('leaderboard-empty');
+        const tableWrapperEl = document.getElementById('leaderboard-table-wrapper');
+        const bodyEl = document.getElementById('leaderboard-body');
+        
+        loadingEl.style.display = 'flex';
+        errorEl.style.display = 'none';
+        emptyEl.style.display = 'none';
+        tableWrapperEl.style.display = 'none';
+        bodyEl.innerHTML = '';
+
+        // Update Personal Best display (address-keyed when wallet connected)
+        const _pbAddr = window.stellarWallet?.address || null;
+        const localScore = parseInt(localStorage.getItem(this._pbKey(_pbAddr)) || '0');
+        const localLevel = parseInt(localStorage.getItem(this._pbLevelKey(_pbAddr)) || '1');
+
+        // Use the current session score/level if they are higher than local storage
+        let pbScore = Math.max(localScore, this.score);
+        let pbLevel = Math.max(localLevel, this.level);
+        
+        document.getElementById('pb-score-val').innerText = pbScore.toString().padStart(3, '0');
+        document.getElementById('pb-level-val').innerText = pbLevel;
+
+        try {
+            let entries = [];
+            if (window.stellarWallet) {
+                entries = await window.stellarWallet.fetchLeaderboard();
+            }
+
+            loadingEl.style.display = 'none';
+
+            // Use on-chain entry as the authoritative PB baseline
+            const _playerAddr = window.stellarWallet?.address || null;
+            if (_playerAddr && entries.length > 0) {
+                const onChainEntry = entries.find(e => e.address === _playerAddr);
+                if (onChainEntry && onChainEntry.score > pbScore) {
+                    pbScore = onChainEntry.score;
+                    pbLevel = Math.max(pbLevel, onChainEntry.level);
+                    document.getElementById('pb-score-val').innerText = pbScore.toString().padStart(3, '0');
+                    document.getElementById('pb-level-val').innerText = pbLevel;
+                }
+            }
+
+            if (!entries || entries.length === 0) {
+                // Fallback local list merged with player personal best if higher than 0
+                const fallbacks = [
+                    { rank: 1, address: "GBX2...9P2K", score: 850, level: 9 },
+                    { rank: 2, address: "GA7T...5W3M", score: 620, level: 7 },
+                    { rank: 3, address: "GCT5...1V4X", score: 410, level: 5 }
+                ];
+                
+                if (pbScore > 0) {
+                    const playerAddr = window.stellarWallet && window.stellarWallet.address 
+                        ? window.stellarWallet._short(window.stellarWallet.address) 
+                        : "YOU (Local)";
+                    
+                    const playerEntry = { rank: 0, address: playerAddr, score: pbScore, level: pbLevel, isCurrentPlayer: true };
+                    
+                    let merged = [...fallbacks, playerEntry];
+                    merged.sort((a, b) => b.score - a.score);
+                    merged.forEach((item, idx) => {
+                        item.rank = idx + 1;
+                    });
+                    this.renderLeaderboard(merged);
+                } else {
+                    this.renderLeaderboard(fallbacks);
+                }
+            } else {
+                const playerAddr = window.stellarWallet && window.stellarWallet.address 
+                    ? window.stellarWallet.address 
+                    : null;
+                
+                const mappedEntries = entries.map(e => {
+                    const isCurrentPlayer = playerAddr && e.address === playerAddr;
+                    return {
+                        rank: e.rank,
+                        address: isCurrentPlayer ? "YOU (" + window.stellarWallet._short(e.address) + ")" : window.stellarWallet._short(e.address),
+                        score: e.score,
+                        level: e.level,
+                        isCurrentPlayer: isCurrentPlayer
+                    };
+                });
+                
+                if (playerAddr && pbScore > 0 && !mappedEntries.some(e => e.isCurrentPlayer)) {
+                    mappedEntries.push({
+                        rank: 0,
+                        address: "YOU (" + window.stellarWallet._short(playerAddr) + ")",
+                        score: pbScore,
+                        level: pbLevel,
+                        isCurrentPlayer: true
+                    });
+                    mappedEntries.sort((a, b) => b.score - a.score);
+                    mappedEntries.forEach((item, idx) => {
+                        item.rank = idx + 1;
+                    });
+                }
+                
+                this.renderLeaderboard(mappedEntries);
+            }
+        } catch (err) {
+            console.error("Error refreshing leaderboard:", err);
+            loadingEl.style.display = 'none';
+            errorEl.style.display = 'flex';
+        }
+    }
+
+    renderLeaderboard(entries) {
+        const tableWrapperEl = document.getElementById('leaderboard-table-wrapper');
+        const bodyEl = document.getElementById('leaderboard-body');
+        
+        bodyEl.innerHTML = '';
+        
+        if (entries.length === 0) {
+            document.getElementById('leaderboard-empty').style.display = 'flex';
+            return;
+        }
+        
+        entries.forEach(e => {
+            const tr = document.createElement('tr');
+            if (e.isCurrentPlayer) {
+                tr.classList.add('current-player-row');
+            }
+            
+            let rankClass = 'rank-other';
+            if (e.rank === 1) rankClass = 'rank-1';
+            else if (e.rank === 2) rankClass = 'rank-2';
+            else if (e.rank === 3) rankClass = 'rank-3';
+            
+            tr.innerHTML = `
+                <td class="${rankClass}"><span class="rank-badge">${e.rank}</span></td>
+                <td><span class="player-addr">${e.address}</span></td>
+                <td><span class="player-score">${e.score}</span></td>
+                <td><span class="player-level">Lv ${e.level}</span></td>
+            `;
+            bodyEl.appendChild(tr);
+        });
+        
+        tableWrapperEl.style.display = 'block';
     }
 
     async switchCategory(category) {

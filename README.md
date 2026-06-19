@@ -100,6 +100,11 @@ The connected wallet's XLM balance, and the same balances verified on Stellar Ex
 ### 3. Successful Testnet Transaction
 `submit_score` transactions confirmed on Testnet (with fees charged), viewed on Stellar Expert:
 
+**Verified transaction hash (Testnet):** `04fe1fd8a82ef7a7237ccd5a2079ea66898dfc0f4adaf80bd13a7ef6dde5815f`
+[View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/04fe1fd8a82ef7a7237ccd5a2079ea66898dfc0f4adaf80bd13a7ef6dde5815f)
+
+> `submit_score(GAOPKW...3K4MZJ, 550, 5)` — Status: Successful — Ledger 3129587 — 2026-06-17 01:48:57 UTC
+
 ![Successful transaction](screenshots/successful-transaction.png)
 ![Successful transaction 2](screenshots/successful-transaction-2.png)
 

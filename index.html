@@ -51,6 +51,7 @@
                 <button class="category-btn-tag" id="category-tag-btn" onclick="game.openCategoryModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--turquoise-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--turquoise); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--turquoise-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Category: General</button>
                 <button class="customize-btn-tag" id="customize-tag-btn" onclick="game.openThemeModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--mustard-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--mustard); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--mustard-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Customize Board</button>
                 <button class="customize-btn-tag" id="customize-chips-btn" onclick="game.openChipModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--turquoise-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--turquoise); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--turquoise-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Customize Chips</button>
+                <button class="customize-btn-tag" id="leaderboard-btn" onclick="game.openLeaderboardModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--mustard-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--mustard); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--mustard-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Leaderboard</button>
             </div>
         </div>
         <div class="stats-container">
@@ -296,6 +297,30 @@
             <h3>Game Updates</h3>
             <div class="changelog-content">
                 <div class="changelog-version">
+                    <h4>v1.7.0 - Hybrid Save System</h4>
+                    <ul>
+                        <li><strong>Address-Keyed Autosave:</strong> In-progress game state (score, level, category, streak) is now saved to <code>localStorage</code> under your wallet address after every correct answer — no fee, instant.</li>
+                        <li><strong>Session Resume:</strong> Reconnecting your wallet automatically restores your last in-progress level and score.</li>
+                        <li><strong>On-Chain Source of Truth:</strong> Your all-time best score remains on the Soroban leaderboard; the personal best panel now uses the on-chain entry as an authoritative baseline.</li>
+                        <li><strong>No Wallet, No Problem:</strong> Anonymous players still get local best-score tracking under a shared anonymous key.</li>
+                    </ul>
+                </div>
+                <div class="changelog-version" style="margin-top: 15px;">
+                    <h4>v1.6.1 - Sound Icon Alignment</h4>
+                    <ul>
+                        <li><strong>Sound Toggle Offset:</strong> Adjusted the fixed mute button down to <code>top: 48px</code>, ensuring it is no longer covered by the Stellar Wallet bar.</li>
+                    </ul>
+                </div>
+                <div class="changelog-version" style="margin-top: 15px;">
+                    <h4>v1.6.0 - Atomic Leaderboards & Personal Best Tracker</h4>
+                    <ul>
+                        <li><strong>On-Chain Leaderboard UI:</strong> View and fetch real-time player high scores directly from the Stellar Testnet (Soroban) smart contract.</li>
+                        <li><strong>Personal Best Storage:</strong> Saves your highest score and maximum level locally using browser <code>localStorage</code>, integrating seamlessly with your connected on-chain identity.</li>
+                        <li><strong>Mock Fallback Mechanics:</strong> Provides high-fidelity local high score rankings if the blockchain ledger is unreachable or empty.</li>
+                        <li><strong>Metallic Rank Badges:</strong> Styled custom gold, silver, and bronze badges to highlight the top three leaderboard performers.</li>
+                    </ul>
+                </div>
+                <div class="changelog-version" style="margin-top: 15px;">
                     <h4>v1.5.0 - Custom Chips, Background Music & Alignment Fixes</h4>
                     <ul>
                         <li><strong>8 Skeuomorphic Chip Materials:</strong> Customize your tiles via the new "Customize Chips" menu. Choose from Bone, Acrylic, Aluminum, Mahogany, Ebony, Vibrant Amber, Malachite, and Smoked Glass!</li>
@@ -351,6 +376,65 @@
                 </div>
             </div>
             <button class="changelog-close-btn" onclick="game.closeChangelogModal(null)">Close</button>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div class="modal-backdrop" id="leaderboard-modal-backdrop" onclick="game.closeLeaderboardModal(event)">
+        <div class="leaderboard-modal" onclick="event.stopPropagation()">
+            <h3>Atomic Leaderboard</h3>
+            <div class="leaderboard-subtitle">On-Chain Soroban Scores</div>
+            
+            <div class="leaderboard-container">
+                <div class="leaderboard-loading" id="leaderboard-loading">
+                    <div class="spinner"></div>
+                    <span>Retrieving blockchain ledger...</span>
+                </div>
+                
+                <div class="leaderboard-error" id="leaderboard-error" style="display: none;">
+                    <span class="material-symbols-outlined error-icon">warning</span>
+                    <span class="error-msg">Failed to connect to network.</span>
+                    <button class="leaderboard-retry-btn" onclick="game.refreshLeaderboard()">Retry</button>
+                </div>
+                
+                <div class="leaderboard-empty" id="leaderboard-empty" style="display: none;">
+                    <span class="material-symbols-outlined empty-icon">leaderboard</span>
+                    <span class="empty-msg">No entries found on-chain.<br/>Be the first to submit a score!</span>
+                </div>
+                
+                <div class="leaderboard-table-wrapper" id="leaderboard-table-wrapper" style="display: none;">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%">Rank</th>
+                                <th style="width: 50%">Player</th>
+                                <th style="width: 20%">Score</th>
+                                <th style="width: 15%">Level</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Personal Best Bar -->
+            <div class="personal-best-box">
+                <div class="pb-title">
+                    <span class="material-symbols-outlined pb-icon">emoji_events</span>
+                    <span>YOUR PERSONAL BEST</span>
+                </div>
+                <div class="pb-stats">
+                    <span class="pb-stat-item">Score: <strong id="pb-score-val">000</strong></span>
+                    <span class="pb-stat-item">Level: <strong id="pb-level-val">1</strong></span>
+                </div>
+            </div>
+            
+            <div class="leaderboard-actions">
+                <button class="leaderboard-refresh-btn" onclick="game.refreshLeaderboard()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 #00bfa5'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 #00bfa5'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 #00bfa5'">Refresh</button>
+                <button class="theme-close-btn" style="margin-top: 0; width: auto;" onclick="game.closeLeaderboardModal(null)">Close</button>
+            </div>
         </div>
     </div>
 

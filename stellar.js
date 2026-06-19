@@ -72,6 +72,9 @@ class StellarWallet {
 
                         // Show the wallet's XLM balance
                         await this._updateBalanceUI();
+
+                        // Restore in-progress game state for this address
+                        if (window.game) window.game.onWalletConnected(address);
                     } catch (e) {
                         this._showStatus(`Connection failed: ${e.message}`, 'error');
                     }
