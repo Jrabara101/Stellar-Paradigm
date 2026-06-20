@@ -1,5 +1,5 @@
 [package]
-name = "hello-world"
+name = "reward-contract"
 version = "0.0.0"
 edition = "2021"
 publish = false
@@ -8,10 +8,11 @@ publish = false
 crate-type = ["lib", "cdylib"]
 doctest = false
 
+[features]
+testutils = ["soroban-sdk/testutils"]
+
 [dependencies]
 soroban-sdk = { workspace = true }
-reward-contract = { path = "../reward-contract" }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
-reward-contract = { path = "../reward-contract", features = ["testutils"] }
