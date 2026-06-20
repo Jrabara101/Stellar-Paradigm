@@ -93,3 +93,81 @@ impl WordScrambleContract {
         0
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use soroban_sdk::testutils::Address as _;
+    use soroban_sdk::Env;
+
+    #[test]
+    fn test_submit_score_appears_on_leaderboard() {
+        let env = Env::default();
+        env.mock_all_auths();
+        let contract_id = env.register(WordScrambleContract, ());
+        let client = WordScrambleContractClient::new(&env, &contract_id);
+
+        let player = Address::generate(&env);
+        client.submit_score(&player, &500, &3);
+
+        let board = client.get_leaderboard();
+        assert_eq!(board.len(), 1);
+        assert_eq!(board.get(0).unwrap().score, 500);
+    }
+
+    #[test]
+    fn test_score_does_not_decrease() {
+        let env = Env::default();
+        env.mock_all_auths();
+        let contract_id = env.register(WordScrambleContract, ());
+        let client = WordScrambleContractClient::new(&env, &contract_id);
+
+        let player = Address::generate(&env);
+        client.submit_score(&player, &800, &5);
+        client.submit_score(&player, &200, &1);
+
+        assert_eq!(client.get_score(&player), 800);
+    }
+
+    #[test]
+    fn test_get_score_returns_zero_for_unknown_player() {
+        let env = Env::default();
+        env.mock_all_auths();
+        let contract_id = env.register(WordScrambleContract, ());
+        let client = WordScrambleContractClient::new(&env, &contract_id);
+
+        let unknown = Address::generate(&env);
+        assert_eq!(client.get_score(&unknown), 0);
+    }
+
+    #[test]
+    fn test_leaderboard_sorted_highest_first() {
+        let env = Env::default();
+        env.mock_all_auths();
+        let contract_id = env.register(WordScrambleContract, ());
+        let client = WordScrambleContractClient::new(&env, &contract_id);
+
+        let p1 = Address::generate(&env);
+        let p2 = Address::generate(&env);
+        let p3 = Address::generate(&env);
+        client.submit_score(&p1, &100, &1);
+        client.submit_score(&p2, &500, &3);
+        client.submit_score(&p3, &300, &2);
+
+        let board = client.get_leaderboard();
+        assert_eq!(board.get(0).unwrap().score, 500);
+        assert_eq!(board.get(1).unwrap().score, 300);
+        assert_eq!(board.get(2).unwrap().score, 100);
+    }
+
+    #[test]
+    fn test_empty_leaderboard_returns_empty_vec() {
+        let env = Env::default();
+        env.mock_all_auths();
+        let contract_id = env.register(WordScrambleContract, ());
+        let client = WordScrambleContractClient::new(&env, &contract_id);
+
+        let board = client.get_leaderboard();
+        assert_eq!(board.len(), 0);
+    }
+}

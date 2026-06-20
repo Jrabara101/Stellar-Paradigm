@@ -868,13 +868,25 @@ button:active {
         overflow-y: auto;
         height: auto;
         min-height: 100vh;
-        padding: 24px 10px;
+        padding: 54px 10px 24px; /* top accounts for fixed stellar bar (~44px) */
     }
     .instructions-panel, .hint-info-panel {
         position: static;
         width: 100%;
         max-width: 440px;
         margin-top: 20px;
+    }
+    /* Pull the letter rack out of fixed positioning so it scrolls with the page */
+    .rack-container {
+        position: static;
+        margin-top: 14px;
+        align-items: center;
+        width: 100%;
+        max-width: 480px;
+    }
+    .rack-slots {
+        justify-content: center;
+        flex-wrap: wrap;
     }
 }
 
@@ -1364,10 +1376,70 @@ button:active {
     /* Removed level-panel responsive overrides */
         body {
             overflow-y: auto;
-            padding: 12px 4px;
+            padding: 54px 4px 12px; /* top accounts for fixed stellar bar */
             height: auto;
             min-height: 100vh;
         }
+
+    /* Shrink stat bubbles so they don't overflow narrow screens */
+    .stats-bubble-wrapper {
+        width: 70px;
+        height: 70px;
+    }
+    .stats-bubble {
+        width: 58px;
+        height: 58px;
+    }
+    .stats-bubble span:first-child {
+        font-size: 0.6rem;
+        letter-spacing: 1px;
+    }
+    .stats-bubble span:last-child {
+        font-size: 1.1rem;
+    }
+    .score-orbit.orbit-1,
+    .score-orbit.orbit-2 {
+        width: 78px;
+        height: 26px;
+    }
+}
+
+/* iPhone SE and very narrow phones (≤420px) */
+@media (max-width: 420px) {
+    h1 {
+        font-size: 1.5rem;
+        letter-spacing: 2px;
+    }
+    .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        width: 95vw;
+        margin-bottom: 8px;
+    }
+    .stats-container {
+        gap: 8px;
+        align-self: flex-end;
+    }
+    .stats-bubble-wrapper {
+        width: 60px;
+        height: 60px;
+    }
+    .stats-bubble {
+        width: 50px;
+        height: 50px;
+    }
+    .stats-bubble span:first-child {
+        font-size: 0.5rem;
+    }
+    .stats-bubble span:last-child {
+        font-size: 0.95rem;
+    }
+    .score-orbit.orbit-1,
+    .score-orbit.orbit-2 {
+        width: 68px;
+        height: 22px;
+    }
 }
 
 /* ==========================================================================

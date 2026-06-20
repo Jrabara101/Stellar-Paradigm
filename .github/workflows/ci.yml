@@ -1,0 +1,57 @@
+name: CI — Build & Test
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  contract-tests:
+    name: Soroban Contract Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            word-scramble-contract/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('word-scramble-contract/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Build contract
+        working-directory: word-scramble-contract
+        run: cargo build --target wasm32-unknown-unknown --release
+
+      - name: Run contract tests
+        working-directory: word-scramble-contract
+        run: cargo test --verbose
+
+  frontend-check:
+    name: Frontend File Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify required frontend files exist
+        run: |
+          echo "Checking required frontend files..."
+          test -f index.html   && echo "✅ index.html" || (echo "❌ index.html missing" && exit 1)
+          test -f style.css    && echo "✅ style.css"  || (echo "❌ style.css missing"  && exit 1)
+          test -f script.js    && echo "✅ script.js"  || (echo "❌ script.js missing"  && exit 1)
+          test -f stellar.js   && echo "✅ stellar.js" || (echo "❌ stellar.js missing" && exit 1)
+          echo "All required files present."
