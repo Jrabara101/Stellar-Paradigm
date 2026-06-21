@@ -5,7 +5,8 @@ const STELLAR_CONFIG = {
     rpcUrl: 'https://soroban-testnet.stellar.org',
     horizonUrl: 'https://horizon-testnet.stellar.org',
     friendbotUrl: 'https://friendbot.stellar.org',
-    contractId: 'CBXJGV4KEDN6WOBFU2P2J4MVSFS673ELQHXKB5RYMIGI3WWQ52O4J6D7',
+    contractId: 'CABYOMNVU473DXLQE7S5NSRETLSNBBLU7EX6R43E2AZ7RISENQIPW75V',
+    rewardContractId: 'CDXIWPK4YYUTZPSXEBLELBBQIJ6X3UKJSDO4CJIH2KZXFWCBH6KXLIOQ',
 };
 
 class StellarWallet {

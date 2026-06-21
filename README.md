@@ -25,7 +25,9 @@ The Soroban contract (`word-scramble-contract/`) exposes:
 | `get_leaderboard()` | Returns the top-10 leaderboard (read-only) |
 | `get_score(player)` | Returns a single player's best score |
 
-**Deployed contract ID (Testnet):** `CBXJGV4KEDN6WOBFU2P2J4MVSFS673ELQHXKB5RYMIGI3WWQ52O4J6D7`
+**WordScramble contract ID (Testnet):** `CABYOMNVU473DXLQE7S5NSRETLSNBBLU7EX6R43E2AZ7RISENQIPW75V`
+
+**Reward contract ID (Testnet):** `CDXIWPK4YYUTZPSXEBLELBBQIJ6X3UKJSDO4CJIH2KZXFWCBH6KXLIOQ`
 
 ---
 
