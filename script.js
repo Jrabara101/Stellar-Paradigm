@@ -1795,16 +1795,18 @@ class TeakScrambleGame {
                     return {
                         rank: e.rank,
                         address: isCurrentPlayer ? "YOU (" + window.stellarWallet._short(e.address) + ")" : window.stellarWallet._short(e.address),
+                        fullAddress: e.address,
                         score: e.score,
                         level: e.level,
                         isCurrentPlayer: isCurrentPlayer
                     };
                 });
-                
+
                 if (playerAddr && pbScore > 0 && !mappedEntries.some(e => e.isCurrentPlayer)) {
                     mappedEntries.push({
                         rank: 0,
                         address: "YOU (" + window.stellarWallet._short(playerAddr) + ")",
+                        fullAddress: playerAddr,
                         score: pbScore,
                         level: pbLevel,
                         isCurrentPlayer: true
@@ -1835,20 +1837,27 @@ class TeakScrambleGame {
             return;
         }
         
+        const walletMap = StellarWallet.getWalletMap();
+
         entries.forEach(e => {
             const tr = document.createElement('tr');
             if (e.isCurrentPlayer) {
                 tr.classList.add('current-player-row');
             }
-            
+
             let rankClass = 'rank-other';
             if (e.rank === 1) rankClass = 'rank-1';
             else if (e.rank === 2) rankClass = 'rank-2';
             else if (e.rank === 3) rankClass = 'rank-3';
-            
+
+            const walletId = e.fullAddress ? walletMap[e.fullAddress] : null;
+            const walletBadge = walletId
+                ? `<span class="wallet-tag">${StellarWallet.walletLabel(walletId)}</span>`
+                : '';
+
             tr.innerHTML = `
                 <td class="${rankClass}"><span class="rank-badge">${e.rank}</span></td>
-                <td><span class="player-addr">${e.address}</span></td>
+                <td><span class="player-addr">${e.address}</span>${walletBadge}</td>
                 <td><span class="player-score">${e.score}</span></td>
                 <td><span class="player-level">Lv ${e.level}</span></td>
             `;

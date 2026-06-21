@@ -1,6 +1,6 @@
 # 🎯 Word Scramble — On-Chain Leaderboard (Stellar)
 
-A retro, mid-century-themed word puzzle game with an **on-chain leaderboard** powered by the **Stellar blockchain** and a **Soroban smart contract**. Players unscramble words to earn points, then save their high scores on-chain by signing a transaction with their Stellar wallet.
+A retro, mid-century-themed word puzzle game with an **on-chain leaderboard** and **badge reward system** powered by the **Stellar blockchain** and two communicating Soroban smart contracts. Players unscramble words to earn points, save scores on-chain, and earn achievement badges minted automatically via inter-contract calls.
 
 **🔗 Live demo:** https://word-scramble-v1.surge.sh
 
@@ -12,22 +12,42 @@ Word Scramble is a fully client-side browser game (no backend) that integrates W
 
 - **Gameplay:** Drag-and-drop letter tiles to solve scrambled words across multiple categories (Science, History, Anime, Technology, and more), with progressive hints, win streaks, custom board themes, and synthesized retro audio.
 - **Blockchain:** When you solve a word, your score is submitted to a Soroban smart contract on **Stellar Testnet**. The contract maintains a top-10 leaderboard, only updating an entry when you beat your previous best.
-- **Multi-wallet:** Connect with any Stellar wallet (Freighter, Albedo, xBull, LOBSTR, Hana, Ledger, and more) through Stellar Wallets Kit.
+- **Inter-contract calls:** `submit_score` automatically calls the **RewardContract** to mint a badge (BRONZE / SILVER / GOLD / LEGEND) when a score milestone is hit — no extra transaction needed.
+- **Event streaming:** The frontend polls `rpc.getEvents()` every 5 seconds. When any player submits a score, all connected tabs flash a **● LIVE** indicator in real time.
+- **Multi-wallet:** Connect with any Stellar wallet (Freighter, Albedo, xBull, LOBSTR, Hana, and more) through Stellar Wallets Kit. The leaderboard shows which wallet each player used.
 - **Auto-funding:** New Testnet accounts are automatically funded via Friendbot on connect, so anyone can play immediately.
 
-### Smart Contract
+---
 
-The Soroban contract (`word-scramble-contract/`) exposes:
+## 🏗️ Smart Contracts
+
+### WordScramble Contract
+**Contract ID (Testnet):** `CBU2ZJVRKYZCUFGUCMHXEK7S4V6HK3ZP47WXJEXIP4VTUGLLRNJ2MIEE`
 
 | Function | Description |
 |---|---|
-| `submit_score(player, score, level)` | Saves a score (requires the player's signature; only overwrites if higher) |
+| `submit_score(player, score, level)` | Saves a score; only overwrites if higher. Emits a `score/saved` event and calls RewardContract to mint a badge. |
 | `get_leaderboard()` | Returns the top-10 leaderboard (read-only) |
 | `get_score(player)` | Returns a single player's best score |
+| `set_reward_contract(reward_contract_id)` | Wires the RewardContract address for inter-contract calls |
 
-**WordScramble contract ID (Testnet):** `CBU2ZJVRKYZCUFGUCMHXEK7S4V6HK3ZP47WXJEXIP4VTUGLLRNJ2MIEE`
+### RewardContract
+**Contract ID (Testnet):** `CDXIWPK4YYUTZPSXEBLELBBQIJ6X3UKJSDO4CJIH2KZXFWCBH6KXLIOQ`
 
-**Reward contract ID (Testnet):** `CDXIWPK4YYUTZPSXEBLELBBQIJ6X3UKJSDO4CJIH2KZXFWCBH6KXLIOQ`
+| Function | Description |
+|---|---|
+| `init(word_contract_id)` | Authorises the WordScramble contract as the only caller allowed to mint badges |
+| `mint_badge(player, badge)` | Mints a badge for the player (idempotent — same badge is never minted twice) |
+| `get_badges(player)` | Returns all badges earned by a player |
+| `has_badge(player, badge)` | Returns `true` if the player holds the given badge |
+
+### Badge Tiers
+| Badge | Score threshold |
+|---|---|
+| 🥉 BRONZE | 100+ |
+| 🥈 SILVER | 300+ |
+| 🥇 GOLD | 500+ |
+| ⭐ LEGEND | 1000+ |
 
 ---
 
@@ -36,7 +56,8 @@ The Soroban contract (`word-scramble-contract/`) exposes:
 - **Frontend:** Vanilla HTML / CSS / JavaScript (no framework, no build step)
 - **Blockchain SDK:** [`@stellar/stellar-sdk`](https://github.com/stellar/js-stellar-sdk) v15 (loaded via esm.sh CDN)
 - **Wallets:** [`@creit.tech/stellar-wallets-kit`](https://github.com/Creit-Tech/Stellar-Wallets-Kit) (multi-wallet)
-- **Smart contract:** Soroban (Rust, `soroban-sdk` 26)
+- **Smart contracts:** Soroban (Rust, `soroban-sdk` 26) — two contracts with inter-contract communication
+- **CI/CD:** GitHub Actions — contract unit tests + frontend file check on every push
 - **Network:** Stellar Testnet (Protocol 26)
 - **Hosting:** Surge (static)
 
@@ -55,8 +76,8 @@ Because the app uses ES modules (`<script type="module">`), it **must be served 
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/<your-username>/<your-repo>.git
-cd <your-repo>
+git clone https://github.com/Jrabara101/word-scramble-stellar.git
+cd word-scramble-stellar
 
 # 2. Start any static server, e.g.:
 npx serve .
@@ -68,18 +89,20 @@ npx serve .
 
 ### How to play + save a score
 1. Click **Connect Wallet** and pick your wallet from the modal.
-2. Your address and **XLM balance** appear in the top bar (new accounts are auto-funded on Testnet).
+2. Your address, **XLM balance**, and any earned **badge** appear in the top bar.
 3. Solve a scramble and click **Submit**.
 4. Approve the transaction in your wallet.
 5. You'll see **"Score saved on-chain!"** with the transaction hash.
+6. If you hit a score milestone (100 / 300 / 500 / 1000), a badge is automatically minted via the RewardContract.
 
-> **Smart contract development** (optional): the contract lives in `word-scramble-contract/`. Build and deploy with the [Stellar CLI](https://developers.stellar.org/docs/tools/cli):
+> **Smart contract development** (optional): contracts live in `word-scramble-contract/`. Build and deploy with the [Stellar CLI](https://developers.stellar.org/docs/tools/cli):
 > ```bash
 > cd word-scramble-contract
 > stellar contract build
-> stellar contract deploy --wasm target/wasm32-unknown-unknown/release/*.wasm --network testnet --source <your-key>
+> stellar contract deploy --wasm target/wasm32v1-none/release/hello_world.wasm --network testnet --source <your-key>
+> stellar contract deploy --wasm target/wasm32v1-none/release/reward_contract.wasm --network testnet --source <your-key>
 > ```
-> Then update `contractId` in `stellar.js`.
+> Then update `contractId` and `rewardContractId` in `stellar.js`.
 
 ---
 
@@ -116,18 +139,39 @@ The on-chain result — the contract's invocation history and the player's accou
 ![Transaction result — contract](screenshots/transaction-result.png)
 ![Transaction result — account](screenshots/transaction-result-2.png)
 
+### 5. Inter-Contract Communication (Badge Minting)
+`submit_score` on WordScramble automatically calls `mint_badge` on RewardContract in the same transaction. Visible on Stellar Expert as a nested contract invocation:
+
+![Inter-contract transaction](screenshots/successful-transaction-2.png)
+
+---
+
+## ⚙️ CI/CD Pipeline
+
+GitHub Actions runs on every push to `main`:
+
+1. **Soroban Contract Tests** — builds both contracts targeting `wasm32v1-none` and runs all unit tests with `cargo test`
+2. **Frontend File Check** — verifies `index.html`, `style.css`, `script.js`, and `stellar.js` are present
+
+[![CI](https://github.com/Jrabara101/word-scramble-stellar/actions/workflows/ci.yml/badge.svg)](https://github.com/Jrabara101/word-scramble-stellar/actions/workflows/ci.yml)
+
 ---
 
 ## 📂 Project Structure
 
 ```
 .
-├── index.html              # Game markup + wallet bar
-├── style.css               # Mid-century styling, themes
-├── script.js               # Game logic (tiles, scoring, streaks)
-├── stellar.js              # Wallet connection + Soroban calls + balance
-├── word-scramble-contract/ # Soroban smart contract (Rust)
-└── screenshots/            # Submission screenshots
+├── index.html                          # Game markup + wallet bar
+├── style.css                           # Mid-century styling, themes, responsive
+├── script.js                           # Game logic (tiles, scoring, leaderboard UI)
+├── stellar.js                          # Wallet connection + Soroban calls + event stream
+├── word-scramble-contract/
+│   ├── contracts/
+│   │   ├── hello-world/src/lib.rs      # WordScramble contract (leaderboard + events)
+│   │   └── reward-contract/src/lib.rs  # RewardContract (badge minting)
+│   └── Cargo.toml
+├── .github/workflows/ci.yml            # CI/CD pipeline
+└── screenshots/                        # Submission screenshots
 ```
 
 ---

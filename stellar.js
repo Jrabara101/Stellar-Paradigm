@@ -84,7 +84,9 @@ class StellarWallet {
                         if (!address) throw new Error('Could not retrieve wallet address.');
 
                         this.address = address;
+                        this.walletId = option.id;
                         this.connected = true;
+                        this._saveWalletRecord(address, option.id);
                         this._updateWalletUI();
                         this._showStatus(`Wallet connected: ${this._short(address)}`, 'success');
 
@@ -363,6 +365,34 @@ class StellarWallet {
         badgeEl.textContent = this._badgeEmoji(badges);
     }
 
+    _saveWalletRecord(address, walletId) {
+        try {
+            const key = 'stellar_wallet_map';
+            const map = JSON.parse(localStorage.getItem(key) || '{}');
+            map[address] = walletId;
+            localStorage.setItem(key, JSON.stringify(map));
+        } catch (e) {}
+    }
+
+    static getWalletMap() {
+        try {
+            return JSON.parse(localStorage.getItem('stellar_wallet_map') || '{}');
+        } catch (e) { return {}; }
+    }
+
+    static walletLabel(walletId) {
+        const labels = {
+            freighter:  '🔑 Freighter',
+            xbull:      '⚡ xBull',
+            albedo:     '🌐 Albedo',
+            hotwallet:  '🔥 Hot Wallet',
+            hana:       '🌸 Hana',
+            lobstr:     '🦞 LOBSTR',
+            rabet:      '🐇 Rabet',
+        };
+        return labels[walletId?.toLowerCase()] || '💫 Stellar';
+    }
+
     _short(address) {
         return `${address.slice(0, 4)}...${address.slice(-4)}`;
     }
@@ -413,3 +443,4 @@ class StellarWallet {
 
 const stellarWallet = new StellarWallet();
 window.stellarWallet = stellarWallet;
+window.StellarWallet = StellarWallet;

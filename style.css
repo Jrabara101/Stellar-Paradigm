@@ -81,6 +81,20 @@
     0%, 100% { opacity: 1; transform: scale(1); }
     50%       { opacity: 0.2; transform: scale(1.2); }
 }
+.wallet-tag {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    background: rgba(225,173,1,0.15);
+    color: var(--mustard, #E1AD01);
+    border: 1px solid rgba(225,173,1,0.4);
+    border-radius: 4px;
+    padding: 1px 5px;
+    margin-left: 6px;
+    vertical-align: middle;
+    white-space: nowrap;
+}
 .stellar-balance {
     font-size: 0.7rem;
     font-weight: 700;
