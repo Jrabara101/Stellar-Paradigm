@@ -25,6 +25,39 @@
     font-size: 0.7rem;
     color: var(--off-white, #F5F5F0);
     font-family: 'Courier Prime', monospace;
+    position: relative;
+    transition: color 0.15s;
+}
+.stellar-address[data-fulladdr]:hover {
+    color: var(--turquoise, #40E0D0);
+}
+.stellar-address[data-fulladdr]::after {
+    content: attr(data-fulladdr) " — click to copy";
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a0d00;
+    color: var(--off-white, #F5F5F0);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.6rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    border: 1px solid var(--mustard, #E1AD01);
+    z-index: 2000;
+    letter-spacing: 0.5px;
+}
+.stellar-address[data-fulladdr]:hover::after {
+    opacity: 1;
+}
+.stellar-badge {
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    color: var(--mustard, #E1AD01);
 }
 .stellar-balance {
     font-size: 0.7rem;

@@ -74,6 +74,9 @@ class StellarWallet {
                         // Show the wallet's XLM balance
                         await this._updateBalanceUI();
 
+                        // Show earned badges
+                        await this._updateBadgeUI();
+
                         // Restore in-progress game state for this address
                         if (window.game) window.game.onWalletConnected(address);
                     } catch (e) {
@@ -96,6 +99,7 @@ class StellarWallet {
         this.connected = false;
         this._updateWalletUI();
         this._updateBalanceUI();
+        this._updateBadgeUI();
         this._showStatus('Wallet disconnected.', 'info');
     }
 
@@ -165,7 +169,8 @@ class StellarWallet {
 
             if (result.status === 'SUCCESS') {
                 this._showStatus(`Score ${score} saved on-chain! Tx: ${this._short(response.hash)}`, 'success');
-                this._updateBalanceUI(); // fees were spent — refresh
+                this._updateBalanceUI();
+                this._updateBadgeUI(); // refresh badge in case a new one was earned
                 return true;
             } else {
                 throw new Error('Transaction not confirmed in time.');
@@ -239,6 +244,47 @@ class StellarWallet {
         balEl.textContent = balance !== null ? `Balance: ${balance} XLM` : 'Balance: unavailable';
     }
 
+    async fetchBadges() {
+        if (!this.address) return [];
+        try {
+            const sdk = await this._getSDK();
+            const rpc = new sdk.rpc.Server(STELLAR_CONFIG.rpcUrl);
+            const contract = new sdk.Contract(STELLAR_CONFIG.rewardContractId);
+            const tempKeypair = sdk.Keypair.random();
+            const tempAccount = new sdk.Account(tempKeypair.publicKey(), '0');
+            const tx = new sdk.TransactionBuilder(tempAccount, {
+                fee: sdk.BASE_FEE,
+                networkPassphrase: STELLAR_CONFIG.networkPassphrase,
+            })
+                .addOperation(contract.call('get_badges', sdk.Address.fromString(this.address).toScVal()))
+                .setTimeout(30)
+                .build();
+            const sim = await rpc.simulateTransaction(tx);
+            if (sdk.rpc.Api.isSimulationError(sim)) return [];
+            const raw = sim.result?.retval;
+            if (!raw) return [];
+            return sdk.scValToNative(raw).map(s => s.toString());
+        } catch (e) {
+            return [];
+        }
+    }
+
+    _badgeEmoji(badges) {
+        if (badges.includes('LEGEND')) return '⭐ LEGEND';
+        if (badges.includes('GOLD'))   return '🥇 GOLD';
+        if (badges.includes('SILVER')) return '🥈 SILVER';
+        if (badges.includes('BRONZE')) return '🥉 BRONZE';
+        return '';
+    }
+
+    async _updateBadgeUI() {
+        const badgeEl = document.getElementById('stellar-badge');
+        if (!badgeEl) return;
+        if (!this.connected) { badgeEl.textContent = ''; return; }
+        const badges = await this.fetchBadges();
+        badgeEl.textContent = this._badgeEmoji(badges);
+    }
+
     _short(address) {
         return `${address.slice(0, 4)}...${address.slice(-4)}`;
     }
@@ -262,11 +308,27 @@ class StellarWallet {
         if (this.connected && this.address) {
             btn.textContent = 'Disconnect';
             btn.onclick = () => window.stellarWallet.disconnect();
-            if (addressEl) addressEl.textContent = this._short(this.address);
+            if (addressEl) {
+                addressEl.textContent = this._short(this.address);
+                addressEl.setAttribute('data-fulladdr', this.address);
+                addressEl.title = '';
+                addressEl.style.cursor = 'pointer';
+                addressEl.onclick = () => {
+                    navigator.clipboard.writeText(this.address).then(() => {
+                        addressEl.textContent = 'Copied!';
+                        setTimeout(() => { addressEl.textContent = this._short(this.address); }, 1500);
+                    });
+                };
+            }
         } else {
             btn.textContent = 'Connect Wallet';
             btn.onclick = () => window.stellarWallet.connect();
-            if (addressEl) addressEl.textContent = 'Not connected';
+            if (addressEl) {
+                addressEl.textContent = 'Not connected';
+                addressEl.removeAttribute('data-fulladdr');
+                addressEl.style.cursor = 'default';
+                addressEl.onclick = null;
+            }
         }
     }
 }
