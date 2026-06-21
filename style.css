@@ -59,6 +59,28 @@
     letter-spacing: 0.5px;
     color: var(--mustard, #E1AD01);
 }
+.stellar-live {
+    font-size: 0.6rem;
+    font-weight: 900;
+    color: #ff4444;
+    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    animation: live-pulse 2s ease-in-out infinite;
+}
+@keyframes live-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+}
+.stellar-live--flash {
+    color: #ff0000;
+    animation: live-flash 0.3s ease-in-out 4;
+}
+@keyframes live-flash {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.2; transform: scale(1.2); }
+}
 .stellar-balance {
     font-size: 0.7rem;
     font-weight: 700;

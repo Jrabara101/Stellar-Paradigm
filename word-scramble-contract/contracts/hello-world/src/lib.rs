@@ -77,6 +77,12 @@ impl WordScrambleContract {
 
         env.storage().persistent().set(&DataKey::Leaderboard, &board);
 
+        // Emit an event so frontends can stream real-time score updates
+        env.events().publish(
+            (symbol_short!("score"), symbol_short!("saved")),
+            (player.clone(), score, level),
+        );
+
         // Award a badge via RewardContract (inter-contract call)
         if let Some(badge) = Self::badge_for_score(score) {
             if let Some(reward_id) = env

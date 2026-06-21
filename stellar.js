@@ -5,7 +5,7 @@ const STELLAR_CONFIG = {
     rpcUrl: 'https://soroban-testnet.stellar.org',
     horizonUrl: 'https://horizon-testnet.stellar.org',
     friendbotUrl: 'https://friendbot.stellar.org',
-    contractId: 'CABYOMNVU473DXLQE7S5NSRETLSNBBLU7EX6R43E2AZ7RISENQIPW75V',
+    contractId: 'CBU2ZJVRKYZCUFGUCMHXEK7S4V6HK3ZP47WXJEXIP4VTUGLLRNJ2MIEE',
     rewardContractId: 'CDXIWPK4YYUTZPSXEBLELBBQIJ6X3UKJSDO4CJIH2KZXFWCBH6KXLIOQ',
 };
 
@@ -20,13 +20,33 @@ class StellarWallet {
     async _getKit() {
         if (this._kit) return this._kit;
         const mod = await import('https://esm.sh/@creit.tech/stellar-wallets-kit@1?bundle');
-        const { StellarWalletsKit, WalletNetwork, allowAllModules, FREIGHTER_ID } =
-            mod.default ?? mod;
+        const {
+            StellarWalletsKit,
+            WalletNetwork,
+            FREIGHTER_ID,
+            FreighterModule,
+            xBullModule,
+            AlbedoModule,
+            HotWalletModule,
+            allowAllModules,
+        } = mod.default ?? mod;
+
+        let modules;
+        const hasExplicit = FreighterModule || xBullModule || AlbedoModule || HotWalletModule;
+        if (hasExplicit) {
+            modules = [];
+            if (FreighterModule)  modules.push(new FreighterModule());
+            if (xBullModule)      modules.push(new xBullModule());
+            if (AlbedoModule)     modules.push(new AlbedoModule());
+            if (HotWalletModule)  modules.push(new HotWalletModule());
+        } else {
+            modules = allowAllModules();
+        }
 
         this._kit = new StellarWalletsKit({
             network: WalletNetwork.TESTNET,
             selectedWalletId: FREIGHTER_ID,
-            modules: allowAllModules(),
+            modules,
         });
         return this._kit;
     }
@@ -77,6 +97,9 @@ class StellarWallet {
                         // Show earned badges
                         await this._updateBadgeUI();
 
+                        // Start polling for real-time score events
+                        this.startEventStream();
+
                         // Restore in-progress game state for this address
                         if (window.game) window.game.onWalletConnected(address);
                     } catch (e) {
@@ -97,6 +120,7 @@ class StellarWallet {
     disconnect() {
         this.address = null;
         this.connected = false;
+        this.stopEventStream();
         this._updateWalletUI();
         this._updateBalanceUI();
         this._updateBadgeUI();
@@ -242,6 +266,60 @@ class StellarWallet {
         balEl.textContent = 'Balance: …';
         const balance = await this.fetchBalance();
         balEl.textContent = balance !== null ? `Balance: ${balance} XLM` : 'Balance: unavailable';
+    }
+
+    async startEventStream() {
+        if (this._streamInterval) return;
+        try {
+            const sdk = await this._getSDK();
+            const rpc = new sdk.rpc.Server(STELLAR_CONFIG.rpcUrl);
+            const latest = await rpc.getLatestLedger();
+            this._lastLedger = latest.sequence;
+        } catch (e) { return; }
+
+        this._updateLiveIndicator(true);
+
+        this._streamInterval = setInterval(async () => {
+            try {
+                const sdk = await this._getSDK();
+                const rpc = new sdk.rpc.Server(STELLAR_CONFIG.rpcUrl);
+                const latest = await rpc.getLatestLedger();
+                const checkFrom = Math.max(this._lastLedger, latest.sequence - 50);
+
+                const res = await rpc.getEvents({
+                    startLedger: checkFrom,
+                    filters: [{ type: 'contract', contractIds: [STELLAR_CONFIG.contractId] }],
+                    limit: 20,
+                });
+
+                this._lastLedger = latest.sequence;
+
+                if (res.events?.length > 0) {
+                    this._flashLive();
+                    this._showStatus('🔴 New score submitted on-chain! Leaderboard updated.', 'info');
+                    window.dispatchEvent(new CustomEvent('stellar:scoreEvent', { detail: res.events }));
+                }
+            } catch (e) { /* silent — don't interrupt gameplay */ }
+        }, 5000);
+    }
+
+    stopEventStream() {
+        clearInterval(this._streamInterval);
+        this._streamInterval = null;
+        this._updateLiveIndicator(false);
+    }
+
+    _flashLive() {
+        const el = document.getElementById('stellar-live');
+        if (!el) return;
+        el.classList.add('stellar-live--flash');
+        setTimeout(() => el.classList.remove('stellar-live--flash'), 2000);
+    }
+
+    _updateLiveIndicator(active) {
+        const el = document.getElementById('stellar-live');
+        if (!el) return;
+        el.style.display = active ? 'inline-flex' : 'none';
     }
 
     async fetchBadges() {
