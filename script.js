@@ -258,15 +258,19 @@ class SoundController {
 
 // --- CANVAS ATOMIC PARTICLES SYSTEM ---
 class ParticleSystem {
-    constructor(canvas) {
+    constructor(canvas, isMini = false) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.particles = [];
         this.active = false;
-        this.colors = ['#40E0D0', '#00CED1', '#E1AD01', '#DAA520', '#ffffff', '#F5F5F0'];
+        this.isMini = isMini;
 
-        window.addEventListener('resize', () => this.resize());
-        this.resize();
+        if (!this.isMini) {
+            window.addEventListener('resize', () => this.resize());
+            this.resize();
+        } else {
+            this.resizeMini();
+        }
     }
 
     resize() {
@@ -274,26 +278,101 @@ class ParticleSystem {
         this.canvas.height = window.innerHeight;
     }
 
+    resizeMini() {
+        this.canvas.width = 255;
+        this.canvas.height = 220;
+    }
+
+    getColorsForTheme() {
+        const theme = document.body.getAttribute('data-theme') || 'teak';
+        switch (theme) {
+            case 'nordic':
+                return ['#90a4ae', '#f9f9f9', '#b0bec5'];
+            case 'rustic':
+                return ['#b08d57', '#8B0000', '#dee3e4'];
+            case 'parchment':
+                return ['#c85a17', '#f4e8d2', '#2b1d14'];
+            case 'coastal':
+                return ['#b8b8b8', '#b87333', '#d2c8b8'];
+            case 'teak':
+            default:
+                return ['#E1AD01', '#40E0D0', '#F5F5F0'];
+        }
+    }
+
     burst(x, y) {
         this.active = true;
-        this.particles = [];
+        this.particles = this.particles.filter(p => p.alpha > 0);
+        
+        const colors = this.getColorsForTheme();
         const count = 120;
         
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
+            const Math_cos = Math.cos;
+            const Math_sin = Math.sin;
             const velocity = 3 + Math.random() * 8;
             this.particles.push({
                 x: x,
                 y: y,
-                vx: Math.cos(angle) * velocity,
-                vy: Math.sin(angle) * velocity - 2,
+                vx: Math_cos(angle) * velocity,
+                vy: Math_sin(angle) * velocity - 2,
                 size: 6 + Math.random() * 12,
-                color: this.colors[Math.floor(Math.random() * this.colors.length)],
+                color: colors[Math.floor(Math.random() * colors.length)],
                 alpha: 1,
                 decay: 0.015 + Math.random() * 0.015,
                 rotation: Math.random() * Math.PI,
                 rotationSpeed: (Math.random() - 0.5) * 0.1,
                 type: Math.random() > 0.4 ? 'atom' : 'dot'
+            });
+        }
+        this.animate();
+    }
+
+    addFloatingText(text, x, y, color, delay = 0, font = 'bold 20px Jost') {
+        setTimeout(() => {
+            this.active = true;
+            this.particles = this.particles.filter(p => p.alpha > 0);
+            
+            this.particles.push({
+                type: 'text',
+                x: x,
+                y: y,
+                vy: -1.1, // Drifts upward ~60px over 900ms (1.1px * 54 frames = 59.4px)
+                alpha: 1,
+                decay: 1 / (900 / 16.6), // Fades out over 900ms
+                color: color,
+                text: text,
+                font: font,
+                rotation: 0
+            });
+            this.animate();
+        }, delay);
+    }
+
+    streakEmberBurst(x, y, count) {
+        this.active = true;
+        this.particles = this.particles.filter(p => p.alpha > 0);
+        
+        const colors = ['#FF4500', '#FF8C00', '#FFA500', '#FFD700', '#FF6347'];
+        
+        for (let i = 0; i < count; i++) {
+            const angle = Math.PI * 1.5 + (Math.random() - 0.5) * 0.4;
+            const speed = 1.5 + Math.random() * 2.5;
+            
+            const lifetime = (80 + Math.random() * 40) / speed;
+            const decay = 1 / lifetime;
+
+            this.particles.push({
+                type: 'ember',
+                x: x + (Math.random() - 0.5) * 20,
+                y: y + (Math.random() - 0.5) * 20,
+                vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 0.5,
+                vy: Math.sin(angle) * speed,
+                size: 3 + Math.random() * 2, // 3-5px
+                color: colors[Math.floor(Math.random() * colors.length)],
+                alpha: 1.0,
+                decay: decay
             });
         }
         this.animate();
@@ -310,11 +389,23 @@ class ParticleSystem {
         let alive = false;
 
         this.particles.forEach(p => {
-            p.x += p.vx;
-            p.y += p.vy;
-            p.vy += 0.15;
-            p.alpha -= p.decay;
-            p.rotation += p.rotationSpeed;
+            if (p.type === 'text') {
+                p.y += p.vy;
+                p.alpha -= p.decay;
+            } else if (p.type === 'ember') {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vx += (Math.random() - 0.5) * 0.1; // slight sway
+                p.alpha -= p.decay;
+            } else if (p.type === 'ghost') {
+                p.alpha -= p.decay;
+            } else {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.15;
+                p.alpha -= p.decay;
+                p.rotation += p.rotationSpeed;
+            }
 
             if (p.alpha > 0) {
                 alive = true;
@@ -323,7 +414,55 @@ class ParticleSystem {
                 this.ctx.rotate(p.rotation);
                 this.ctx.globalAlpha = p.alpha;
 
-                if (p.type === 'atom') {
+                if (p.type === 'text') {
+                    this.ctx.font = p.font;
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.textAlign = 'center';
+                    
+                    // High contrast Jost shadow
+                    this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                    this.ctx.shadowBlur = 4;
+                    this.ctx.shadowOffsetX = 1;
+                    this.ctx.shadowOffsetY = 1;
+                    
+                    this.ctx.fillText(p.text, 0, 0);
+                } else if (p.type === 'ember') {
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+                    this.ctx.fillStyle = p.color;
+                    
+                    // Ember glow
+                    this.ctx.shadowColor = p.color;
+                    this.ctx.shadowBlur = 6;
+                    this.ctx.shadowOffsetX = 0;
+                    this.ctx.shadowOffsetY = 0;
+                    
+                    this.ctx.fill();
+                } else if (p.type === 'ghost') {
+                    // Draw neon arcade ghost tile outline
+                    this.ctx.beginPath();
+                    const radius = 4;
+                    const halfSize = p.size / 2;
+                    
+                    // Simple rounded rectangle path
+                    this.ctx.roundRect(-halfSize, -halfSize, p.size, p.size, radius);
+                    
+                    this.ctx.strokeStyle = p.color;
+                    this.ctx.lineWidth = 2.5;
+                    
+                    this.ctx.shadowColor = p.color;
+                    this.ctx.shadowBlur = 10;
+                    this.ctx.shadowOffsetX = 0;
+                    this.ctx.shadowOffsetY = 0;
+                    this.ctx.stroke();
+                    
+                    // Draw the letter
+                    this.ctx.font = `bold ${p.size * 0.55}px Jost`;
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText(p.letter, 0, 0);
+                } else if (p.type === 'atom') {
                     this.ctx.beginPath();
                     this.ctx.arc(0, 0, p.size / 4, 0, Math.PI * 2);
                     this.ctx.fillStyle = p.color;
@@ -440,6 +579,10 @@ class TeakScrambleGame {
         
         this.sound = new SoundController();
         this.particles = new ParticleSystem(document.getElementById('effects-canvas'));
+        const miniCanvas = document.getElementById('mini-effects-canvas');
+        if (miniCanvas) {
+            this.miniParticles = new ParticleSystem(miniCanvas, true);
+        }
         this.streakElement = document.getElementById('streak-val');
 
         // Custom board theme initialization
@@ -449,6 +592,21 @@ class TeakScrambleGame {
         // Custom chip material initialization
         this.currentChipMaterial = localStorage.getItem('word_scramble_chip_material') || 'bone';
         this.applyChipMaterial(this.currentChipMaterial, false);
+
+        // Custom tile effects initialization
+        this.currentTileEffect = localStorage.getItem('word_scramble_tile_effect') || 'none';
+        this.applyTileEffect(this.currentTileEffect, false);
+
+        // Customize effects initialization
+        this.effectsSettings = {
+            shockwave: localStorage.getItem('ws_fx_shockwave') !== 'false',
+            particles: localStorage.getItem('ws_fx_particles') !== 'false',
+            bounce: localStorage.getItem('ws_fx_bounce') !== 'false',
+            scorePop: localStorage.getItem('ws_fx_scorePop') !== 'false',
+            wave: localStorage.getItem('ws_fx_wave') !== 'false',
+            streakFire: localStorage.getItem('ws_fx_streakFire') !== 'false',
+            victoryGlow: localStorage.getItem('ws_fx_victoryGlow') !== 'false'
+        };
 
         // Initialize drag-and-drop trackers
         this.activeDragTile = null;
@@ -504,6 +662,15 @@ class TeakScrambleGame {
             this.scoreElement.innerText = this.score.toString().padStart(3, '0');
             this.levelElement.innerText = this.level;
             if (this.streakElement) this.streakElement.innerText = this.winStreak;
+
+            const streakBubble = document.querySelector('.streak-bubble');
+            if (streakBubble) {
+                if (this.winStreak >= 10) {
+                    streakBubble.classList.add('streak-glow-active');
+                } else {
+                    streakBubble.classList.remove('streak-glow-active');
+                }
+            }
 
             if (progress.category) {
                 this.currentCategory = progress.category;
@@ -896,6 +1063,7 @@ class TeakScrambleGame {
             document.body.appendChild(tile);
         });
 
+        this.setupTileEffectsListeners();
         this.syncViewPositions(false);
     }
 
@@ -985,7 +1153,7 @@ class TeakScrambleGame {
             const x = rect.left - bodyRect.left + offset;
             const y = rect.top - bodyRect.top + offset;
             
-            tileObj.element.style.transform = `translate3d(${x}px, ${y}px, 0px)`;
+            tileObj.element.style.transform = `translate3d(${x}px, ${y}px, 0px) var(--tile-extra-transform, )`;
 
             if (!animate) {
                 tileObj.element.offsetHeight; // flush
@@ -1032,7 +1200,20 @@ class TeakScrambleGame {
         const bodyRect = document.body.getBoundingClientRect();
         const x = clientX - this.dragOffset.x - bodyRect.left;
         const y = clientY - this.dragOffset.y - bodyRect.top;
-        this.activeDragTile.element.style.transform = `translate3d(${x}px, ${y}px, 0px)`;
+        this.activeDragTile.element.style.transform = `translate3d(${x}px, ${y}px, 0px) var(--tile-extra-transform, )`;
+
+        // Canvas animations during drag based on effect
+        if (this.currentTileEffect === 'neon') {
+            const tileRect = this.activeDragTile.element.getBoundingClientRect();
+            const centerX = tileRect.left + tileRect.width / 2;
+            const centerY = tileRect.top + tileRect.height / 2;
+            this.spawnNeonGhost(this.activeDragTile.char, centerX, centerY, tileRect.width);
+        } else if (this.currentTileEffect === 'volcanic') {
+            const tileRect = this.activeDragTile.element.getBoundingClientRect();
+            const centerX = tileRect.left + tileRect.width / 2;
+            const bottomY = tileRect.bottom;
+            this.spawnDragEmber(centerX, bottomY);
+        }
 
         const halfWidth = this.activeDragTile.element.offsetWidth / 2;
         const halfHeight = this.activeDragTile.element.offsetHeight / 2;
@@ -1161,25 +1342,32 @@ class TeakScrambleGame {
 
         if (playerWord === this.targetWord) {
             this.sound.play('win');
+            if (this.effectsSettings.shockwave) {
+                this.triggerShockwave();
+            }
             this.tilesData.forEach(t => t.element.classList.add('locked'));
             
             // Trigger bounce effect sequentially on each letter from start to end
-            this.targetCellIndices.forEach((cellIdx, i) => {
-                const tileObj = this.boardOccupants[cellIdx];
-                if (tileObj && tileObj.element) {
-                    setTimeout(() => {
-                        tileObj.element.classList.add('bounce-active');
-                        // Remove class after animation finishes so it can be re-applied
-                        tileObj.element.addEventListener('animationend', () => {
-                            tileObj.element.classList.remove('bounce-active');
-                        }, { once: true });
-                    }, i * 100); // 100ms delay between each letter
-                }
-            });
+            if (this.effectsSettings.bounce) {
+                this.targetCellIndices.forEach((cellIdx, i) => {
+                    const tileObj = this.boardOccupants[cellIdx];
+                    if (tileObj && tileObj.element) {
+                        setTimeout(() => {
+                            tileObj.element.classList.add('bounce-active');
+                            // Remove class after animation finishes so it can be re-applied
+                            tileObj.element.addEventListener('animationend', () => {
+                                tileObj.element.classList.remove('bounce-active');
+                            }, { once: true });
+                        }, i * 100); // 100ms delay between each letter
+                    }
+                });
+            }
 
-            const badge = document.querySelector('.score-bubble');
-            const badgeRect = badge.getBoundingClientRect();
-            this.particles.burst(badgeRect.left + 30, badgeRect.top + 30);
+            if (this.effectsSettings.particles) {
+                const badge = document.querySelector('.score-bubble');
+                const badgeRect = badge.getBoundingClientRect();
+                this.particles.burst(badgeRect.left + 30, badgeRect.top + 30);
+            }
 
             this.winStreak++;
             const streakBonus = this.getStreakBonus();
@@ -1187,6 +1375,43 @@ class TeakScrambleGame {
             this.scoreElement.innerText = this.score.toString().padStart(3, '0');
             if (this.streakElement) this.streakElement.innerText = this.winStreak;
             this.updateVictoryBreakdown(100, streakBonus);
+
+            const streakBubble = document.querySelector('.streak-bubble');
+            if (streakBubble) {
+                if (this.winStreak >= 10) {
+                    streakBubble.classList.add('streak-glow-active');
+                } else {
+                    streakBubble.classList.remove('streak-glow-active');
+                }
+            }
+
+            // Streak fire effect (3+ streak only)
+            if (this.winStreak >= 3 && this.effectsSettings.streakFire) {
+                if (streakBubble) {
+                    const rect = streakBubble.getBoundingClientRect();
+                    const startX = rect.left + rect.width / 2;
+                    const startY = rect.top + rect.height / 2;
+                    const count = this.winStreak >= 10 ? 40 : 20;
+                    this.particles.streakEmberBurst(startX, startY, count);
+                }
+            }
+
+            if (this.effectsSettings.scorePop) {
+                const scoreTextElem = document.getElementById('score-text');
+                if (scoreTextElem) {
+                    const rect = scoreTextElem.getBoundingClientRect();
+                    const startX = rect.left + rect.width / 2;
+                    const startY = rect.top + rect.height / 2;
+                    this.particles.addFloatingText(`+100 PTS`, startX, startY, '#FFFFFF', 0, 'bold 20px Jost');
+                    if (streakBonus > 0) {
+                        this.particles.addFloatingText(`+${streakBonus} STREAK`, startX, startY, '#FF9A6C', 120, 'bold 20px Jost');
+                    }
+                }
+            }
+
+            if (this.effectsSettings.wave) {
+                this.triggerGridFlashWave();
+            }
 
             // Save personal best (address-keyed when wallet connected)
             const _pbAddr = window.stellarWallet?.address || null;
@@ -1204,12 +1429,20 @@ class TeakScrambleGame {
             }
 
             setTimeout(() => {
+                if (this.effectsSettings.victoryGlow) {
+                    this.victoryScreen.classList.add('victory-glow-active');
+                } else {
+                    this.victoryScreen.classList.remove('victory-glow-active');
+                }
                 this.victoryScreen.classList.add('active');
             }, 1200); // Wait for the cascade bounce animation to finish beautifully
         } else {
             this.sound.play('error');
             this.winStreak = 0;
             if (this.streakElement) this.streakElement.innerText = this.winStreak;
+
+            const streakBubble = document.querySelector('.streak-bubble');
+            if (streakBubble) streakBubble.classList.remove('streak-glow-active');
             
             // Shake and highlight incorrect board tiles red
             this.tilesData.forEach(t => {
@@ -1480,6 +1713,7 @@ class TeakScrambleGame {
 
     async nextLevel() {
         this.victoryScreen.classList.remove('active');
+        this.victoryScreen.classList.remove('victory-glow-active');
         this.particles.stop();
 
         this.level++;
@@ -1702,6 +1936,152 @@ class TeakScrambleGame {
         }, 120);
     }
 
+    openTileEffectsModal() {
+        this.sound.play('select');
+        document.getElementById('tile-effects-modal-backdrop').classList.add('active');
+        this.updateTileEffectsModalHighlight();
+    }
+
+    closeTileEffectsModal(event) {
+        if (!event || event.target === document.getElementById('tile-effects-modal-backdrop')) {
+            this.sound.play('select');
+            document.getElementById('tile-effects-modal-backdrop').classList.remove('active');
+        }
+    }
+
+    updateTileEffectsModalHighlight() {
+        document.querySelectorAll('#tile-effects-modal-backdrop .theme-card').forEach(card => {
+            card.classList.remove('current');
+        });
+        const activeCard = document.getElementById(`tile-effect-card-${this.currentTileEffect}`);
+        if (activeCard) activeCard.classList.add('current');
+    }
+
+    switchTileEffect(effectId) {
+        if (effectId === this.currentTileEffect) {
+            document.getElementById('tile-effects-modal-backdrop').classList.remove('active');
+            return;
+        }
+
+        this.sound.play('win');
+        this.currentTileEffect = effectId;
+        localStorage.setItem('word_scramble_tile_effect', effectId);
+
+        this.updateTileEffectsModalHighlight();
+        this.applyTileEffect(effectId, true);
+        document.getElementById('tile-effects-modal-backdrop').classList.remove('active');
+    }
+
+    applyTileEffect(effectId, animate = true) {
+        document.body.setAttribute('data-tile-effect', effectId);
+        
+        // Update button text in header
+        const btn = document.getElementById('tile-effects-btn');
+        if (btn) {
+            let label = 'None';
+            if (effectId === 'neon') label = 'Neon Arcade';
+            if (effectId === 'volcanic') label = 'Volcanic Forge';
+            if (effectId === 'holographic') label = 'Holographic';
+            btn.innerText = `Tile Effect: ${label}`;
+        }
+
+        // Apply mouse tracking listeners
+        this.setupTileEffectsListeners();
+
+        setTimeout(() => {
+            this.syncViewPositions(animate);
+        }, 120);
+    }
+
+    setupTileEffectsListeners() {
+        if (!this.tilesData) return;
+        this.tilesData.forEach(tileObj => {
+            const tile = tileObj.element;
+            
+            // Remove existing listeners to prevent duplicates
+            if (tile._onMouseMove) tile.removeEventListener('mousemove', tile._onMouseMove);
+            if (tile._onMouseLeave) tile.removeEventListener('mouseleave', tile._onMouseLeave);
+            
+            if (this.currentTileEffect === 'holographic') {
+                tile._onMouseMove = (e) => {
+                    const rect = tile.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const percentX = (x / rect.width) * 100;
+                    const percentY = (y / rect.height) * 100;
+                    tile.style.setProperty('--mouse-x', `${percentX}%`);
+                    tile.style.setProperty('--mouse-y', `${percentY}%`);
+                    
+                    // Subtle tilt between -6deg and 6deg
+                    const tiltX = ((percentY - 50) / 50) * -6;
+                    const tiltY = ((percentX - 50) / 50) * 6;
+                    tile.style.setProperty('--tilt-x', `${tiltX}deg`);
+                    tile.style.setProperty('--tilt-y', `${tiltY}deg`);
+                };
+                tile._onMouseLeave = () => {
+                    tile.style.removeProperty('--mouse-x');
+                    tile.style.removeProperty('--mouse-y');
+                    tile.style.removeProperty('--tilt-x');
+                    tile.style.removeProperty('--tilt-y');
+                };
+                
+                tile.addEventListener('mousemove', tile._onMouseMove);
+                tile.addEventListener('mouseleave', tile._onMouseLeave);
+            } else {
+                tile.style.removeProperty('--mouse-x');
+                tile.style.removeProperty('--mouse-y');
+                tile.style.removeProperty('--tilt-x');
+                tile.style.removeProperty('--tilt-y');
+            }
+        });
+    }
+
+    spawnNeonGhost(char, x, y, size) {
+        if (!this.particles) return;
+        this.particles.active = true;
+        
+        // Cycle neon colors: magenta, cyan, yellow
+        const cycle = Math.floor(Date.now() / 400) % 3;
+        const colors = ['#ff00ff', '#00ffff', '#ffff00'];
+        const color = colors[cycle];
+        
+        this.particles.particles.push({
+            type: 'ghost',
+            x: x,
+            y: y,
+            letter: char,
+            color: color,
+            alpha: 0.4,
+            decay: 0.03, // Fades out in about 13 frames (~200ms)
+            size: size,
+            rotation: 0
+        });
+        this.particles.animate();
+    }
+
+    spawnDragEmber(x, y) {
+        if (!this.particles) return;
+        this.particles.active = true;
+        
+        const colors = ['#FF4500', '#FF8C00', '#FFA500', '#FFD700', '#FF3300'];
+        const angle = Math.PI * 1.5 + (Math.random() - 0.5) * 0.5; // up
+        const speed = 1.0 + Math.random() * 2.0;
+        
+        this.particles.particles.push({
+            type: 'ember',
+            x: x + (Math.random() - 0.5) * 20,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            size: 2 + Math.random() * 3,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            alpha: 1.0,
+            decay: 0.02 + Math.random() * 0.02,
+            rotation: 0
+        });
+        this.particles.animate();
+    }
+
     openLeaderboardModal() {
         this.sound.play('select');
         document.getElementById('leaderboard-modal-backdrop').classList.add('active');
@@ -1902,6 +2282,9 @@ class TeakScrambleGame {
         this.winStreak = 0;
         if (this.streakElement) this.streakElement.innerText = this.winStreak;
 
+        const streakBubble = document.querySelector('.streak-bubble');
+        if (streakBubble) streakBubble.classList.remove('streak-glow-active');
+
         // Clear pre-fetched data since we changed category
         this.prefetchedData = null;
 
@@ -1961,6 +2344,293 @@ class TeakScrambleGame {
         const regexWord = new RegExp(escapedWord, 'gi');
         censored = censored.replace(regexWord, '____');
         return censored;
+    }
+
+    triggerShockwave(force = false) {
+        if (!force && !this.effectsSettings.shockwave) return;
+        const board = document.getElementById('main-board');
+        if (!board) return;
+
+        const ring = document.createElement('div');
+        ring.className = 'shockwave-ring';
+        board.appendChild(ring);
+
+        // Remove after animation completes (600ms)
+        setTimeout(() => {
+            ring.remove();
+        }, 700);
+    }
+
+    openEffectsModal() {
+        this.sound.play('select');
+        
+        // Sync toggles with current settings
+        const switches = {
+            shockwave: document.getElementById('fx-switch-shockwave'),
+            particles: document.getElementById('fx-switch-particles'),
+            bounce: document.getElementById('fx-switch-bounce'),
+            scorePop: document.getElementById('fx-switch-scorePop'),
+            wave: document.getElementById('fx-switch-wave'),
+            streakFire: document.getElementById('fx-switch-streakFire'),
+            victoryGlow: document.getElementById('fx-switch-victoryGlow')
+        };
+        for (const [key, element] of Object.entries(switches)) {
+            if (element) {
+                element.checked = this.effectsSettings[key];
+            }
+        }
+        
+        document.getElementById('effects-modal-backdrop').classList.add('active');
+    }
+
+    closeEffectsModal(event) {
+        if (!event || event.target === document.getElementById('effects-modal-backdrop')) {
+            this.sound.play('select');
+            document.getElementById('effects-modal-backdrop').classList.remove('active');
+        }
+    }
+
+    toggleEffect(effectKey) {
+        this.sound.play('select');
+        this.effectsSettings[effectKey] = !this.effectsSettings[effectKey];
+        localStorage.setItem(`ws_fx_${effectKey}`, this.effectsSettings[effectKey]);
+        
+        const element = document.getElementById(`fx-switch-${effectKey}`);
+        if (element) {
+            element.checked = this.effectsSettings[effectKey];
+        }
+    }
+
+    previewVictoryEffect(type) {
+        this.sound.play('win');
+
+        if (type === 'shockwave' || type === 'all') {
+            this.triggerShockwave(true); // force trigger
+        }
+
+        if (type === 'particles' || type === 'all') {
+            const board = document.getElementById('main-board');
+            if (board) {
+                const rect = board.getBoundingClientRect();
+                this.particles.burst(rect.left + rect.width / 2, rect.top + rect.height / 2);
+            }
+        }
+
+        if (type === 'streakFire' || type === 'all') {
+            // Preview embers from the streak bubble
+            const streakBubble = document.querySelector('.streak-bubble');
+            if (streakBubble) {
+                const rect = streakBubble.getBoundingClientRect();
+                const startX = rect.left + rect.width / 2;
+                const startY = rect.top + rect.height / 2;
+                this.particles.streakEmberBurst(startX, startY, 40); // 40 embers for max streak preview
+
+                // Temporarily add pulse glow class for 3 seconds
+                streakBubble.classList.add('streak-glow-active');
+                setTimeout(() => {
+                    if (this.winStreak < 10) {
+                        streakBubble.classList.remove('streak-glow-active');
+                    }
+                }, 3000);
+            }
+        }
+
+        if (type === 'victoryGlow' || type === 'all') {
+            // Temporarily show the main victory screen with the glowing h2 title
+            if (this.victoryScreen) {
+                this.victoryScreen.classList.add('victory-glow-active');
+                this.victoryScreen.classList.add('active');
+                setTimeout(() => {
+                    this.victoryScreen.classList.remove('active');
+                    this.victoryScreen.classList.remove('victory-glow-active');
+                }, 3000);
+            }
+        }
+
+        if (type === 'bounce' || type === 'all') {
+            this.targetCellIndices.forEach((cellIdx, i) => {
+                const tileObj = this.boardOccupants[cellIdx];
+                if (tileObj && tileObj.element) {
+                    setTimeout(() => {
+                        tileObj.element.classList.add('bounce-active');
+                        tileObj.element.addEventListener('animationend', () => {
+                            tileObj.element.classList.remove('bounce-active');
+                        }, { once: true });
+                    }, i * 100);
+                }
+            });
+        }
+
+        if (type === 'scorePop' || type === 'all') {
+            const scoreTextElem = document.getElementById('score-text');
+            if (scoreTextElem) {
+                const rect = scoreTextElem.getBoundingClientRect();
+                const startX = rect.left + rect.width / 2;
+                const startY = rect.top + rect.height / 2;
+                this.particles.addFloatingText(`+100 PTS`, startX, startY, '#FFFFFF', 0, 'bold 20px Jost');
+                this.particles.addFloatingText(`+20 STREAK`, startX, startY, '#FF9A6C', 120, 'bold 20px Jost');
+            }
+        }
+
+        if (type === 'wave' || type === 'all') {
+            this.triggerGridFlashWave();
+        }
+
+        // Trigger visual preview HUD
+        if (type === 'shockwave') {
+            this.showPreviewHUD('Shockwave Ring', 'shockwave');
+        } else if (type === 'particles') {
+            this.showPreviewHUD('Confetti Burst', 'particles');
+        } else if (type === 'bounce') {
+            this.showPreviewHUD('Bounce Cascade', 'bounce');
+        } else if (type === 'scorePop') {
+            this.showPreviewHUD('Score Pop-Up', 'scorePop');
+        } else if (type === 'wave') {
+            this.showPreviewHUD('Grid Flash Wave', 'wave');
+        } else if (type === 'streakFire') {
+            this.showPreviewHUD('Streak Fire', 'streakFire');
+        } else if (type === 'victoryGlow') {
+            this.showPreviewHUD('Victory Title Glow', 'victoryGlow');
+        } else if (type === 'all') {
+            this.showPreviewHUD('All Effects', 'all');
+        }
+    }
+
+    showPreviewHUD(effectName, type) {
+        const hud = document.getElementById('preview-hud');
+        const title = document.getElementById('preview-hud-title');
+        if (!hud || !title) return;
+
+        title.textContent = effectName;
+        hud.classList.add('active');
+
+        // Stop any currently running mini particle animations and clear canvas
+        if (this.miniParticles) {
+            this.miniParticles.stop();
+        }
+
+        // Remove active class from mini victory title
+        const miniTitle = document.getElementById('mini-victory-title');
+        if (miniTitle) {
+            miniTitle.classList.remove('active');
+        }
+
+        // Trigger corresponding mini animations based on type
+        if (type === 'shockwave' || type === 'all') {
+            this.triggerMiniShockwave();
+        }
+
+        if (type === 'particles' || type === 'all') {
+            if (this.miniParticles) {
+                this.miniParticles.burst(127.5, 110);
+            }
+        }
+
+        if (type === 'streakFire' || type === 'all') {
+            if (this.miniParticles) {
+                this.miniParticles.streakEmberBurst(225, 30, 20);
+            }
+            const miniStreak = document.getElementById('mini-streak-bubble');
+            if (miniStreak) {
+                miniStreak.classList.add('streak-glow-active');
+                setTimeout(() => miniStreak.classList.remove('streak-glow-active'), 3000);
+            }
+        }
+
+        if (type === 'victoryGlow' || type === 'all') {
+            if (miniTitle) {
+                miniTitle.classList.add('active');
+                setTimeout(() => miniTitle.classList.remove('active'), 3000);
+            }
+        }
+
+        if (type === 'bounce' || type === 'all') {
+            const miniRack = document.getElementById('mini-rack');
+            if (miniRack) {
+                Array.from(miniRack.children).forEach((tile, i) => {
+                    setTimeout(() => {
+                        tile.classList.add('mini-bounce-active');
+                        tile.addEventListener('animationend', () => {
+                            tile.classList.remove('mini-bounce-active');
+                        }, { once: true });
+                    }, i * 100);
+                });
+            }
+        }
+
+        if (type === 'scorePop' || type === 'all') {
+            if (this.miniParticles) {
+                this.miniParticles.addFloatingText(`+100 PTS`, 30, 30, '#FFFFFF', 0, 'bold 12px Jost');
+                this.miniParticles.addFloatingText(`+20 STREAK`, 30, 30, '#FF9A6C', 120, 'bold 12px Jost');
+            }
+        }
+
+        if (type === 'wave' || type === 'all') {
+            const miniGrid = document.getElementById('mini-grid');
+            if (miniGrid) {
+                const cells = Array.from(miniGrid.children);
+                const centerRow = 2;
+                const centerCol = 2;
+                cells.forEach((cell, idx) => {
+                    const r = Math.floor(idx / 5);
+                    const c = idx % 5;
+                    const dist = Math.abs(r - centerRow) + Math.abs(c - centerCol);
+                    const delay = (dist / 4) * 250;
+                    setTimeout(() => {
+                        cell.classList.add('flash-active');
+                        setTimeout(() => cell.classList.remove('flash-active'), 50);
+                    }, delay);
+                });
+            }
+        }
+
+        if (this.hudTimeout) clearTimeout(this.hudTimeout);
+        this.hudTimeout = setTimeout(() => this.closePreviewHUD(), 3500);
+    }
+
+    triggerMiniShockwave() {
+        const wrapper = document.querySelector('.mini-board-wrapper');
+        if (!wrapper) return;
+        const ring = document.createElement('div');
+        ring.className = 'mini-shockwave-ring';
+        wrapper.appendChild(ring);
+        setTimeout(() => ring.remove(), 700);
+    }
+
+    closePreviewHUD() {
+        const hud = document.getElementById('preview-hud');
+        if (hud) hud.classList.remove('active');
+        if (this.miniParticles) {
+            this.miniParticles.stop();
+        }
+    }
+
+    triggerGridFlashWave() {
+        if (!this.targetCellIndices || this.targetCellIndices.length === 0) return;
+
+        const midIdx = this.targetCellIndices[Math.floor(this.targetCellIndices.length / 2)];
+        const centerRow = Math.floor(midIdx / 10);
+        const centerCol = midIdx % 10;
+
+        const cells = Array.from(this.boardGrid.children);
+        const cellData = cells.map((cell, idx) => {
+            const r = Math.floor(idx / 10);
+            const c = idx % 10;
+            const dist = Math.abs(r - centerRow) + Math.abs(c - centerCol);
+            return { element: cell, dist: dist };
+        });
+
+        const maxDist = Math.max(...cellData.map(c => c.dist));
+
+        cellData.forEach(item => {
+            const delay = (item.dist / maxDist) * 350; // max delay 350ms
+            setTimeout(() => {
+                item.element.classList.add('flash-active');
+                setTimeout(() => {
+                    item.element.classList.remove('flash-active');
+                }, 50);
+            }, delay);
+        });
     }
 }
 

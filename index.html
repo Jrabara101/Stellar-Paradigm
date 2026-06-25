@@ -53,7 +53,9 @@
                 <button class="category-btn-tag" id="category-tag-btn" onclick="game.openCategoryModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--turquoise-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--turquoise); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--turquoise-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Category: General</button>
                 <button class="customize-btn-tag" id="customize-tag-btn" onclick="game.openThemeModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--mustard-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--mustard); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--mustard-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Customize Board</button>
                 <button class="customize-btn-tag" id="customize-chips-btn" onclick="game.openChipModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--turquoise-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--turquoise); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--turquoise-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Customize Chips</button>
+                <button class="customize-btn-tag" id="tile-effects-btn" onclick="game.openTileEffectsModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--mustard-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--mustard); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--mustard-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Tile Effect: None</button>
                 <button class="customize-btn-tag" id="leaderboard-btn" onclick="game.openLeaderboardModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--mustard-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--mustard); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--mustard-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Leaderboard</button>
+                <button class="customize-btn-tag" id="effects-btn" onclick="game.openEffectsModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--turquoise-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--turquoise); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--turquoise-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Effects</button>
             </div>
         </div>
         <div class="stats-container">
@@ -293,6 +295,44 @@
         </div>
     </div>
 
+    <!-- Customize Tile Effects Selector Modal -->
+    <div class="modal-backdrop" id="tile-effects-modal-backdrop" onclick="game.closeTileEffectsModal(event)">
+        <div class="theme-modal" onclick="event.stopPropagation()">
+            <h3>Select Custom Tile Effect</h3>
+            <div class="theme-grid">
+                <!-- Tile Effect: None/Default -->
+                <div class="theme-card" id="tile-effect-card-none" onclick="game.switchTileEffect('none')">
+                    <div class="theme-preview" style="background: var(--off-white); border: 2px solid var(--teak-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: inset 0 -3px 4px rgba(0,0,0,0.2); border-top: 1.5px solid rgba(255,255,255,0.4); margin-bottom: 4px;">
+                        <div style="font-weight: 800; font-size: 2.5rem; color: var(--teak-dark); font-family: inherit;">A</div>
+                    </div>
+                    <div class="theme-name">None</div>
+                </div>
+                <!-- Tile Effect: Neon Arcade -->
+                <div class="theme-card" id="tile-effect-card-neon" onclick="game.switchTileEffect('neon')">
+                    <div class="theme-preview" style="background: #0d0d1a; border: 2px solid #ff00ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: 0 0 10px #ff00ff, inset 0 0 5px #ff00ff; margin-bottom: 4px;">
+                        <div style="font-weight: 800; font-size: 2.5rem; color: #ff00ff; text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff; font-family: inherit;">B</div>
+                    </div>
+                    <div class="theme-name">Neon Arcade</div>
+                </div>
+                <!-- Tile Effect: Volcanic Forge -->
+                <div class="theme-card" id="tile-effect-card-volcanic" onclick="game.switchTileEffect('volcanic')">
+                    <div class="theme-preview" style="background: #262220; border: 2px solid #1c1816; border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: 0 3px 0 #ff4500, 0 6px 10px rgba(0,0,0,0.7); margin-bottom: 4px;">
+                        <div style="font-weight: 800; font-size: 2.5rem; color: #ff8c00; text-shadow: 0 -1.5px 0 rgba(0,0,0,0.8); font-family: inherit;">C</div>
+                    </div>
+                    <div class="theme-name">Volcanic Forge</div>
+                </div>
+                <!-- Tile Effect: Holographic Foil -->
+                <div class="theme-card" id="tile-effect-card-holographic" onclick="game.switchTileEffect('holographic')">
+                    <div class="theme-preview" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 15%, #a1c4fd 30%, #c2e9fb 45%, #e0c3fc 60%, #fbc2eb 75%, #ff9a9e 100%); background-size: 200% 200%; border: 2px solid var(--teak-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; margin-bottom: 4px; animation: holo-flow 3s linear infinite;">
+                        <div style="font-weight: 800; font-size: 2.5rem; color: #ffffff; text-shadow: -1px -1px 0 var(--teak-dark), 1px -1px 0 var(--teak-dark), -1px 1px 0 var(--teak-dark), 1px 1px 0 var(--teak-dark); font-family: inherit;">D</div>
+                    </div>
+                    <div class="theme-name">Holographic</div>
+                </div>
+            </div>
+            <button class="theme-close-btn" style="margin-top: 20px;" onclick="game.closeTileEffectsModal(null)">Close Menu</button>
+        </div>
+    </div>
+
     <!-- Changelog Selector Modal -->
     <div class="modal-backdrop" id="changelog-modal-backdrop" onclick="game.closeChangelogModal(event)">
         <div class="changelog-modal" onclick="event.stopPropagation()">
@@ -437,6 +477,180 @@
                 <button class="leaderboard-refresh-btn" onclick="game.refreshLeaderboard()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 #00bfa5'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 #00bfa5'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 #00bfa5'">Refresh</button>
                 <button class="theme-close-btn" style="margin-top: 0; width: auto;" onclick="game.closeLeaderboardModal(null)">Close</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Customize Effects Modal -->
+    <div class="modal-backdrop" id="effects-modal-backdrop" onclick="game.closeEffectsModal(event)">
+        <div class="theme-modal" onclick="event.stopPropagation()">
+            <h3>Visual Effects Menu</h3>
+            <div class="effects-settings-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+                
+                <!-- Shockwave Toggle -->
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <span style="font-weight: 900; font-size: 0.95rem;">Shockwave Ring</span>
+                        <span class="toggle-description" style="font-size: 0.75rem; opacity: 0.85;">Expanding turquoise ring from board center on correct solve</span>
+                    </div>
+                    <label class="retro-switch">
+                        <input type="checkbox" id="fx-switch-shockwave" onclick="game.toggleEffect('shockwave')">
+                        <span class="retro-slider"></span>
+                    </label>
+                </div>
+
+                <!-- Particles (Confetti) Toggle -->
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <span style="font-weight: 900; font-size: 0.95rem;">Confetti Burst</span>
+                        <span class="toggle-description" style="font-size: 0.75rem; opacity: 0.85;">Theme-matched confetti particle explosion on correct solve</span>
+                    </div>
+                    <label class="retro-switch">
+                        <input type="checkbox" id="fx-switch-particles" onclick="game.toggleEffect('particles')">
+                        <span class="retro-slider"></span>
+                    </label>
+                </div>
+
+                <!-- Letter Bounce Toggle -->
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <span style="font-weight: 900; font-size: 0.95rem;">Bounce Cascade</span>
+                        <span class="toggle-description" style="font-size: 0.75rem; opacity: 0.85;">Sequential bouncy wave animation on solved tiles</span>
+                    </div>
+                    <label class="retro-switch">
+                        <input type="checkbox" id="fx-switch-bounce" onclick="game.toggleEffect('bounce')">
+                        <span class="retro-slider"></span>
+                    </label>
+                </div>
+
+                <!-- Score Float-Up Pop Toggle -->
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <span style="font-weight: 900; font-size: 0.95rem;">Score Pop-Up</span>
+                        <span class="toggle-description" style="font-size: 0.75rem; opacity: 0.85;">Floating points and streak indicators above the score bubble</span>
+                    </div>
+                    <label class="retro-switch">
+                        <input type="checkbox" id="fx-switch-scorePop" onclick="game.toggleEffect('scorePop')">
+                        <span class="retro-slider"></span>
+                    </label>
+                </div>
+
+                <!-- Board Grid Cell Flash Wave Toggle -->
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <span style="font-weight: 900; font-size: 0.95rem;">Grid Flash Wave</span>
+                        <span class="toggle-description" style="font-size: 0.75rem; opacity: 0.85;">Rippling cell highlight wave outward from solved slots</span>
+                    </div>
+                    <label class="retro-switch">
+                        <input type="checkbox" id="fx-switch-wave" onclick="game.toggleEffect('wave')">
+                        <span class="retro-slider"></span>
+                    </label>
+                </div>
+
+                <!-- Streak Fire Toggle -->
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <span style="font-weight: 900; font-size: 0.95rem;">Streak Fire</span>
+                        <span class="toggle-description" style="font-size: 0.75rem; opacity: 0.85;">Drifting ember particles from the streak bubble on 3+ streak</span>
+                    </div>
+                    <label class="retro-switch">
+                        <input type="checkbox" id="fx-switch-streakFire" onclick="game.toggleEffect('streakFire')">
+                        <span class="retro-slider"></span>
+                    </label>
+                </div>
+
+                <!-- Victory Title Glow Toggle -->
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <span style="font-weight: 900; font-size: 0.95rem;">Victory Title Glow</span>
+                        <span class="toggle-description" style="font-size: 0.75rem; opacity: 0.85;">Pulsing turquoise text glow on the spectacular victory title</span>
+                    </div>
+                    <label class="retro-switch">
+                        <input type="checkbox" id="fx-switch-victoryGlow" onclick="game.toggleEffect('victoryGlow')">
+                        <span class="retro-slider"></span>
+                    </label>
+                </div>
+
+            </div>
+
+            <h4 style="margin: 20px 0 10px 0; text-transform: uppercase; font-family: inherit; font-size: 0.85rem; color: var(--teak-dark); border-bottom: 2px solid var(--mustard); padding-bottom: 4px; font-weight: 900; text-align: left;">Victory Preview Buttons</h4>
+            <div class="preview-buttons-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <button class="preview-btn" onclick="game.previewVictoryEffect('shockwave')" style="font-size: 0.75rem; padding: 8px; background: #e0f7fa; border: 1.5px solid var(--teak-dark); box-shadow: 0 3px 0 #4dd0e1;">Test Shockwave</button>
+                <button class="preview-btn" onclick="game.previewVictoryEffect('particles')" style="font-size: 0.75rem; padding: 8px; background: #e0f7fa; border: 1.5px solid var(--teak-dark); box-shadow: 0 3px 0 #4dd0e1;">Test Confetti</button>
+                <button class="preview-btn" onclick="game.previewVictoryEffect('bounce')" style="font-size: 0.75rem; padding: 8px; background: #e0f7fa; border: 1.5px solid var(--teak-dark); box-shadow: 0 3px 0 #4dd0e1;">Test Cascade</button>
+                <button class="preview-btn" onclick="game.previewVictoryEffect('scorePop')" style="font-size: 0.75rem; padding: 8px; background: #e0f7fa; border: 1.5px solid var(--teak-dark); box-shadow: 0 3px 0 #4dd0e1;">Test Score Pop</button>
+                <button class="preview-btn" onclick="game.previewVictoryEffect('wave')" style="font-size: 0.75rem; padding: 8px; background: #e0f7fa; border: 1.5px solid var(--teak-dark); box-shadow: 0 3px 0 #4dd0e1;">Test Flash Wave</button>
+                <button class="preview-btn" onclick="game.previewVictoryEffect('streakFire')" style="font-size: 0.75rem; padding: 8px; background: #e0f7fa; border: 1.5px solid var(--teak-dark); box-shadow: 0 3px 0 #4dd0e1;">Test Streak Fire</button>
+                <button class="preview-btn" onclick="game.previewVictoryEffect('victoryGlow')" style="font-size: 0.75rem; padding: 8px; background: #e0f7fa; border: 1.5px solid var(--teak-dark); box-shadow: 0 3px 0 #4dd0e1;">Test Title Glow</button>
+                <button class="preview-btn preview-all-btn" onclick="game.previewVictoryEffect('all')" style="font-size: 0.75rem; padding: 8px; background: var(--mustard); border: 1.5px solid var(--teak-dark); box-shadow: 0 3px 0 var(--mustard-dark);">Test All Effects</button>
+            </div>
+
+            <button class="theme-close-btn" style="margin-top: 20px;" onclick="game.closeEffectsModal(null)">Close Menu</button>
+        </div>
+    </div>
+
+    <!-- Floating Animation Preview HUD (Slides in from the right) -->
+    <div class="preview-hud-panel" id="preview-hud">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--mustard); padding-bottom: 6px; margin-bottom: 10px;">
+            <h3 id="preview-hud-title" style="margin: 0; font-size: 0.85rem; text-transform: uppercase; font-weight: 900; color: var(--teak-dark); font-family: inherit;">Effect Preview</h3>
+            <button onclick="game.closePreviewHUD()" style="font-size: 0.7rem; padding: 2px 6px; background: var(--mustard); border: 1.5px solid var(--teak-dark); border-radius: 4px; cursor: pointer; font-weight: 900; font-family: inherit; line-height: 1;">✕</button>
+        </div>
+        <div class="mini-board-wrapper" style="position: relative; width: 100%; height: 220px; background: var(--teak-base); border: 2.5px solid var(--teak-dark); border-radius: 8px; overflow: hidden; box-shadow: inset 0 0 15px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 10px; box-sizing: border-box;">
+            <!-- Mini Score Bubble -->
+            <div class="mini-score-bubble" id="mini-score-bubble" style="position: absolute; top: 8px; left: 8px; width: 44px; height: 44px; border-radius: 50%; background: var(--off-white); border: 2px solid var(--teak-dark); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.45rem; font-weight: 900; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                <span style="font-size: 0.35rem; opacity: 0.7; line-height: 1;">SCORE</span>
+                <span id="mini-score-val" style="color: var(--mustard-dark); font-size: 0.55rem; font-weight: 900; line-height: 1.2;">100</span>
+            </div>
+            
+            <!-- Mini Streak Bubble -->
+            <div class="mini-streak-bubble" id="mini-streak-bubble" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border-radius: 50%; background: var(--off-white); border: 2px solid var(--teak-dark); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.45rem; font-weight: 900; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                <span style="font-size: 0.35rem; opacity: 0.7; line-height: 1;">STREAK</span>
+                <span id="mini-streak-val" style="color: #FF6B35; font-size: 0.55rem; font-weight: 900; line-height: 1.2;">3</span>
+            </div>
+
+            <!-- Mini Grid -->
+            <div class="mini-grid" id="mini-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; width: 110px; height: 110px; margin-top: 15px;">
+                <!-- 25 mini cells -->
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+                <div class="mini-grid-cell" style="background: rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1); border-radius: 2px; transition: background-color 0.15s;"></div>
+            </div>
+
+            <!-- Mini Rack / Letter Slots -->
+            <div class="mini-rack" id="mini-rack" style="display: flex; gap: 4px; justify-content: center; width: 100%; margin-top: 6px; z-index: 2;">
+                <div class="mini-tile" style="width: 22px; height: 22px; background: var(--off-white); border: 1.5px solid var(--teak-dark); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.65rem; color: var(--teak-dark); box-shadow: 0 2px 0 var(--teak-dark); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative;">S</div>
+                <div class="mini-tile" style="width: 22px; height: 22px; background: var(--off-white); border: 1.5px solid var(--teak-dark); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.65rem; color: var(--teak-dark); box-shadow: 0 2px 0 var(--teak-dark); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative;">O</div>
+                <div class="mini-tile" style="width: 22px; height: 22px; background: var(--off-white); border: 1.5px solid var(--teak-dark); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.65rem; color: var(--teak-dark); box-shadow: 0 2px 0 var(--teak-dark); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative;">L</div>
+                <div class="mini-tile" style="width: 22px; height: 22px; background: var(--off-white); border: 1.5px solid var(--teak-dark); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.65rem; color: var(--teak-dark); box-shadow: 0 2px 0 var(--teak-dark); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative;">V</div>
+                <div class="mini-tile" style="width: 22px; height: 22px; background: var(--off-white); border: 1.5px solid var(--teak-dark); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.65rem; color: var(--teak-dark); box-shadow: 0 2px 0 var(--teak-dark); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative;">E</div>
+            </div>
+
+            <!-- Canvas overlaid on top -->
+            <canvas id="mini-effects-canvas" width="255" height="220" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5;"></canvas>
+            
+            <!-- Mini Victory Title (normally hidden, pulses on Title Glow preview) -->
+            <div class="mini-victory-title" id="mini-victory-title" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); opacity: 0; pointer-events: none; z-index: 15; font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 0.95rem; color: #ffffff; text-transform: uppercase; letter-spacing: 1.5px; transition: opacity 0.3s, transform 0.3s; background: rgba(40, 20, 10, 0.9); padding: 4px 8px; border-radius: 4px; border: 1.5px solid var(--teak-dark);">SPECTACULAR!</div>
         </div>
     </div>
 
