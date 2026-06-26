@@ -2413,6 +2413,65 @@ body[data-chip-material="glass"] .wood-tile {
     box-shadow: 0 0px 0 var(--teak-dark) !important;
 }
 
+/* --- RESET BUTTONS --- */
+.reset-score-btn {
+    background: #ef5350;
+    color: #fff;
+    border: 2px solid #b71c1c;
+    border-radius: 6px;
+    padding: 11px 20px;
+    font-size: 0.9rem;
+    font-weight: 900;
+    box-shadow: 0 3px 0 #b71c1c;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-family: inherit;
+    transition: transform 0.1s, box-shadow 0.1s, background-color 0.2s;
+}
+.reset-score-btn:hover { background: #e53935; }
+.reset-score-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 0px 0 #b71c1c !important;
+}
+
+.admin-reset-panel {
+    margin: 12px 0 0;
+    padding: 12px 16px;
+    background: rgba(183, 28, 28, 0.12);
+    border: 1.5px solid rgba(239, 83, 80, 0.5);
+    border-radius: 8px;
+    text-align: center;
+}
+.admin-reset-title {
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #ef5350;
+    margin-bottom: 8px;
+}
+.reset-leaderboard-btn {
+    background: #b71c1c;
+    color: #fff;
+    border: 2px solid #7f0000;
+    border-radius: 6px;
+    padding: 9px 18px;
+    font-size: 0.85rem;
+    font-weight: 900;
+    box-shadow: 0 3px 0 #7f0000;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-family: inherit;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+.reset-leaderboard-btn:hover { background: #c62828; }
+.reset-leaderboard-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 0px 0 #7f0000 !important;
+}
+
 /* --- SHOCKWAVE RING EFFECT --- */
 .shockwave-ring {
     position: absolute;

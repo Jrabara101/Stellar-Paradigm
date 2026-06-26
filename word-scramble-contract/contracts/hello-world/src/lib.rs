@@ -14,6 +14,7 @@ pub struct PlayerScore {
 pub enum DataKey {
     Leaderboard,
     RewardContract,
+    Admin,
 }
 
 const MAX_ENTRIES: u32 = 10;
@@ -23,6 +24,14 @@ pub struct WordScrambleContract;
 
 #[contractimpl]
 impl WordScrambleContract {
+    /// Register the deployer as admin (call once after deploy).
+    pub fn init_admin(env: Env, admin: Address) {
+        if env.storage().instance().has(&DataKey::Admin) {
+            panic!("admin already set");
+        }
+        env.storage().instance().set(&DataKey::Admin, &admin);
+    }
+
     /// Store the RewardContract address so submit_score can call it.
     pub fn set_reward_contract(env: Env, reward_contract_id: Address) {
         env.storage().instance().set(&DataKey::RewardContract, &reward_contract_id);
@@ -117,6 +126,41 @@ impl WordScrambleContract {
             }
         }
         0
+    }
+
+    /// Admin: wipe the entire leaderboard back to empty.
+    pub fn reset_leaderboard(env: Env, admin: Address) {
+        admin.require_auth();
+        let stored_admin: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::Admin)
+            .expect("admin not initialised — call init_admin first");
+        if admin != stored_admin {
+            panic!("unauthorised");
+        }
+        env.storage()
+            .persistent()
+            .set(&DataKey::Leaderboard, &Vec::<PlayerScore>::new(&env));
+    }
+
+    /// Player: reset only your own score back to 0 / level 1.
+    pub fn reset_score(env: Env, player: Address) {
+        player.require_auth();
+        let mut board: Vec<PlayerScore> = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Leaderboard)
+            .unwrap_or(Vec::new(&env));
+
+        for i in 0..board.len() {
+            let entry = board.get(i).unwrap();
+            if entry.player == player {
+                board.remove(i);
+                break;
+            }
+        }
+        env.storage().persistent().set(&DataKey::Leaderboard, &board);
     }
 
     fn badge_for_score(score: u32) -> Option<Symbol> {

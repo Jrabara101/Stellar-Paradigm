@@ -5,7 +5,8 @@ const STELLAR_CONFIG = {
     rpcUrl: 'https://soroban-testnet.stellar.org',
     horizonUrl: 'https://horizon-testnet.stellar.org',
     friendbotUrl: 'https://friendbot.stellar.org',
-    contractId: 'CBU2ZJVRKYZCUFGUCMHXEK7S4V6HK3ZP47WXJEXIP4VTUGLLRNJ2MIEE',
+    contractId: 'CD2XXLJBFBVYAGJYUHQR4XH6ZYWQUMR6A22TUFY4R2S3VU2NCY7KPJEG',
+    adminAddress: 'GCTCR3MURG5WAIAEEYWOCE4HQB7DNBOTSJSG4MXFZJXXG4OTVNYGGWS3',
     rewardContractId: 'CDXIWPK4YYUTZPSXEBLELBBQIJ6X3UKJSDO4CJIH2KZXFWCBH6KXLIOQ',
 };
 
@@ -346,6 +347,133 @@ class StellarWallet {
             return sdk.scValToNative(raw).map(s => s.toString());
         } catch (e) {
             return [];
+        }
+    }
+
+    // Reset only the connected player's own score (player-signed)
+    async resetScore() {
+        if (!this.connected || !this.address) {
+            this._showStatus('Connect your wallet first.', 'error');
+            return false;
+        }
+        this._showStatus('Resetting your score on-chain…', 'info');
+        try {
+            const sdk = await this._getSDK();
+            const kit = await this._getKit();
+            const rpc = new sdk.rpc.Server(STELLAR_CONFIG.rpcUrl);
+            const contract = new sdk.Contract(STELLAR_CONFIG.contractId);
+
+            await this._ensureFunded(this.address);
+            const account = await rpc.getAccount(this.address);
+
+            let tx = new sdk.TransactionBuilder(account, {
+                fee: sdk.BASE_FEE,
+                networkPassphrase: STELLAR_CONFIG.networkPassphrase,
+            })
+                .addOperation(contract.call(
+                    'reset_score',
+                    sdk.Address.fromString(this.address).toScVal(),
+                ))
+                .setTimeout(180)
+                .build();
+
+            const sim = await rpc.simulateTransaction(tx);
+            if (sdk.rpc.Api.isSimulationError(sim)) throw new Error(`Simulation failed: ${sim.error}`);
+            tx = sdk.rpc.assembleTransaction(tx, sim).build();
+
+            this._showStatus('Please approve in your wallet…', 'info');
+            const { signedTxXdr } = await kit.signTransaction(tx.toXDR(), {
+                address: this.address,
+                networkPassphrase: STELLAR_CONFIG.networkPassphrase,
+            });
+            const signedTx = sdk.TransactionBuilder.fromXDR(signedTxXdr, STELLAR_CONFIG.networkPassphrase);
+            const response = await rpc.sendTransaction(signedTx);
+            if (response.status === 'ERROR') throw new Error(`Transaction failed: ${response.errorResult}`);
+
+            let result = await rpc.getTransaction(response.hash);
+            let attempts = 0;
+            while (result.status === 'NOT_FOUND' && attempts < 20) {
+                await new Promise(r => setTimeout(r, 1000));
+                result = await rpc.getTransaction(response.hash);
+                attempts++;
+            }
+
+            if (result.status === 'SUCCESS') {
+                // Also clear localStorage for this wallet
+                const addr = this.address;
+                localStorage.removeItem(`ws_prog_${addr}`);
+                localStorage.removeItem(`ws_pb_${addr}`);
+                localStorage.removeItem(`ws_pb_level_${addr}`);
+                this._showStatus('Your score has been reset to 0 / Level 1!', 'success');
+                return true;
+            }
+            throw new Error('Transaction not confirmed in time.');
+        } catch (err) {
+            this._showStatus(`Reset failed: ${err.message}`, 'error');
+            return false;
+        }
+    }
+
+    // Admin: wipe the entire leaderboard (only works if connected wallet is the admin)
+    async resetLeaderboard() {
+        if (!this.connected || !this.address) {
+            this._showStatus('Connect your wallet first.', 'error');
+            return false;
+        }
+        if (this.address !== STELLAR_CONFIG.adminAddress) {
+            this._showStatus('Only the admin wallet can reset the full leaderboard.', 'error');
+            return false;
+        }
+        this._showStatus('Resetting the entire leaderboard on-chain…', 'info');
+        try {
+            const sdk = await this._getSDK();
+            const kit = await this._getKit();
+            const rpc = new sdk.rpc.Server(STELLAR_CONFIG.rpcUrl);
+            const contract = new sdk.Contract(STELLAR_CONFIG.contractId);
+
+            await this._ensureFunded(this.address);
+            const account = await rpc.getAccount(this.address);
+
+            let tx = new sdk.TransactionBuilder(account, {
+                fee: sdk.BASE_FEE,
+                networkPassphrase: STELLAR_CONFIG.networkPassphrase,
+            })
+                .addOperation(contract.call(
+                    'reset_leaderboard',
+                    sdk.Address.fromString(this.address).toScVal(),
+                ))
+                .setTimeout(180)
+                .build();
+
+            const sim = await rpc.simulateTransaction(tx);
+            if (sdk.rpc.Api.isSimulationError(sim)) throw new Error(`Simulation failed: ${sim.error}`);
+            tx = sdk.rpc.assembleTransaction(tx, sim).build();
+
+            this._showStatus('Please approve in your wallet…', 'info');
+            const { signedTxXdr } = await kit.signTransaction(tx.toXDR(), {
+                address: this.address,
+                networkPassphrase: STELLAR_CONFIG.networkPassphrase,
+            });
+            const signedTx = sdk.TransactionBuilder.fromXDR(signedTxXdr, STELLAR_CONFIG.networkPassphrase);
+            const response = await rpc.sendTransaction(signedTx);
+            if (response.status === 'ERROR') throw new Error(`Transaction failed: ${response.errorResult}`);
+
+            let result = await rpc.getTransaction(response.hash);
+            let attempts = 0;
+            while (result.status === 'NOT_FOUND' && attempts < 20) {
+                await new Promise(r => setTimeout(r, 1000));
+                result = await rpc.getTransaction(response.hash);
+                attempts++;
+            }
+
+            if (result.status === 'SUCCESS') {
+                this._showStatus('Leaderboard wiped! All scores reset to 0 / Level 1.', 'success');
+                return true;
+            }
+            throw new Error('Transaction not confirmed in time.');
+        } catch (err) {
+            this._showStatus(`Reset failed: ${err.message}`, 'error');
+            return false;
         }
     }
 

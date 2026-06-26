@@ -473,8 +473,17 @@
                 </div>
             </div>
             
+            <!-- Admin panel — only shown when the admin wallet is connected -->
+            <div class="admin-reset-panel" id="admin-reset-panel">
+                <div class="admin-reset-title">Admin Controls</div>
+                <button class="reset-leaderboard-btn" id="reset-leaderboard-btn" onclick="game.confirmAdminReset()">
+                    Reset Entire Leaderboard
+                </button>
+            </div>
+
             <div class="leaderboard-actions">
                 <button class="leaderboard-refresh-btn" onclick="game.refreshLeaderboard()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 #00bfa5'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 #00bfa5'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 #00bfa5'">Refresh</button>
+                <button class="reset-score-btn" id="reset-score-btn" onclick="game.confirmSelfReset()" style="display: none;">Reset My Score</button>
                 <button class="theme-close-btn" style="margin-top: 0; width: auto;" onclick="game.closeLeaderboardModal(null)">Close</button>
             </div>
         </div>

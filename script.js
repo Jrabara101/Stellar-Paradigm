@@ -2085,7 +2085,43 @@ class TeakScrambleGame {
     openLeaderboardModal() {
         this.sound.play('select');
         document.getElementById('leaderboard-modal-backdrop').classList.add('active');
+        this._updateResetUI();
         this.refreshLeaderboard();
+    }
+
+    _updateResetUI() {
+        const wallet = window.stellarWallet;
+        const connected = wallet && wallet.connected;
+
+        const resetBtn = document.getElementById('reset-score-btn');
+        const adminPanel = document.getElementById('admin-reset-panel');
+
+        if (resetBtn) resetBtn.style.display = connected ? 'inline-block' : 'none';
+        // Admin panel is always shown; contract enforces auth on the actual call
+        if (adminPanel) adminPanel.style.display = 'block';
+    }
+
+    confirmSelfReset() {
+        if (!confirm('Reset your score and level to 0 / Level 1 on the blockchain?\n\nThis cannot be undone.')) return;
+        window.stellarWallet.resetScore().then(ok => {
+            if (ok) {
+                // Reset in-memory game state
+                this.score = 0;
+                this.level = 1;
+                this.winStreak = 0;
+                this.scoreElement.innerText = '000';
+                this.levelElement.innerText = '1';
+                if (this.streakElement) this.streakElement.innerText = '0';
+                this.refreshLeaderboard();
+            }
+        });
+    }
+
+    confirmAdminReset() {
+        if (!confirm('ADMIN: Wipe the ENTIRE leaderboard for ALL players?\n\nThis is irreversible.')) return;
+        window.stellarWallet.resetLeaderboard().then(ok => {
+            if (ok) this.refreshLeaderboard();
+        });
     }
 
     closeLeaderboardModal(event) {
