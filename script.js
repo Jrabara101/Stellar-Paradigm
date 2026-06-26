@@ -284,6 +284,19 @@ class ParticleSystem {
     }
 
     getColorsForTheme() {
+        const tileEffect = document.body.getAttribute('data-tile-effect') || 'none';
+        if (tileEffect === 'neon') {
+            return ['#ff00ff', '#00ffff', '#ffff00'];
+        } else if (tileEffect === 'volcanic') {
+            return ['#ff4500', '#ff8c00', '#ff0000', '#262220'];
+        } else if (tileEffect === 'holographic') {
+            return ['#ff9a9e', '#fecfef', '#a1c4fd', '#c2e9fb', '#e0c3fc', '#fbc2eb'];
+        } else if (tileEffect === 'ice-crystal') {
+            return ['#e0f2fe', '#bae6fd', '#7dd3fc', '#38bdf8', '#ffffff'];
+        } else if (tileEffect === 'stained-glass') {
+            return ['#ef4444', '#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#06b6d4'];
+        }
+
         const theme = document.body.getAttribute('data-theme') || 'teak';
         switch (theme) {
             case 'nordic':
@@ -397,7 +410,7 @@ class ParticleSystem {
                 p.y += p.vy;
                 p.vx += (Math.random() - 0.5) * 0.1; // slight sway
                 p.alpha -= p.decay;
-            } else if (p.type === 'ghost') {
+            } else if (p.type === 'ghost' || p.type === 'glow') {
                 p.alpha -= p.decay;
             } else {
                 p.x += p.vx;
@@ -462,6 +475,16 @@ class ParticleSystem {
                     this.ctx.textAlign = 'center';
                     this.ctx.textBaseline = 'middle';
                     this.ctx.fillText(p.letter, 0, 0);
+                } else if (p.type === 'glow') {
+                    // Draw soft colored glow circle (radial gradient)
+                    const grad = this.ctx.createRadialGradient(0, 0, 0, 0, 0, p.size / 2);
+                    grad.addColorStop(0, p.color);
+                    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+                    this.ctx.fillStyle = grad;
+                    this.ctx.fill();
                 } else if (p.type === 'atom') {
                     this.ctx.beginPath();
                     this.ctx.arc(0, 0, p.size / 4, 0, Math.PI * 2);
@@ -1213,6 +1236,22 @@ class TeakScrambleGame {
             const centerX = tileRect.left + tileRect.width / 2;
             const bottomY = tileRect.bottom;
             this.spawnDragEmber(centerX, bottomY);
+        } else if (this.currentTileEffect === 'stained-glass') {
+            const tileRect = this.activeDragTile.element.getBoundingClientRect();
+            const centerX = tileRect.left + tileRect.width / 2;
+            const centerY = tileRect.top + tileRect.height / 2;
+            
+            // Get background color of the tile to match its unique glass color
+            const style = window.getComputedStyle(this.activeDragTile.element);
+            let color = style.backgroundColor || 'rgba(59, 130, 246, 0.45)';
+            // Ensure color has high visibility for the glow
+            if (color.startsWith('rgba')) {
+                color = color.replace(/[\d\.]+\)$/, '0.65)');
+            } else if (color.startsWith('rgb(')) {
+                color = color.replace('rgb(', 'rgba(').replace(')', ', 0.65)');
+            }
+            
+            this.spawnGlassGlow(centerX, centerY, tileRect.width * 1.6, color);
         }
 
         const halfWidth = this.activeDragTile.element.offsetWidth / 2;
@@ -1982,6 +2021,8 @@ class TeakScrambleGame {
             if (effectId === 'neon') label = 'Neon Arcade';
             if (effectId === 'volcanic') label = 'Volcanic Forge';
             if (effectId === 'holographic') label = 'Holographic';
+            if (effectId === 'ice-crystal') label = 'Ice Crystal';
+            if (effectId === 'stained-glass') label = 'Stained Glass';
             btn.innerText = `Tile Effect: ${label}`;
         }
 
@@ -2077,6 +2118,23 @@ class TeakScrambleGame {
             color: colors[Math.floor(Math.random() * colors.length)],
             alpha: 1.0,
             decay: 0.02 + Math.random() * 0.02,
+            rotation: 0
+        });
+        this.particles.animate();
+    }
+
+    spawnGlassGlow(x, y, size, color) {
+        if (!this.particles) return;
+        this.particles.active = true;
+        
+        this.particles.particles.push({
+            type: 'glow',
+            x: x,
+            y: y,
+            color: color,
+            alpha: 0.7,
+            decay: 0.08, // Fades out in about 9 frames (~150ms)
+            size: size,
             rotation: 0
         });
         this.particles.animate();

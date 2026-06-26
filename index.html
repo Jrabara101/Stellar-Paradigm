@@ -53,7 +53,6 @@
                 <button class="category-btn-tag" id="category-tag-btn" onclick="game.openCategoryModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--turquoise-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--turquoise); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--turquoise-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Category: General</button>
                 <button class="customize-btn-tag" id="customize-tag-btn" onclick="game.openThemeModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--mustard-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--mustard); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--mustard-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Customize Board</button>
                 <button class="customize-btn-tag" id="customize-chips-btn" onclick="game.openChipModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--turquoise-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--turquoise); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--turquoise-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Customize Chips</button>
-                <button class="customize-btn-tag" id="tile-effects-btn" onclick="game.openTileEffectsModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--mustard-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--mustard); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--mustard-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Tile Effect: None</button>
                 <button class="customize-btn-tag" id="leaderboard-btn" onclick="game.openLeaderboardModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--mustard-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--mustard); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--mustard-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Leaderboard</button>
                 <button class="customize-btn-tag" id="effects-btn" onclick="game.openEffectsModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--turquoise-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--turquoise); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--turquoise-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Effects</button>
             </div>
@@ -328,6 +327,22 @@
                     </div>
                     <div class="theme-name">Holographic</div>
                 </div>
+                <!-- Tile Effect: Ice Crystal -->
+                <div class="theme-card" id="tile-effect-card-ice-crystal" onclick="game.switchTileEffect('ice-crystal')">
+                    <div class="theme-preview" style="background: rgba(224, 242, 254, 0.75); border: 2.5px solid #93c5fd; border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: inset 0 0 8px rgba(255,255,255,0.6); margin-bottom: 4px; position: relative; overflow: hidden;">
+                        <!-- Static corner frost simulation for preview -->
+                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at top left, #ffffff 0%, transparent 40%), radial-gradient(circle at top right, #ffffff 0%, transparent 40%), radial-gradient(circle at bottom left, #ffffff 0%, transparent 40%), radial-gradient(circle at bottom right, #ffffff 0%, transparent 40%); opacity: 0.7; pointer-events: none;"></div>
+                        <div style="font-weight: 800; font-size: 2.5rem; color: #1e3a8a; font-family: inherit; z-index: 1;">E</div>
+                    </div>
+                    <div class="theme-name">Ice Crystal</div>
+                </div>
+                <!-- Tile Effect: Stained Glass -->
+                <div class="theme-card" id="tile-effect-card-stained-glass" onclick="game.switchTileEffect('stained-glass')">
+                    <div class="theme-preview" style="background: rgba(139, 92, 246, 0.45); border: 2.5px solid #1e293b; border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.35); margin-bottom: 4px; position: relative;">
+                        <div style="font-weight: 800; font-size: 2.5rem; color: #1e293b; font-family: inherit;">F</div>
+                    </div>
+                    <div class="theme-name">Stained Glass</div>
+                </div>
             </div>
             <button class="theme-close-btn" style="margin-top: 20px;" onclick="game.closeTileEffectsModal(null)">Close Menu</button>
         </div>
@@ -495,6 +510,15 @@
             <h3>Visual Effects Menu</h3>
             <div class="effects-settings-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
                 
+                <!-- Custom Tile Effect Selection Button Row -->
+                <div class="toggle-container" style="border-bottom: 2px solid var(--teak-dark) !important; padding-bottom: 12px; margin-bottom: 4px;">
+                    <div class="toggle-label">
+                        <span style="font-weight: 900; font-size: 0.95rem;">Tile Letter Styling</span>
+                        <span class="toggle-description" style="font-size: 0.75rem; opacity: 0.85;">Select visual skins & custom animations for every tile letter</span>
+                    </div>
+                    <button class="customize-btn-tag" id="tile-effects-btn" onclick="game.openTileEffectsModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--mustard-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--mustard); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--mustard-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s; margin-left: 10px;">Tile Effect: None</button>
+                </div>
+
                 <!-- Shockwave Toggle -->
                 <div class="toggle-container">
                     <div class="toggle-label">

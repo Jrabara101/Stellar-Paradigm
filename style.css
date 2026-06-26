@@ -186,6 +186,13 @@ body {
     height: 100vh; 
     overflow: hidden; 
     font-family: 'Jost', 'Futura', sans-serif;
+
+    /* Victory and Shockwave visual effects theme colors default (turquoise) */
+    --shockwave-color: rgba(64, 224, 208, 0.85);
+    --shockwave-glow: rgba(64, 224, 208, 0.6);
+    --shockwave-inner: rgba(64, 224, 208, 0.4);
+    --victory-glow-color1: var(--turquoise);
+    --victory-glow-color2: rgba(64, 224, 208, 0.5);
 }
 
 /* Ambient Glow behind board */
@@ -2478,14 +2485,14 @@ body[data-chip-material="glass"] .wood-tile {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    border: 4px solid rgba(64, 224, 208, 0.85);
+    border: 4px solid var(--shockwave-color);
     border-radius: 50%;
     pointer-events: none;
     z-index: 999;
     width: 0;
     height: 0;
     box-sizing: border-box;
-    box-shadow: 0 0 20px rgba(64, 224, 208, 0.6), inset 0 0 12px rgba(64, 224, 208, 0.4);
+    box-shadow: 0 0 20px var(--shockwave-glow), inset 0 0 12px var(--shockwave-inner);
     animation: shockwave-ring-expand 600ms cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
 }
 
@@ -2493,16 +2500,16 @@ body[data-chip-material="glass"] .wood-tile {
     0% {
         width: 0;
         height: 0;
-        border-color: rgba(64, 224, 208, 0.85);
+        border-color: var(--shockwave-color);
         border-width: 8px;
-        box-shadow: 0 0 20px rgba(64, 224, 208, 0.6), inset 0 0 12px rgba(64, 224, 208, 0.4);
+        box-shadow: 0 0 20px var(--shockwave-glow), inset 0 0 12px var(--shockwave-inner);
     }
     100% {
         width: 800px; /* Expands to ~400px radius (800px diameter) */
         height: 800px;
-        border-color: rgba(64, 224, 208, 0);
+        border-color: transparent;
         border-width: 1px;
-        box-shadow: 0 0 0px rgba(64, 224, 208, 0), inset 0 0 0px rgba(64, 224, 208, 0);
+        box-shadow: 0 0 0px transparent, inset 0 0 0px transparent;
     }
 }
 
@@ -2644,28 +2651,28 @@ input:checked + .retro-slider:before {
 @keyframes victory-title-glow {
     0% {
         text-shadow: 
-            1px 1px 0px var(--turquoise),
-            2px 2px 0px var(--turquoise),
+            1px 1px 0px var(--victory-glow-color1),
+            2px 2px 0px var(--victory-glow-color1),
             3px 3px 0px var(--teak-dark);
     }
     25%, 65% {
         text-shadow: 
-            1px 1px 0px var(--turquoise),
-            2px 2px 0px var(--turquoise),
+            1px 1px 0px var(--victory-glow-color1),
+            2px 2px 0px var(--victory-glow-color1),
             3px 3px 0px var(--teak-dark),
-            0 0 20px var(--turquoise), 
-            0 0 40px rgba(64,224,208,0.5);
+            0 0 20px var(--victory-glow-color1), 
+            0 0 40px var(--victory-glow-color2);
     }
     45%, 85% {
         text-shadow: 
-            1px 1px 0px var(--turquoise),
-            2px 2px 0px var(--turquoise),
+            1px 1px 0px var(--victory-glow-color1),
+            2px 2px 0px var(--victory-glow-color1),
             3px 3px 0px var(--teak-dark);
     }
     100% {
         text-shadow: 
-            1px 1px 0px var(--turquoise),
-            2px 2px 0px var(--turquoise),
+            1px 1px 0px var(--victory-glow-color1),
+            2px 2px 0px var(--victory-glow-color1),
             3px 3px 0px var(--teak-dark);
     }
 }
@@ -2755,14 +2762,14 @@ input:checked + .retro-slider:before {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    border: 3px solid rgba(64, 224, 208, 0.85);
+    border: 3px solid var(--shockwave-color);
     border-radius: 50%;
     pointer-events: none;
     z-index: 999;
     width: 0;
     height: 0;
     box-sizing: border-box;
-    box-shadow: 0 0 15px rgba(64, 224, 208, 0.6), inset 0 0 8px rgba(64, 224, 208, 0.4);
+    box-shadow: 0 0 15px var(--shockwave-glow), inset 0 0 8px var(--shockwave-inner);
     animation: mini-shockwave-ring-expand 600ms cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
 }
 
@@ -2770,16 +2777,16 @@ input:checked + .retro-slider:before {
     0% {
         width: 0;
         height: 0;
-        border-color: rgba(64, 224, 208, 0.85);
+        border-color: var(--shockwave-color);
         border-width: 6px;
-        box-shadow: 0 0 15px rgba(64, 224, 208, 0.6), inset 0 0 8px rgba(64, 224, 208, 0.4);
+        box-shadow: 0 0 15px var(--shockwave-glow), inset 0 0 8px var(--shockwave-inner);
     }
     100% {
         width: 180px;
         height: 180px;
-        border-color: rgba(64, 224, 208, 0);
+        border-color: transparent;
         border-width: 1px;
-        box-shadow: 0 0 0px rgba(64, 224, 208, 0), inset 0 0 0px rgba(64, 224, 208, 0);
+        box-shadow: 0 0 0px transparent, inset 0 0 0px transparent;
     }
 }
 
@@ -3110,6 +3117,401 @@ body[data-tile-effect="holographic"] .wood-tile.locked {
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
+
+/* ==========================================================================
+   4. ICE CRYSTAL EFFECT
+   ========================================================================== */
+body[data-tile-effect="ice-crystal"] .wood-tile {
+    background: rgba(224, 242, 254, 0.65) !important; /* pale blue, semi-transparent */
+    border: 2px solid #93c5fd !important;
+    color: #1d4ed8 !important; /* pale blue theme base letter color */
+    box-shadow: 
+        0 4px 0 #3b82f6,
+        inset 0 0 10px rgba(255, 255, 255, 0.7),
+        0 6px 12px rgba(0, 0, 0, 0.15) !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.3s, border-color 0.3s, color 0.3s;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+body[data-tile-effect="ice-crystal"] .wood-tile::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    /* Static corner frost crystals simulation */
+    background: 
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 8%, transparent 35%),
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 8%, transparent 35%),
+        radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 8%, transparent 35%),
+        radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 8%, transparent 35%) !important;
+    opacity: 0.7;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 2px;
+    transform: scale(1);
+    transform-origin: center;
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+body[data-tile-effect="ice-crystal"] .wood-tile:hover {
+    color: #1e3a8a !important; /* chills - deeper blue tint */
+    background: rgba(191, 219, 254, 0.75) !important;
+    border-color: #60a5fa !important;
+    box-shadow: 
+        0 8px 0 #2563eb,
+        inset 0 0 12px rgba(255, 255, 255, 0.9),
+        0 10px 18px rgba(0, 0, 0, 0.25) !important;
+    --tile-extra-transform: scale(1.08) translateY(-3px) rotate(0deg);
+}
+
+body[data-tile-effect="ice-crystal"] .wood-tile:hover::before {
+    transform: scale(1.35) !important; /* grows inward from corner to center */
+    opacity: 1 !important;
+}
+
+body[data-tile-effect="ice-crystal"] .wood-tile.dragging {
+    color: #1e3a8a !important;
+    background: rgba(191, 219, 254, 0.8) !important;
+    border-color: #60a5fa !important;
+    box-shadow: 
+        0 12px 0 #2563eb,
+        inset 0 0 14px rgba(255, 255, 255, 0.95),
+        0 16px 28px rgba(0, 0, 0, 0.3) !important;
+    --tile-extra-transform: scale(1.2) translateY(0px) rotate(0deg);
+}
+
+body[data-tile-effect="ice-crystal"] .wood-tile.dragging::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    /* Hairline cracks / stress lines */
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' stroke='rgba(255,255,255,0.75)' stroke-width='1.5' fill='none' stroke-linecap='round'%3E%3Cpath d='M15 15 L35 30 L45 20 L75 55 M35 30 L30 65 L15 80 M75 55 L90 50 M45 20 L40 5 M55 35 L70 25 M30 65 L45 80'/%3E%3C/svg%3E") !important;
+    background-size: cover;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: 2px;
+}
+
+body[data-tile-effect="ice-crystal"] .wood-tile.inlaid {
+    color: #1d4ed8 !important;
+    background: rgba(219, 234, 254, 0.75) !important;
+    border-color: #93c5fd !important;
+    box-shadow: 
+        0 2px 0 #3b82f6,
+        inset 0 0 8px rgba(255, 255, 255, 0.6),
+        0 4px 6px rgba(0, 0, 0, 0.12) !important;
+}
+
+body[data-tile-effect="ice-crystal"] .wood-tile.inlaid::after {
+    content: '';
+    position: absolute;
+    top: -20px; left: -20px; right: -20px; bottom: -20px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(147, 197, 253, 0.55) 45%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 2;
+    animation: ice-frost-bloom 0.4s ease-out forwards;
+}
+
+@keyframes ice-frost-bloom {
+    0% {
+        transform: scale(0.3);
+        opacity: 1;
+        filter: blur(4px);
+    }
+    100% {
+        transform: scale(1.6);
+        opacity: 0;
+        filter: blur(1px);
+    }
+}
+
+body[data-tile-effect="ice-crystal"] .wood-tile.locked {
+    background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%) !important; /* solid opaque glacier blue */
+    border-color: #0284c7 !important;
+    color: #0369a1 !important;
+    box-shadow: 
+        0 2px 0 #0284c7,
+        0 4px 6px rgba(0, 0, 0, 0.25) !important;
+    /* strong text shadow for engraved depth */
+    text-shadow: 
+        1px 1px 0px rgba(255, 255, 255, 0.8),
+        -1px -1px 0px rgba(0, 0, 0, 0.35),
+        0px 2px 4px rgba(0, 0, 0, 0.2) !important;
+    pointer-events: none;
+}
+
+body[data-tile-effect="ice-crystal"] .wood-tile.locked::before {
+    /* Frost fills full tile */
+    transform: scale(1.4) !important;
+    opacity: 0.95 !important;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 100%) !important;
+}
+
+/* ==========================================================================
+   5. STAINED GLASS EFFECT
+   ========================================================================== */
+body[data-tile-effect="stained-glass"] .wood-tile {
+    border: 2.5px solid #1e293b !important; /* Dark lead came borders */
+    color: #1e293b !important; /* Dark charcoal text for the leading */
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    transition: transform 0.2s, box-shadow 0.2s, background 0.3s, border-color 0.3s, color 0.3s, filter 0.3s;
+}
+
+/* Translucent jewel-tone color variation */
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+1) {
+    background: rgba(239, 68, 68, 0.45) !important; /* Ruby */
+    box-shadow: 
+        0 4px 0 #1e293b,
+        0 4px 10px rgba(239, 68, 68, 0.3) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+2) {
+    background: rgba(59, 130, 246, 0.45) !important; /* Sapphire */
+    box-shadow: 
+        0 4px 0 #1e293b,
+        0 4px 10px rgba(59, 130, 246, 0.3) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+3) {
+    background: rgba(16, 185, 129, 0.45) !important; /* Emerald */
+    box-shadow: 
+        0 4px 0 #1e293b,
+        0 4px 10px rgba(16, 185, 129, 0.3) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+4) {
+    background: rgba(139, 92, 246, 0.45) !important; /* Amethyst */
+    box-shadow: 
+        0 4px 0 #1e293b,
+        0 4px 10px rgba(139, 92, 246, 0.3) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+5) {
+    background: rgba(245, 158, 11, 0.45) !important; /* Amber */
+    box-shadow: 
+        0 4px 0 #1e293b,
+        0 4px 10px rgba(245, 158, 11, 0.3) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+6) {
+    background: rgba(6, 182, 212, 0.45) !important; /* Turquoise */
+    box-shadow: 
+        0 4px 0 #1e293b,
+        0 4px 10px rgba(6, 182, 212, 0.3) !important;
+}
+
+/* Hover: Backlight surges & colored box-shadow intensifies */
+body[data-tile-effect="stained-glass"] .wood-tile:hover {
+    --tile-extra-transform: scale(1.08) translateY(-3px) rotate(0deg);
+}
+
+body[data-tile-effect="stained-glass"] .wood-tile:hover::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.5) 0%, transparent 75%) !important;
+    pointer-events: none;
+    z-index: -1;
+    border-radius: 2px;
+}
+
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+1):hover {
+    background: rgba(239, 68, 68, 0.7) !important;
+    box-shadow: 
+        0 8px 0 #1e293b,
+        0 8px 22px rgba(239, 68, 68, 0.65) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+2):hover {
+    background: rgba(59, 130, 246, 0.7) !important;
+    box-shadow: 
+        0 8px 0 #1e293b,
+        0 8px 22px rgba(59, 130, 246, 0.65) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+3):hover {
+    background: rgba(16, 185, 129, 0.7) !important;
+    box-shadow: 
+        0 8px 0 #1e293b,
+        0 8px 22px rgba(16, 185, 129, 0.65) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+4):hover {
+    background: rgba(139, 92, 246, 0.7) !important;
+    box-shadow: 
+        0 8px 0 #1e293b,
+        0 8px 22px rgba(139, 92, 246, 0.65) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+5):hover {
+    background: rgba(245, 158, 11, 0.7) !important;
+    box-shadow: 
+        0 8px 0 #1e293b,
+        0 8px 22px rgba(245, 158, 11, 0.65) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+6):hover {
+    background: rgba(6, 182, 212, 0.7) !important;
+    box-shadow: 
+        0 8px 0 #1e293b,
+        0 8px 22px rgba(6, 182, 212, 0.65) !important;
+}
+
+/* Dragging: Casts a shadow and glow */
+body[data-tile-effect="stained-glass"] .wood-tile.dragging {
+    --tile-extra-transform: scale(1.18) translateY(0px) rotate(0deg);
+}
+
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+1).dragging {
+    background: rgba(239, 68, 68, 0.7) !important;
+    box-shadow: 
+        0 12px 0 #1e293b,
+        0 14px 28px rgba(239, 68, 68, 0.75) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+2).dragging {
+    background: rgba(59, 130, 246, 0.7) !important;
+    box-shadow: 
+        0 12px 0 #1e293b,
+        0 14px 28px rgba(59, 130, 246, 0.75) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+3).dragging {
+    background: rgba(16, 185, 129, 0.7) !important;
+    box-shadow: 
+        0 12px 0 #1e293b,
+        0 14px 28px rgba(16, 185, 129, 0.75) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+4).dragging {
+    background: rgba(139, 92, 246, 0.7) !important;
+    box-shadow: 
+        0 12px 0 #1e293b,
+        0 14px 28px rgba(139, 92, 246, 0.75) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+5).dragging {
+    background: rgba(245, 158, 11, 0.7) !important;
+    box-shadow: 
+        0 12px 0 #1e293b,
+        0 14px 28px rgba(245, 158, 11, 0.75) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+6).dragging {
+    background: rgba(6, 182, 212, 0.7) !important;
+    box-shadow: 
+        0 12px 0 #1e293b,
+        0 14px 28px rgba(6, 182, 212, 0.75) !important;
+}
+
+/* Inlaid: Lock in with brief flare */
+body[data-tile-effect="stained-glass"] .wood-tile.inlaid {
+    animation: glass-inlaid-flare 0.5s ease-out forwards;
+}
+
+@keyframes glass-inlaid-flare {
+    0% {
+        box-shadow: 0 2px 0 #1e293b, inset 0 0 0px 0px rgba(255, 255, 255, 0);
+        filter: brightness(1);
+    }
+    35% {
+        box-shadow: 0 2px 0 #1e293b, inset 0 0 20px 8px rgba(255, 255, 255, 1);
+        filter: brightness(1.7);
+    }
+    100% {
+        box-shadow: 0 2px 0 #1e293b, inset 0 0 0px 0px rgba(255, 255, 255, 0);
+        filter: brightness(1);
+    }
+}
+
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+1).inlaid {
+    background: rgba(239, 68, 68, 0.65) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+2).inlaid {
+    background: rgba(59, 130, 246, 0.65) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+3).inlaid {
+    background: rgba(16, 185, 129, 0.65) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+4).inlaid {
+    background: rgba(139, 92, 246, 0.65) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+5).inlaid {
+    background: rgba(245, 158, 11, 0.65) !important;
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+6).inlaid {
+    background: rgba(6, 182, 212, 0.65) !important;
+}
+
+/* Locked: Saturated deep jewel tone, fully opaque */
+body[data-tile-effect="stained-glass"] .wood-tile.locked {
+    color: #ffffff !important;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+    box-shadow: 
+        0 2px 0 #1e293b,
+        0 2px 10px rgba(255, 255, 255, 0.15) !important;
+    pointer-events: none;
+    animation: none !important;
+}
+
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+1).locked {
+    background: rgb(220, 38, 38) !important; /* Ruby */
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+2).locked {
+    background: rgb(37, 99, 235) !important; /* Sapphire */
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+3).locked {
+    background: rgb(5, 150, 105) !important; /* Emerald */
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+4).locked {
+    background: rgb(124, 58, 237) !important; /* Amethyst */
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+5).locked {
+    background: rgb(217, 119, 6) !important; /* Amber */
+}
+body[data-tile-effect="stained-glass"] .wood-tile:nth-child(6n+6).locked {
+    background: rgb(8, 145, 178) !important; /* Turquoise */
+}
+
+/* Stack tile effects modal on top of general effects modal */
+#tile-effects-modal-backdrop {
+    z-index: 1600;
+}
+
+/* Align shockwave and victory glow colors with selected tile effects */
+body[data-tile-effect="neon"] {
+    --shockwave-color: rgba(255, 0, 255, 0.85);
+    --shockwave-glow: rgba(255, 0, 255, 0.6);
+    --shockwave-inner: rgba(0, 255, 255, 0.4);
+    
+    --victory-glow-color1: #ff00ff;
+    --victory-glow-color2: rgba(0, 255, 255, 0.5);
+}
+
+body[data-tile-effect="volcanic"] {
+    --shockwave-color: rgba(255, 69, 0, 0.85);
+    --shockwave-glow: rgba(255, 140, 0, 0.7);
+    --shockwave-inner: rgba(255, 69, 0, 0.5);
+    
+    --victory-glow-color1: #ff4500;
+    --victory-glow-color2: rgba(255, 140, 0, 0.5);
+}
+
+body[data-tile-effect="holographic"] {
+    --shockwave-color: rgba(255, 154, 158, 0.85);
+    --shockwave-glow: rgba(161, 196, 253, 0.8);
+    --shockwave-inner: rgba(224, 195, 252, 0.6);
+    
+    --victory-glow-color1: #fbc2eb;
+    --victory-glow-color2: rgba(161, 196, 253, 0.6);
+}
+
+body[data-tile-effect="ice-crystal"] {
+    --shockwave-color: rgba(147, 197, 253, 0.85);
+    --shockwave-glow: rgba(224, 242, 254, 0.8);
+    --shockwave-inner: rgba(255, 255, 255, 0.6);
+    
+    --victory-glow-color1: #93c5fd;
+    --victory-glow-color2: rgba(224, 242, 254, 0.6);
+}
+
+body[data-tile-effect="stained-glass"] {
+    --shockwave-color: rgba(139, 92, 246, 0.85);
+    --shockwave-glow: rgba(6, 182, 212, 0.7);
+    --shockwave-inner: rgba(245, 158, 11, 0.5);
+    
+    --victory-glow-color1: #8b5cf6;
+    --victory-glow-color2: rgba(6, 182, 212, 0.6);
+}
+
 
 
 
