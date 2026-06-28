@@ -214,6 +214,35 @@ GitHub Actions runs automatically on every push to `main`:
 
 ---
 
+## 🔗 Stellar Integration
+
+### Why Built on Stellar
+
+This application leverages Stellar's core strengths:
+
+- **Low-Cost Asset Tokenization** — Badges and future credentials are tokenized assets on-chain, aligned with [Stellar's asset tokenization framework](https://stellar.org/use-cases/tokenization)
+- **Micro-Payment Infrastructure** — Badge minting and credential issuance use micro-payments (0.5 XLM per credential) that are only economically viable on Stellar
+- **Global Accessibility** — Players and institutions worldwide can access the app via Stellar Anchors for on/off-ramp conversions
+- **Fast Finality** — 5-second settlement ensures leaderboard updates and badge mints are verifiable immediately
+- **Financial Inclusion** — Aligns with Stellar's mission: expanding access to financial services by making Web3 approachable for non-technical users
+
+### Resources
+
+- [Stellar Anchors](https://stellar.org/learn/anchor-basics) — On/off-ramp infrastructure for global access
+- [Asset Tokenization](https://stellar.org/use-cases/tokenization) — Badge and credential tokenization model
+- [Payments](https://stellar.org/use-cases/payments) — Micro-payment infrastructure for badges
+- [On/Off Ramps](https://stellar.org/use-cases/ramps) — Institutional fiat conversion
+- [Stellar Ecosystem](https://stellar.org/ecosystem) — Partnership opportunities with wallets, identity providers, DeFi
+
+### Future Stellar Integration
+
+- **DeFi:** Credentials as collateral for education loans and work advances
+- **Wallets:** Credential display and sharing in Freighter, Lobstr, and other Stellar wallets
+- **Identity:** Integration with Stellar identity providers for institutional verification
+- **Payments:** Direct fiat-to-XLM conversion for schools and institutions via Stellar Anchors
+
+---
+
 ## 📜 License
 
 MIT
