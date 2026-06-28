@@ -4,6 +4,8 @@ A retro, mid-century-themed word puzzle game with an **on-chain leaderboard** an
 
 **🔗 Live demo:** https://word-scramble-v1.surge.sh
 
+**🎬 Demo video:** [Video/Word Scramble Video.mp4](Video/Word%20Scramble%20Video.mp4)
+
 ---
 
 ## 📖 Project Description
@@ -103,6 +105,22 @@ npx serve .
 > stellar contract deploy --wasm target/wasm32v1-none/release/reward_contract.wasm --network testnet --source <your-key>
 > ```
 > Then update `contractId` and `rewardContractId` in `stellar.js`.
+
+---
+
+## 🎬 Demo Video
+
+A full walkthrough of the app end to end — wallet connection, solving a word, on-chain score submission, inter-contract badge minting, real-time event streaming across two tabs, leaderboard with wallet type badges, and CI/CD pipeline passing on GitHub Actions.
+
+📁 **File:** [Video/Word Scramble Video.mp4](Video/Word%20Scramble%20Video.mp4)
+
+> **What the video covers:**
+> 1. Opening the live URL at `word-scramble-v1.surge.sh`
+> 2. Multi-wallet connect modal (Stellar Wallets Kit)
+> 3. Solving a word → Submit → Freighter approval → "Score saved on-chain!"
+> 4. Tab 2 live event stream flash (● LIVE indicator via `rpc.getEvents`)
+> 5. Leaderboard showing scores, badges, and wallet type per player
+> 6. GitHub Actions CI — contract tests + frontend check passing
 
 ---
 
