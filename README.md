@@ -78,8 +78,8 @@ Because the app uses ES modules (`<script type="module">`), it **must be served 
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/Jrabara101/word-scramble-stellar.git
-cd word-scramble-stellar
+git clone https://github.com/Jrabara101/Stellar-Paradigm.git
+cd Stellar-Paradigm
 
 # 2. Start any static server, e.g.:
 npx serve .
@@ -166,12 +166,32 @@ The on-chain result — the contract's invocation history and the player's accou
 
 ## ⚙️ CI/CD Pipeline
 
-GitHub Actions runs on every push to `main`:
+GitHub Actions runs automatically on every push to `main`:
 
-1. **Soroban Contract Tests** — builds both contracts targeting `wasm32v1-none` and runs all unit tests with `cargo test`
+1. **Soroban Contract Tests** — builds both contracts targeting `wasm32v1-none` and runs all 6 unit tests with `cargo test`
 2. **Frontend File Check** — verifies `index.html`, `style.css`, `script.js`, and `stellar.js` are present
 
-[![CI](https://github.com/Jrabara101/word-scramble-stellar/actions/workflows/ci.yml/badge.svg)](https://github.com/Jrabara101/word-scramble-stellar/actions/workflows/ci.yml)
+[![CI](https://github.com/Jrabara101/Stellar-Paradigm/actions/workflows/ci.yml/badge.svg)](https://github.com/Jrabara101/Stellar-Paradigm/actions/workflows/ci.yml)
+
+**11 workflow runs — 10 passing ✅ | 1 fixed early failure (wasm32 target, resolved in Run #2)**
+
+| Run | Commit | Result |
+|---|---|---|
+| #11 | Add demo video and update README | ✅ 35s |
+| #10 | Line tile visuals | ✅ 25s |
+| #9 | Redeploy Leaderboards | ✅ 1m 0s |
+| #8 | Effects on Tile and Visual Effects | ✅ 24s |
+| #7 | Add wallet type badges on leaderboard | ✅ 34s |
+| #6 | Add event streaming with real-time updates | ✅ 34s |
+| #5 | Add badge display in wallet bar | ✅ 21s |
+| #4 | Deploy RewardContract and update contract IDs | ✅ 21s |
+| #3 | Add RewardContract with inter-contract badge minting | ✅ 55s |
+| #2 | Fix CI: use wasm32v1-none target for Rust 1.82+ | ✅ 1m 54s |
+| #1 | Add CI/CD pipeline and 5 contract unit tests | ❌ Fixed in #2 |
+
+🔗 [View all workflow runs](https://github.com/Jrabara101/Stellar-Paradigm/actions)
+
+![GitHub Actions CI — all runs passing](screenshots/github-actions.png)
 
 ---
 
