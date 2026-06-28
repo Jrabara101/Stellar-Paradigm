@@ -6,6 +6,10 @@ A retro, mid-century-themed word puzzle game with an **on-chain leaderboard** an
 
 **🎬 Demo video:** [Video/Word Scramble Video.mp4](Video/Word%20Scramble%20Video.mp4)
 
+**📄 Level 4 Idea Submission:** 
+- Markdown: [IDEA_2_SUBMISSION.md](IDEA_2_SUBMISSION.md)
+- HTML (open in Word): [IDEA_2_SUBMISSION.html](IDEA_2_SUBMISSION.html)
+
 ---
 
 ## 📖 Project Description
@@ -211,6 +215,44 @@ GitHub Actions runs automatically on every push to `main`:
 ├── .github/workflows/ci.yml            # CI/CD pipeline
 └── screenshots/                        # Submission screenshots
 ```
+
+---
+
+## 📝 Level 4 Submission
+
+The complete **Level 4 Idea Submission** for the **On-Chain Vocabulary Credential System** is available in multiple formats:
+
+### View the Submission
+
+1. **Markdown (GitHub):** [IDEA_2_SUBMISSION.md](IDEA_2_SUBMISSION.md)
+2. **HTML (Formatted):** [IDEA_2_SUBMISSION.html](IDEA_2_SUBMISSION.html) — Open in any browser
+3. **Word Document:** See instructions below
+
+### Sections Included
+
+- ✅ Problem Statement (1.5B learners lack verifiable credentials)
+- ✅ Why Stellar? (asset tokenization, micro-payments, financial inclusion)
+- ✅ Target Users (9 distinct user groups with personas)
+- ✅ Technical Architecture (CredentialContract, schema, data flow)
+- ✅ Complexity Evaluation (8 technical challenges + estimated time)
+- ✅ Complete 4-Phase Roadmap (MVP → partnerships → mainnet → scale)
+- ✅ Stellar Ecosystem Alignment (resources + partnership opportunities)
+- ✅ Success Metrics (Week 2 through Month 6 targets)
+
+### Convert to Word Document
+
+**Option 1 — Open in Microsoft Word (Easiest)**
+1. Right-click `IDEA_2_SUBMISSION.html` → Open with Microsoft Word
+2. Word automatically formats the HTML
+3. File → Save As → Choose `.docx` format
+
+**Option 2 — Open HTML file**
+1. Double-click `IDEA_2_SUBMISSION.html` to open in browser
+2. File → Print → Save as PDF (or Print to PDF)
+3. Or copy/paste formatted content into Word
+
+**Option 3 — Use Online Converter**
+Upload the `.md` or `.html` file to [Cloudconvert](https://cloudconvert.com/) (free, no signup required)
 
 ---
 
