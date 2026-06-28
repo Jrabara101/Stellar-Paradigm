@@ -7,8 +7,9 @@ A retro, mid-century-themed word puzzle game with an **on-chain leaderboard** an
 **🎬 Demo video:** [Video/Word Scramble Video.mp4](Video/Word%20Scramble%20Video.mp4)
 
 **📄 Level 4 Idea Submission:** 
+- **Word Document:** [IDEA_2_SUBMISSION.docx](IDEA_2_SUBMISSION.docx) ⬅️ **Download this for submission**
 - Markdown: [IDEA_2_SUBMISSION.md](IDEA_2_SUBMISSION.md)
-- HTML (open in Word): [IDEA_2_SUBMISSION.html](IDEA_2_SUBMISSION.html)
+- HTML: [IDEA_2_SUBMISSION.html](IDEA_2_SUBMISSION.html)
 
 ---
 
@@ -224,9 +225,9 @@ The complete **Level 4 Idea Submission** for the **On-Chain Vocabulary Credentia
 
 ### View the Submission
 
-1. **Markdown (GitHub):** [IDEA_2_SUBMISSION.md](IDEA_2_SUBMISSION.md)
+1. **📥 Word Document (.docx):** [IDEA_2_SUBMISSION.docx](IDEA_2_SUBMISSION.docx) — **Click to download and submit**
 2. **HTML (Formatted):** [IDEA_2_SUBMISSION.html](IDEA_2_SUBMISSION.html) — Open in any browser
-3. **Word Document:** See instructions below
+3. **Markdown (GitHub):** [IDEA_2_SUBMISSION.md](IDEA_2_SUBMISSION.md) — Full text version
 
 ### Sections Included
 
@@ -239,20 +240,23 @@ The complete **Level 4 Idea Submission** for the **On-Chain Vocabulary Credentia
 - ✅ Stellar Ecosystem Alignment (resources + partnership opportunities)
 - ✅ Success Metrics (Week 2 through Month 6 targets)
 
-### Convert to Word Document
+### Ready to Submit
 
-**Option 1 — Open in Microsoft Word (Easiest)**
-1. Right-click `IDEA_2_SUBMISSION.html` → Open with Microsoft Word
-2. Word automatically formats the HTML
-3. File → Save As → Choose `.docx` format
+✅ **Word document is ready:** [IDEA_2_SUBMISSION.docx](IDEA_2_SUBMISSION.docx)
 
-**Option 2 — Open HTML file**
-1. Double-click `IDEA_2_SUBMISSION.html` to open in browser
-2. File → Print → Save as PDF (or Print to PDF)
-3. Or copy/paste formatted content into Word
+The `.docx` file has been automatically generated from the HTML submission with all formatting preserved:
+- Professional header and styling
+- Formatted tables and sections
+- Color-coded difficulty badges and checklists
+- Ready to submit directly to Rise In
 
-**Option 3 — Use Online Converter**
-Upload the `.md` or `.html` file to [Cloudconvert](https://cloudconvert.com/) (free, no signup required)
+**To open/edit:**
+- Download the file and open in Microsoft Word
+- Or open directly in Google Docs, LibreOffice, etc.
+
+**Alternative formats** (if needed):
+- [IDEA_2_SUBMISSION.html](IDEA_2_SUBMISSION.html) — Open in browser or Word
+- [IDEA_2_SUBMISSION.md](IDEA_2_SUBMISSION.md) — Plain text markdown version
 
 ---
 
