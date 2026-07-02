@@ -13,6 +13,21 @@ A retro, mid-century-themed word puzzle game with an **on-chain leaderboard** an
 
 ---
 
+## 🔌 Frontend ↔ Smart Contract Integration
+
+**Integration file:** [`stellar.js`](stellar.js) (575 lines) — this is the file that connects the browser UI to the Soroban contracts. It is committed at the repo root and has been present since the very first commit ([`8f324d5`](https://github.com/Jrabara101/Stellar-Paradigm/commit/8f324d5)).
+
+| Requirement | Where it's implemented in `stellar.js` |
+|---|---|
+| **Wallet connection** | [`StellarWallet.connect()`](stellar.js#L76-L121) opens the Stellar Wallets Kit modal, retrieves the selected wallet's address via `kit.getAddress()`, and stores the session (supports Freighter, xBull, Albedo, LOBSTR, Hana, and more) |
+| **Contract initialization** | [`new sdk.Contract(STELLAR_CONFIG.contractId)`](stellar.js#L145) and [`new sdk.Contract(STELLAR_CONFIG.rewardContractId)`](stellar.js#L333) instantiate the two deployed Soroban contracts using the SDK loaded in [`_getSDK()`](stellar.js#L55-L60) |
+| **Transaction building** | [`submitScore()`](stellar.js#L133-L209) builds a transaction with `TransactionBuilder` → `simulateTransaction` → `assembleTransaction` → wallet `signTransaction` → `sendTransaction`, then polls `getTransaction` for confirmation. The same pattern repeats in [`resetScore()`](stellar.js#L354-L415) and [`resetLeaderboard()`](stellar.js#L418-L478) |
+| **Function matching** | Every `contract.call(...)` name matches an exported `pub fn` in the Rust contracts: `submit_score`, `get_leaderboard`, `get_score`, `reset_score`, `reset_leaderboard` in [`word-scramble-contract/contracts/hello-world/src/lib.rs`](word-scramble-contract/contracts/hello-world/src/lib.rs), and `get_badges` in the RewardContract |
+
+CI also enforces that `stellar.js` exists on every push — see [`.github/workflows/ci.yml`](.github/workflows/ci.yml) and the "Frontend File Check" step referenced in the [CI/CD Pipeline](#️-cicd-pipeline) section below.
+
+---
+
 ## 📖 Project Description
 
 Word Scramble is a fully client-side browser game (no backend) that integrates Web3 wallet connectivity and smart-contract calls directly from the frontend:
