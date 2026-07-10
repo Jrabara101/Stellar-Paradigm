@@ -8,6 +8,14 @@ package-lock.json
 # Soroban contract source (already deployed on-chain)
 word-scramble-contract/
 
+# Documentation / submission assets — not needed at runtime (~87MB)
+Video/
+Word Scramble Boards Inspired/
+Test Mobile UI/
+Idea Submissions/
+screenshots/
+*.docx
+
 # Tooling / editor config
 .claude/
 .git/

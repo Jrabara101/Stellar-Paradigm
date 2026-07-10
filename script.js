@@ -616,6 +616,10 @@ class TeakScrambleGame {
         this.currentChipMaterial = localStorage.getItem('word_scramble_chip_material') || 'bone';
         this.applyChipMaterial(this.currentChipMaterial, false);
 
+        // Custom tile font initialization
+        this.currentTileFont = localStorage.getItem('word_scramble_tile_font') || 'jost';
+        this.applyTileFont(this.currentTileFont, false);
+
         // Custom tile effects initialization
         this.currentTileEffect = localStorage.getItem('word_scramble_tile_effect') || 'none';
         this.applyTileEffect(this.currentTileEffect, false);
@@ -628,8 +632,12 @@ class TeakScrambleGame {
             scorePop: localStorage.getItem('ws_fx_scorePop') !== 'false',
             wave: localStorage.getItem('ws_fx_wave') !== 'false',
             streakFire: localStorage.getItem('ws_fx_streakFire') !== 'false',
-            victoryGlow: localStorage.getItem('ws_fx_victoryGlow') !== 'false'
+            victoryGlow: localStorage.getItem('ws_fx_victoryGlow') !== 'false',
+            // Unlike the effects above, Performance Mode defaults OFF —
+            // it's an opt-in trade of visual polish for speed.
+            performanceMode: localStorage.getItem('ws_fx_performanceMode') === 'true'
         };
+        this._applyPerformanceModeAttr();
 
         // Initialize drag-and-drop trackers
         this.activeDragTile = null;
@@ -1148,6 +1156,11 @@ class TeakScrambleGame {
         if (!this.tilesData || this.tilesData.length === 0) return;
 
         const bodyRect = document.body.getBoundingClientRect();
+        // Read once per sync (not per tile) — lets the tile font picker
+        // shrink wide/tall glyphs (e.g. Press Start 2P) via CSS.
+        const fontScale = parseFloat(
+            getComputedStyle(document.body).getPropertyValue('--tile-font-scale')
+        ) || 0.55;
 
         this.tilesData.forEach(tileObj => {
             let targetDOM = null;
@@ -1168,7 +1181,7 @@ class TeakScrambleGame {
             const tileSize = rect.width - pad;
             tileObj.element.style.width = `${tileSize}px`;
             tileObj.element.style.height = `${tileSize}px`;
-            tileObj.element.style.fontSize = `${tileSize * 0.55}px`;
+            tileObj.element.style.fontSize = `${tileSize * fontScale}px`;
 
             const offset = pad / 2;
             
@@ -1203,6 +1216,39 @@ class TeakScrambleGame {
         this.dragStartRect = tileRect;
 
         tileObj.element.classList.add('dragging');
+
+        // Snapshot snap-target geometry once per drag. Layout can't change mid-drag
+        // (touch scroll is prevented), so measuring every cell on every move is waste.
+        this.cacheDragTargets();
+        this.attachDragMoveListeners();
+    }
+
+    cacheDragTargets() {
+        this._dragSnapTargets = [];
+
+        Array.from(this.boardGrid.children).forEach(cell => {
+            const rect = cell.getBoundingClientRect();
+            this._dragSnapTargets.push({
+                type: 'board',
+                index: parseInt(cell.dataset.index),
+                element: cell,
+                cx: rect.left + rect.width / 2,
+                cy: rect.top + rect.height / 2
+            });
+        });
+
+        Array.from(this.rackSlotsContainer.children).forEach((slot, index) => {
+            const rect = slot.getBoundingClientRect();
+            this._dragSnapTargets.push({
+                type: 'rack',
+                index: index,
+                element: slot,
+                cx: rect.left + rect.width / 2,
+                cy: rect.top + rect.height / 2
+            });
+        });
+
+        this._dashedSlots = Array.from(document.querySelectorAll('.dashed-slot'));
     }
 
     dragMove(e) {
@@ -1262,12 +1308,18 @@ class TeakScrambleGame {
     dragEnd(e) {
         if (!this.activeDragTile) return;
 
+        this.detachDragMoveListeners();
+
         const tileObj = this.activeDragTile;
         tileObj.element.classList.remove('dragging');
         this.activeDragTile = null;
 
         // Clean layout highlights
-        document.querySelectorAll('.dashed-slot').forEach(el => el.classList.remove('drag-hover'));
+        if (this._dashedSlots) {
+            this._dashedSlots.forEach(el => el.classList.remove('drag-hover'));
+        }
+        this._dragSnapTargets = [];
+        this._dashedSlots = null;
 
         // Mobile touch tap detection: if dragged distance is tiny, trigger tap-to-move
         if (this.draggedDistance < 10) {
@@ -1312,42 +1364,17 @@ class TeakScrambleGame {
         let bestCell = null;
         let minDist = 36; // Snapping radius threshold
 
-        // 1. Scan board 10x10 squares
-        Array.from(this.boardGrid.children).forEach(cell => {
-            const rect = cell.getBoundingClientRect();
-            const cellX = rect.left + rect.width / 2;
-            const cellY = rect.top + rect.height / 2;
-            const dist = Math.sqrt((cx - cellX)**2 + (cy - cellY)**2);
-            
+        // Scan cached board cells + rack slots (geometry measured once in dragStart)
+        for (const target of this._dragSnapTargets) {
+            const dist = Math.sqrt((cx - target.cx)**2 + (cy - target.cy)**2);
             if (dist < minDist) {
                 minDist = dist;
-                bestCell = {
-                    type: 'board',
-                    index: parseInt(cell.dataset.index),
-                    element: cell
-                };
+                bestCell = target;
             }
-        });
-
-        // 2. Scan rack slots
-        Array.from(this.rackSlotsContainer.children).forEach((slot, index) => {
-            const rect = slot.getBoundingClientRect();
-            const slotX = rect.left + rect.width / 2;
-            const slotY = rect.top + rect.height / 2;
-            const dist = Math.sqrt((cx - slotX)**2 + (cy - slotY)**2);
-            
-            if (dist < minDist) {
-                minDist = dist;
-                bestCell = {
-                    type: 'rack',
-                    index: index,
-                    element: slot
-                };
-            }
-        });
+        }
 
         // Highlight slot outline if dragged over target cell paths
-        document.querySelectorAll('.dashed-slot').forEach(el => el.classList.remove('drag-hover'));
+        this._dashedSlots.forEach(el => el.classList.remove('drag-hover'));
 
         if (bestCell) {
             this.hoveredCell = bestCell;
@@ -1363,13 +1390,29 @@ class TeakScrambleGame {
     }
 
     registerGlobalEvents() {
-        window.addEventListener('mousemove', (e) => this.dragMove(e));
-        window.addEventListener('touchmove', (e) => this.dragMove(e), { passive: false });
-        
+        // Move handlers are attached only while a drag is active (see dragStart/dragEnd).
+        // A permanently registered non-passive touchmove on window blocks scroll
+        // optimization for the whole page, even when nothing is being dragged.
+        this._boundDragMove = (e) => this.dragMove(e);
+
         window.addEventListener('mouseup', (e) => this.dragEnd(e));
         window.addEventListener('touchend', (e) => this.dragEnd(e));
 
-        window.addEventListener('resize', () => this.syncViewPositions(false));
+        window.addEventListener('resize', () => {
+            this.syncViewPositions(false);
+            // Re-measure snap targets if a drag is in progress (layout just changed)
+            if (this.activeDragTile) this.cacheDragTargets();
+        });
+    }
+
+    attachDragMoveListeners() {
+        window.addEventListener('mousemove', this._boundDragMove);
+        window.addEventListener('touchmove', this._boundDragMove, { passive: false });
+    }
+
+    detachDragMoveListeners() {
+        window.removeEventListener('mousemove', this._boundDragMove);
+        window.removeEventListener('touchmove', this._boundDragMove);
     }
 
     verifySolution() {
@@ -1465,6 +1508,15 @@ class TeakScrambleGame {
             // Submit score to Stellar leaderboard (non-blocking)
             if (window.stellarWallet && window.stellarWallet.connected) {
                 window.stellarWallet.submitScore(this.score, this.level);
+            }
+
+            // Daily Challenge gets its own victory-screen content (share
+            // block, no "Next Scramble"); a regular win must restore the
+            // default content in case a prior daily win left it mutated.
+            if (this.isDailyChallenge) {
+                this.completeDailyChallenge();
+            } else {
+                this.resetVictoryScreenUI();
             }
 
             setTimeout(() => {
@@ -1832,7 +1884,13 @@ class TeakScrambleGame {
                 if (this.isEntranceLoad) {
                     this.isEntranceLoad = false;
                     setTimeout(() => {
-                        this.openChangelogModal();
+                        // True first-time visitors see a quick welcome card
+                        // instead of (and then before) the changelog.
+                        if (!localStorage.getItem('ws_onboarding_seen')) {
+                            this.showOnboarding();
+                        } else {
+                            this.openChangelogModal();
+                        }
                     }, 400);
                 }
             }, 300);
@@ -1865,6 +1923,19 @@ class TeakScrambleGame {
             this.sound.play('select');
             document.getElementById('changelog-modal-backdrop').classList.remove('active');
         }
+    }
+
+    showOnboarding() {
+        document.getElementById('onboarding-modal-backdrop').classList.add('active');
+    }
+
+    dismissOnboarding(event) {
+        if (event && event.target !== document.getElementById('onboarding-modal-backdrop')) return;
+        this.sound.play('select');
+        document.getElementById('onboarding-modal-backdrop').classList.remove('active');
+        localStorage.setItem('ws_onboarding_seen', 'true');
+        // Still show the changelog afterward, same as every other visit.
+        setTimeout(() => this.openChangelogModal(), 300);
     }
 
     openThemeModal() {
@@ -1929,13 +2000,19 @@ class TeakScrambleGame {
     openChipModal() {
         this.sound.play('select');
         document.getElementById('chip-modal-backdrop').classList.add('active');
-        
-        // Update active class on the chip cards
-        document.querySelectorAll('#chip-modal-backdrop .theme-card').forEach(card => {
+
+        // Update active class on the chip cards (scoped to chip-card-* so it
+        // doesn't clobber the tile font grid's own .current highlight)
+        document.querySelectorAll('#chip-modal-backdrop .theme-card[id^="chip-card-"]').forEach(card => {
             card.classList.remove('current');
         });
         const activeCard = document.getElementById(`chip-card-${this.currentChipMaterial}`);
         if (activeCard) activeCard.classList.add('current');
+
+        // Load accessibility/premium tile fonts (for previews) and refresh
+        // the font grid's selection + lock state
+        this._ensureLazyTileFonts();
+        this.updateTileFontModalUI();
     }
 
     closeChipModal(event) {
@@ -1955,8 +2032,8 @@ class TeakScrambleGame {
         this.currentChipMaterial = materialId;
         localStorage.setItem('word_scramble_chip_material', materialId);
 
-        // Update active highlight
-        document.querySelectorAll('#chip-modal-backdrop .theme-card').forEach(card => {
+        // Update active highlight (scoped to chip-card-* — see openChipModal)
+        document.querySelectorAll('#chip-modal-backdrop .theme-card[id^="chip-card-"]').forEach(card => {
             card.classList.remove('current');
         });
         const activeCard = document.getElementById(`chip-card-${materialId}`);
@@ -1970,6 +2047,97 @@ class TeakScrambleGame {
         document.body.setAttribute('data-chip-material', materialId);
 
         // Update tile positions since margins/borders might have adjusted
+        setTimeout(() => {
+            this.syncViewPositions(animate);
+        }, 120);
+    }
+
+    // --- Tile Font Picker ---
+    // IDs of tile fonts that are NOT preloaded in <head> and must be fetched
+    // on demand (accessibility font is self-hosted; premium fonts are
+    // Google Fonts gated behind a badge).
+    static TILE_FONT_LAZY = ['dyslexic', 'bungee', 'pressstart'];
+    static TILE_FONT_PREMIUM = ['bungee', 'pressstart'];
+
+    isTileFontUnlocked() {
+        const badges = (window.stellarWallet && window.stellarWallet.cachedBadges) || [];
+        return badges.includes('GOLD') || badges.includes('LEGEND');
+    }
+
+    // Injects the premium Google Fonts stylesheet + the self-hosted
+    // OpenDyslexic stylesheet exactly once. Called both when the modal
+    // opens (so previews render correctly) and from applyTileFont() for a
+    // restored lazy selection at boot (modal may never be opened).
+    _ensureLazyTileFonts() {
+        if (this._tileFontsInjected) return;
+        this._tileFontsInjected = true;
+
+        const googleLink = document.createElement('link');
+        googleLink.rel = 'stylesheet';
+        googleLink.href = 'https://fonts.googleapis.com/css2?family=Bungee&family=Press+Start+2P&display=swap';
+        document.head.appendChild(googleLink);
+
+        const localLink = document.createElement('link');
+        localLink.rel = 'stylesheet';
+        localLink.href = 'fonts/tile-fonts.css';
+        document.head.appendChild(localLink);
+    }
+
+    updateTileFontModalUI() {
+        document.querySelectorAll('#tile-font-grid .theme-card').forEach(card => {
+            card.classList.remove('current');
+        });
+        const activeCard = document.getElementById(`font-card-${this.currentTileFont}`);
+        if (activeCard) activeCard.classList.add('current');
+
+        const unlocked = this.isTileFontUnlocked();
+        TeakScrambleGame.TILE_FONT_PREMIUM.forEach(fontId => {
+            const card = document.getElementById(`font-card-${fontId}`);
+            if (card) card.classList.toggle('locked', !unlocked);
+        });
+    }
+
+    switchTileFont(fontId) {
+        const isPremium = TeakScrambleGame.TILE_FONT_PREMIUM.includes(fontId);
+        if (isPremium && !this.isTileFontUnlocked()) {
+            this.sound.play('select');
+            if (window.stellarWallet) {
+                const msg = window.stellarWallet.connected
+                    ? 'Font locked — earn the GOLD badge on the leaderboard to unlock it.'
+                    : 'Connect your wallet and earn the GOLD badge to unlock this font.';
+                window.stellarWallet._showStatus(msg, 'error');
+            }
+            this.updateTileFontModalUI(); // keep lock state in sync, modal stays open
+            return;
+        }
+
+        if (fontId === this.currentTileFont) {
+            document.getElementById('chip-modal-backdrop').classList.remove('active');
+            return;
+        }
+
+        this.sound.play('win');
+        this.currentTileFont = fontId;
+        localStorage.setItem('word_scramble_tile_font', fontId);
+        this.updateTileFontModalUI();
+
+        this.applyTileFont(fontId, true);
+        document.getElementById('chip-modal-backdrop').classList.remove('active');
+    }
+
+    applyTileFont(fontId, animate = true) {
+        if (fontId === 'jost') {
+            document.body.removeAttribute('data-tile-font');
+        } else {
+            document.body.setAttribute('data-tile-font', fontId);
+        }
+
+        if (TeakScrambleGame.TILE_FONT_LAZY.includes(fontId)) {
+            this._ensureLazyTileFonts();
+        }
+
+        // Font metrics differ, and the inline font-size scale (see
+        // syncViewPositions) may have changed with the CSS variable.
         setTimeout(() => {
             this.syncViewPositions(animate);
         }, 120);
@@ -2342,10 +2510,16 @@ class TeakScrambleGame {
     }
 
     async switchCategory(category) {
-        if (category === this.currentCategory && this.tilesData.length > 0) {
+        // Note: even if `category` matches this.currentCategory, a real
+        // switch must still happen when leaving Daily Challenge mode —
+        // currentCategory is left untouched while a daily run is active.
+        if (category === this.currentCategory && this.tilesData.length > 0 && !this.isDailyChallenge) {
             document.getElementById('category-modal-backdrop').classList.remove('active');
             return;
         }
+
+        this.isDailyChallenge = false;
+        this.updateDailyBanner();
 
         this.sound.play('select');
         document.getElementById('category-modal-backdrop').classList.remove('active');
@@ -2387,6 +2561,196 @@ class TeakScrambleGame {
         this.tilesData = [];
 
         await this.runLoadingScreen(this.initLevel());
+    }
+
+    // --- Daily Challenge ---
+    // A deterministic word, the same for every player on a given day, drawn
+    // from the existing offline `general` dictionary (no network calls —
+    // instant start, no loading screen needed). Reuses buildLevelArchetype()
+    // for tile/board setup exactly like a regular level does.
+
+    _addrKey() {
+        return (window.stellarWallet && window.stellarWallet.address) || 'anon';
+    }
+
+    _dailyPool() {
+        if (!this._dailyWordPool) {
+            // Flatten all difficulty tiers of the general dictionary into one
+            // pool (33 words) so the daily word varies in length day to day
+            // and the cycle is longer than any single tier alone.
+            this._dailyWordPool = Object.values(this.dictionary.general).flat();
+        }
+        return this._dailyWordPool;
+    }
+
+    startDailyChallenge() {
+        const dropdown = document.getElementById('menu-dropdown');
+        dropdown?.classList.remove('open');
+        dropdown?.closest('.header-container')?.classList.remove('menu-open');
+
+        const dayIndex = Math.floor(Date.now() / 86400000);
+        this.dailyDayIndex = dayIndex;
+        this.isDailyChallenge = true;
+
+        const streakData = JSON.parse(localStorage.getItem(`ws_daily_streak_${this._addrKey()}`) || 'null') || { count: 0, lastDayIndex: -1 };
+        this.dailyStreak = streakData.count;
+
+        // Already solved today — show the stored result instead of a fresh board.
+        const stored = JSON.parse(localStorage.getItem(`ws_daily_result_${this._addrKey()}`) || 'null');
+        if (stored && stored.dayIndex === dayIndex) {
+            this.showDailyAlreadyCompleted(stored);
+            return;
+        }
+
+        this.sound.play('select');
+
+        const pool = this._dailyPool();
+        const word = pool[dayIndex % pool.length].toUpperCase();
+        this.targetWord = word;
+
+        this.wordClue = `Today's Daily Challenge — a word starting with '${word[0]}' and ending with '${word[word.length - 1]}'.`;
+        this.fetchDictionaryDefinition(word).then(resolvedClue => {
+            if (resolvedClue && this.isDailyChallenge && this.targetWord === word) {
+                this.wordClue = this.censorWordInClue(resolvedClue, this.targetWord);
+                this.updateClueUI();
+            }
+        });
+
+        let scrambled = word;
+        let attempts = 0;
+        while (scrambled === word && attempts < 100) {
+            scrambled = word.split('').sort(() => Math.random() - 0.5).join('');
+            attempts++;
+        }
+        this.scrambledWord = scrambled;
+
+        this.boardOccupants = Array(100).fill(null);
+        this.rackSlots = Array(word.length).fill(null);
+
+        const isVertical = Math.random() > 0.5;
+        const len = word.length;
+        let startRow, startCol;
+        if (isVertical) {
+            startRow = Math.floor(Math.random() * (10 - len));
+            startCol = Math.floor(Math.random() * 10);
+        } else {
+            startRow = Math.floor(Math.random() * 10);
+            startCol = Math.floor(Math.random() * (10 - len));
+        }
+        this.targetCellIndices = [];
+        for (let j = 0; j < len; j++) {
+            const r = isVertical ? startRow + j : startRow;
+            const c = isVertical ? startCol : startCol + j;
+            this.targetCellIndices.push(r * 10 + c);
+        }
+
+        this.buildLevelArchetype();
+
+        this.clueLevel = 1;
+        this.clue3Exhausted = false;
+        this.showingPureDefinition = false;
+        this.updateClueUI();
+
+        this.resetVictoryScreenUI();
+        this.updateDailyBanner();
+    }
+
+    exitDailyChallenge() {
+        this.isDailyChallenge = false;
+        this.updateDailyBanner();
+        this.resetVictoryScreenUI();
+        this.victoryScreen.classList.remove('active');
+        this.runLoadingScreen(this.initLevel());
+    }
+
+    updateDailyBanner() {
+        const banner = document.getElementById('daily-banner');
+        if (!banner) return;
+        if (this.isDailyChallenge) {
+            banner.style.display = 'flex';
+            const textEl = document.getElementById('daily-banner-text');
+            if (textEl) textEl.innerText = `📅 Daily #${this.dailyDayIndex} · 🔥 ${this.dailyStreak || 0}`;
+        } else {
+            banner.style.display = 'none';
+        }
+    }
+
+    // hintsUsed: 0, 1, or 2 (derived from clueLevel at the moment of winning)
+    buildDailyEmojiGrid(hintsUsed) {
+        const total = 3;
+        const clean = Math.max(0, total - hintsUsed);
+        return '🟩'.repeat(clean) + '🟨'.repeat(total - clean);
+    }
+
+    completeDailyChallenge() {
+        const hintsUsed = Math.min(2, Math.max(0, this.clueLevel - 1));
+        const addrKey = this._addrKey();
+
+        const streakData = JSON.parse(localStorage.getItem(`ws_daily_streak_${addrKey}`) || 'null') || { count: 0, lastDayIndex: -1 };
+        if (streakData.lastDayIndex === this.dailyDayIndex - 1) {
+            streakData.count += 1;
+        } else if (streakData.lastDayIndex !== this.dailyDayIndex) {
+            streakData.count = 1;
+        }
+        streakData.lastDayIndex = this.dailyDayIndex;
+        localStorage.setItem(`ws_daily_streak_${addrKey}`, JSON.stringify(streakData));
+        this.dailyStreak = streakData.count;
+
+        const result = { dayIndex: this.dailyDayIndex, word: this.targetWord, hintsUsed, streak: streakData.count };
+        localStorage.setItem(`ws_daily_result_${addrKey}`, JSON.stringify(result));
+        this._lastDailyResult = result;
+
+        document.getElementById('victory-title').innerText = 'Daily Challenge Complete!';
+        document.getElementById('victory-subtitle').innerText = `You solved Day #${result.dayIndex} — "${result.word}"`;
+        document.getElementById('daily-emoji-grid').innerText = this.buildDailyEmojiGrid(hintsUsed);
+        document.getElementById('daily-share-block').style.display = 'flex';
+        document.getElementById('victory-next-btn').style.display = 'none';
+
+        this.updateDailyBanner();
+    }
+
+    showDailyAlreadyCompleted(stored) {
+        this.dailyStreak = stored.streak;
+        this._lastDailyResult = stored;
+
+        this.resetVictoryScreenUI();
+        document.getElementById('victory-title').innerText = 'Already Solved Today!';
+        document.getElementById('victory-subtitle').innerText = `Day #${stored.dayIndex} — "${stored.word}" · Come back tomorrow for a new word.`;
+        document.getElementById('daily-emoji-grid').innerText = this.buildDailyEmojiGrid(stored.hintsUsed);
+        document.getElementById('daily-share-block').style.display = 'flex';
+        document.getElementById('victory-next-btn').style.display = 'none';
+
+        this.victoryScreen.classList.add('active');
+        this.updateDailyBanner();
+    }
+
+    shareDailyResult() {
+        const result = this._lastDailyResult;
+        if (!result) return;
+        const grid = this.buildDailyEmojiGrid(result.hintsUsed);
+        const text = `Word Scramble Daily #${result.dayIndex}\n${grid}\n🔥 Streak: ${result.streak}\n${window.location.origin}`;
+
+        if (navigator.share) {
+            navigator.share({ text }).catch(() => {});
+        } else if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+                window.stellarWallet?._showStatus('Result copied to clipboard!', 'success');
+            });
+        }
+    }
+
+    // Restores the victory screen's default (non-daily) content. Called at
+    // win-time for a regular solve, in case a previous Daily Challenge win
+    // left it showing daily-specific text.
+    resetVictoryScreenUI() {
+        const titleEl = document.getElementById('victory-title');
+        const subEl = document.getElementById('victory-subtitle');
+        const shareBlock = document.getElementById('daily-share-block');
+        const nextBtn = document.getElementById('victory-next-btn');
+        if (titleEl) titleEl.innerText = 'Spectacular!';
+        if (subEl) subEl.innerText = 'You have unscrambled the atomic matrix.';
+        if (shareBlock) shareBlock.style.display = 'none';
+        if (nextBtn) nextBtn.style.display = '';
     }
 
     async fetchDictionaryDefinition(word) {
@@ -2488,10 +2852,29 @@ class TeakScrambleGame {
         this.sound.play('select');
         this.effectsSettings[effectKey] = !this.effectsSettings[effectKey];
         localStorage.setItem(`ws_fx_${effectKey}`, this.effectsSettings[effectKey]);
-        
+
         const element = document.getElementById(`fx-switch-${effectKey}`);
         if (element) {
             element.checked = this.effectsSettings[effectKey];
+        }
+
+        // Performance Mode is CSS-driven (strips box-shadow/backdrop-filter
+        // in bulk via style.css), unlike the other effects which are
+        // JS-gated at their individual trigger sites.
+        if (effectKey === 'performanceMode') {
+            this._applyPerformanceModeAttr();
+        }
+    }
+
+    _applyPerformanceModeAttr() {
+        // setAttribute/removeAttribute (not toggleAttribute) to match the
+        // convention used by theme/chip/font — and because the CSS selector
+        // is body[data-performance-mode="true"], which toggleAttribute's
+        // empty-string value would never match.
+        if (this.effectsSettings.performanceMode) {
+            document.body.setAttribute('data-performance-mode', 'true');
+        } else {
+            document.body.removeAttribute('data-performance-mode');
         }
     }
 
@@ -2728,8 +3111,31 @@ class TeakScrambleGame {
     }
 }
 
+// --- Header MENU dropdown ---
+function toggleHeaderMenu(e) {
+    e.stopPropagation();
+    const dropdown = document.getElementById('menu-dropdown');
+    const isOpen = dropdown.classList.toggle('open');
+    dropdown.closest('.header-container').classList.toggle('menu-open', isOpen);
+    document.getElementById('menu-toggle-btn').setAttribute('aria-expanded', isOpen);
+}
+
+// Close the menu when clicking anywhere else (menu items bubble here too,
+// so picking an action closes the panel before its modal opens)
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('menu-dropdown');
+    if (dropdown && dropdown.classList.contains('open') && !e.target.closest('#menu-toggle-btn')) {
+        dropdown.classList.remove('open');
+        dropdown.closest('.header-container').classList.remove('menu-open');
+        document.getElementById('menu-toggle-btn').setAttribute('aria-expanded', 'false');
+    }
+});
+
 // Instantiate game engine on DOMContentLoaded
 let game;
 document.addEventListener('DOMContentLoaded', () => {
     game = new TeakScrambleGame();
+    // `let game` is a lexical global, not a window property — stellar.js
+    // checks window.game for the wallet session-resume hook, so expose it.
+    window.game = game;
 });

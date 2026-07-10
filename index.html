@@ -19,10 +19,36 @@
     
     <!-- Retro Atomic SVG Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2212%22 fill=%22%23E1AD01%22 stroke=%22%235C3A21%22 stroke-width=%224%22/><ellipse cx=%2250%22 cy=%2250%22 rx=%2242%22 ry=%2214%22 fill=%22none%22 stroke=%22%2340E0D0%22 stroke-width=%224%22 transform=%22rotate(30 50 50)%22/><ellipse cx=%2250%22 cy=%2250%22 rx=%2242%22 ry=%2214%22 fill=%22none%22 stroke=%22%2340E0D0%22 stroke-width=%224%22 transform=%22rotate(-30 50 50)%22/></svg>">
-    
+
+    <!-- PWA: installable app + offline shell (see sw.js) -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#5C3A21">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <!-- Warm up the TLS handshake for the wallet SDK CDN (loaded lazily on Connect Wallet) -->
+    <link rel="preconnect" href="https://esm.sh" crossorigin>
+
     <link rel="stylesheet" href="style.css">
+
+    <!-- Analytics + Error Monitoring (GoatCounter — free, no cookies/consent banner needed) -->
+    <!-- Sign up free at https://www.goatcounter.com, create a site, then replace WORD-SCRAMBLE-STELLAR below with your site code -->
+    <script async src="//gc.zgo.at/count.js"
+            data-goatcounter="https://word-scramble-stellar.goatcounter.com/count"></script>
+
     <script type="module" src="stellar.js"></script>
     <script src="script.js" defer></script>
+    <script src="feedback.js" defer></script>
+
+    <!-- Register the service worker for instant repeat loads + offline shell -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(() => {
+                    /* non-fatal — the game works fine without it */
+                });
+            });
+        }
+    </script>
 </head>
 <body>
 
@@ -49,12 +75,20 @@
     <div class="header-container">
         <div style="display: flex; flex-direction: column; gap: 6px;">
             <h1>Word Scramble</h1>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button class="category-btn-tag" id="category-tag-btn" onclick="game.openCategoryModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--turquoise-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--turquoise); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--turquoise-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Category: General</button>
-                <button class="customize-btn-tag" id="customize-tag-btn" onclick="game.openThemeModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--mustard-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--mustard); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--mustard-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Customize Board</button>
-                <button class="customize-btn-tag" id="customize-chips-btn" onclick="game.openChipModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--turquoise-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--turquoise); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--turquoise-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Customize Chips</button>
-                <button class="customize-btn-tag" id="leaderboard-btn" onclick="game.openLeaderboardModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--mustard-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--mustard-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--mustard); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--mustard-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Leaderboard</button>
-                <button class="customize-btn-tag" id="effects-btn" onclick="game.openEffectsModal()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 var(--turquoise-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 var(--turquoise-dark)'" style="font-size: 0.8rem; padding: 8px 12px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--turquoise); color: var(--teak-dark); font-weight: 900; box-shadow: 0 3px 0 var(--turquoise-dark); width: fit-content; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;">Effects</button>
+            <div class="menu-dropdown" id="menu-dropdown">
+                <button class="menu-toggle-btn" id="menu-toggle-btn" onclick="toggleHeaderMenu(event)" aria-haspopup="true" aria-expanded="false">☰ Menu <span class="menu-caret">▾</span></button>
+                <div class="menu-panel" id="menu-panel" role="menu">
+                    <button class="menu-item" id="daily-challenge-btn" role="menuitem" onclick="game.startDailyChallenge()">📅 Daily Challenge</button>
+                    <button class="menu-item" id="category-tag-btn" role="menuitem" onclick="game.openCategoryModal()">Category: General</button>
+                    <button class="menu-item" id="customize-tag-btn" role="menuitem" onclick="game.openThemeModal()">Customize Board</button>
+                    <button class="menu-item" id="customize-chips-btn" role="menuitem" onclick="game.openChipModal()">Customize Chips</button>
+                    <button class="menu-item" id="leaderboard-btn" role="menuitem" onclick="game.openLeaderboardModal()">Leaderboard</button>
+                    <button class="menu-item" id="effects-btn" role="menuitem" onclick="game.openEffectsModal()">Effects</button>
+                </div>
+            </div>
+            <div class="daily-banner" id="daily-banner" onclick="game.exitDailyChallenge()" title="Click to exit Daily Challenge and return to regular play">
+                <span id="daily-banner-text"></span>
+                <span class="daily-banner-exit">✕</span>
             </div>
         </div>
         <div class="stats-container">
@@ -165,10 +199,29 @@
     <!-- Victory screen overlay -->
     <div class="victory-screen" id="victory-screen">
         <div class="victory-box">
-            <h2>Spectacular!</h2>
-            <p>You have unscrambled the atomic matrix.</p>
+            <h2 id="victory-title">Spectacular!</h2>
+            <p id="victory-subtitle">You have unscrambled the atomic matrix.</p>
             <div class="victory-score-breakdown" id="victory-breakdown"></div>
-            <button class="victory-btn" onclick="game.nextLevel()">Next Scramble</button>
+            <div class="daily-share-block" id="daily-share-block">
+                <div class="daily-emoji-grid" id="daily-emoji-grid"></div>
+                <button class="victory-btn" id="daily-share-btn" onclick="game.shareDailyResult()">📤 Share Result</button>
+                <button class="daily-exit-btn" onclick="game.exitDailyChallenge()">Back to Regular Play</button>
+            </div>
+            <button class="victory-btn" id="victory-next-btn" onclick="game.nextLevel()">Next Scramble</button>
+        </div>
+    </div>
+
+    <!-- First-Visit Onboarding Modal (reuses the standard modal-backdrop/theme-modal shell) -->
+    <div class="modal-backdrop" id="onboarding-modal-backdrop" onclick="game.dismissOnboarding(event)">
+        <div class="theme-modal" onclick="event.stopPropagation()" style="max-width: 420px; text-align: center;">
+            <h3>Welcome to Word Scramble! 👋</h3>
+            <p style="margin: 14px 0; line-height: 1.6; font-size: 0.9rem;">
+                Drag or tap the wooden tiles onto the highlighted board slots to unscramble the word. Stuck? Use <strong>Hint</strong> or <strong>Word Hint</strong> for help.
+            </p>
+            <p style="margin: 14px 0; line-height: 1.6; font-size: 0.9rem;">
+                <strong>No wallet needed to play!</strong> Jump right in — connect one anytime to save your score on-chain and earn badges.
+            </p>
+            <button class="theme-close-btn" onclick="game.dismissOnboarding(null)">Got It — Let's Play!</button>
         </div>
     </div>
 
@@ -290,6 +343,62 @@
                     <div class="theme-name">Smoked Glass</div>
                 </div>
             </div>
+
+            <h3 style="margin-top: 10px;">Select Tile Font</h3>
+            <div class="theme-grid" id="tile-font-grid">
+                <!-- Font: Jost (default) -->
+                <div class="theme-card" id="font-card-jost" onclick="game.switchTileFont('jost')">
+                    <div class="theme-preview" style="background: #f5f3eb; border: 2px solid var(--teak-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: inset 0 -3px 4px rgba(0,0,0,0.2); border-top: 1.5px solid rgba(255,255,255,0.4); margin-bottom: 4px;">
+                        <div style="font-weight: 900; font-size: 2.5rem; color: #4a3728; font-family: 'Jost', sans-serif;">A</div>
+                    </div>
+                    <div class="theme-name">Classic</div>
+                </div>
+                <!-- Font: Courier Prime -->
+                <div class="theme-card" id="font-card-courier" onclick="game.switchTileFont('courier')">
+                    <div class="theme-preview" style="background: #f5f3eb; border: 2px solid var(--teak-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: inset 0 -3px 4px rgba(0,0,0,0.2); border-top: 1.5px solid rgba(255,255,255,0.4); margin-bottom: 4px;">
+                        <div style="font-weight: 700; font-size: 2.5rem; color: #4a3728; font-family: 'Courier Prime', monospace;">A</div>
+                    </div>
+                    <div class="theme-name">Typewriter</div>
+                </div>
+                <!-- Font: Space Grotesk -->
+                <div class="theme-card" id="font-card-grotesk" onclick="game.switchTileFont('grotesk')">
+                    <div class="theme-preview" style="background: #f5f3eb; border: 2px solid var(--teak-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: inset 0 -3px 4px rgba(0,0,0,0.2); border-top: 1.5px solid rgba(255,255,255,0.4); margin-bottom: 4px;">
+                        <div style="font-weight: 700; font-size: 2.5rem; color: #4a3728; font-family: 'Space Grotesk', sans-serif;">A</div>
+                    </div>
+                    <div class="theme-name">Grotesk</div>
+                </div>
+                <!-- Font: Montserrat -->
+                <div class="theme-card" id="font-card-montserrat" onclick="game.switchTileFont('montserrat')">
+                    <div class="theme-preview" style="background: #f5f3eb; border: 2px solid var(--teak-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: inset 0 -3px 4px rgba(0,0,0,0.2); border-top: 1.5px solid rgba(255,255,255,0.4); margin-bottom: 4px;">
+                        <div style="font-weight: 800; font-size: 2.5rem; color: #4a3728; font-family: 'Montserrat', sans-serif;">A</div>
+                    </div>
+                    <div class="theme-name">Modern Bold</div>
+                </div>
+                <!-- Font: OpenDyslexic (accessibility, lazy-loaded) -->
+                <div class="theme-card" id="font-card-dyslexic" onclick="game.switchTileFont('dyslexic')">
+                    <div class="theme-preview" style="background: #f5f3eb; border: 2px solid var(--teak-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: inset 0 -3px 4px rgba(0,0,0,0.2); border-top: 1.5px solid rgba(255,255,255,0.4); margin-bottom: 4px;">
+                        <div style="font-weight: 700; font-size: 2.2rem; color: #4a3728; font-family: 'OpenDyslexic', sans-serif;">A</div>
+                    </div>
+                    <div class="theme-name">Easy Read</div>
+                </div>
+                <!-- Font: Bungee (premium, GOLD/LEGEND-gated, lazy-loaded) -->
+                <div class="theme-card locked" id="font-card-bungee" onclick="game.switchTileFont('bungee')">
+                    <div class="theme-preview" style="background: #f5f3eb; border: 2px solid var(--teak-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: inset 0 -3px 4px rgba(0,0,0,0.2); border-top: 1.5px solid rgba(255,255,255,0.4); margin-bottom: 4px;">
+                        <div style="font-weight: 400; font-size: 2.5rem; color: #4a3728; font-family: 'Bungee', sans-serif;">A</div>
+                        <span class="font-lock material-symbols-outlined">lock</span>
+                    </div>
+                    <div class="theme-name">Arcade 🔒</div>
+                </div>
+                <!-- Font: Press Start 2P (premium, GOLD/LEGEND-gated, lazy-loaded) -->
+                <div class="theme-card locked" id="font-card-pressstart" onclick="game.switchTileFont('pressstart')">
+                    <div class="theme-preview" style="background: #f5f3eb; border: 2px solid var(--teak-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: inset 0 -3px 4px rgba(0,0,0,0.2); border-top: 1.5px solid rgba(255,255,255,0.4); margin-bottom: 4px;">
+                        <div style="font-weight: 400; font-size: 1.8rem; color: #4a3728; font-family: 'Press Start 2P', monospace;">A</div>
+                        <span class="font-lock material-symbols-outlined">lock</span>
+                    </div>
+                    <div class="theme-name">Retro Pixel 🔒</div>
+                </div>
+            </div>
+
             <button class="theme-close-btn" onclick="game.closeChipModal(null)">Close Menu</button>
         </div>
     </div>
@@ -354,6 +463,45 @@
             <h3>Game Updates</h3>
             <div class="changelog-content">
                 <div class="changelog-version">
+                    <h4>v1.9.0 - Daily Challenge, Performance Mode & Onboarding</h4>
+                    <ul>
+                        <li><strong>Daily Challenge:</strong> A new word every day, the same for every player — accessible from ☰ Menu. Solve it, then share your result with a Wordle-style emoji grid showing how many hints you needed.</li>
+                        <li><strong>Daily Streak:</strong> Come back each day to build a streak, shown right in the header while a Daily Challenge is active.</li>
+                        <li><strong>Performance Mode:</strong> A new toggle in the Effects menu strips heavy shadows and blur for smoother play on slower devices.</li>
+                        <li><strong>Welcome Onboarding:</strong> First-time visitors now see a quick "how to play" card explaining drag-and-drop and that a wallet is optional — connect anytime to save your score on-chain.</li>
+                    </ul>
+                </div>
+                <div class="changelog-version" style="margin-top: 15px;">
+                    <h4>v1.8.2 - Tile Font Picker</h4>
+                    <ul>
+                        <li><strong>Tile Font Picker:</strong> Choose your letter tile font in the Customize Chips menu — Classic (Jost), Typewriter (Courier Prime), Grotesk (Space Grotesk), and Modern Bold (Montserrat) are free and available immediately.</li>
+                        <li><strong>Easy Read Font:</strong> Added OpenDyslexic as an accessibility-focused tile font option.</li>
+                        <li><strong>Premium Fonts:</strong> Arcade (Bungee) and Retro Pixel (Press Start 2P) are unlockable tile fonts for players holding a GOLD or LEGEND badge on the on-chain leaderboard.</li>
+                        <li><strong>Lazy Font Loading:</strong> Accessibility and premium fonts only download when you open Customize Chips or have one already selected — the initial page load stays untouched.</li>
+                    </ul>
+                </div>
+                <div class="changelog-version" style="margin-top: 15px;">
+                    <h4>v1.8.1 - Speed & Performance Update</h4>
+                    <ul>
+                        <li><strong>Installable App (PWA):</strong> Word Scramble can now be installed to your home screen or desktop, with instant repeat loads and an offline game shell via a service worker.</li>
+                        <li><strong>Smarter Live Updates:</strong> The on-chain event stream now polls every 5s only while the tab is visible, slows to 30s in background tabs, catches up instantly when you return, and stays fully paused until a wallet connects.</li>
+                        <li><strong>Leaderboard Cache:</strong> Leaderboard reads are cached for 15 seconds and refresh automatically the moment any player submits a new score — reopening the leaderboard is now instant.</li>
+                        <li><strong>Faster Wallet Connect:</strong> The connection to the wallet SDK's CDN is pre-warmed at page load, so the first "Connect Wallet" click resolves quicker.</li>
+                    </ul>
+                </div>
+                <div class="changelog-version" style="margin-top: 15px;">
+                    <h4>v1.8.0 - Interface Overhaul & Performance Update</h4>
+                    <ul>
+                        <li><strong>Header Menu Dropdown:</strong> The five header buttons (Category, Customize Board, Customize Chips, Leaderboard, Effects) are now collapsed into a single <em>☰ Menu</em> dropdown on all screen sizes, freeing up space above the board.</li>
+                        <li><strong>Title & Navbar Fix:</strong> The page now grows and scrolls instead of clipping — the Word Scramble title no longer hides underneath the fixed wallet bar on any screen size.</li>
+                        <li><strong>Clue Panel Overflow Fix:</strong> Long dictionary definitions wrap inside the clue card (matched to the board width) and scroll internally past 150px, instead of stretching the whole board sideways.</li>
+                        <li><strong>Letter Rack Relocated:</strong> The tile rack moved from the bottom-right corner to sit centered directly below the board, with tiles enlarged from 38px to 52px (and bigger letters on mobile too).</li>
+                        <li><strong>Readable Side Panels:</strong> "How to Play" and "Hint Guide" cards widened to 340px with larger text (0.95rem), bigger headings, and larger step badges for readability.</li>
+                        <li><strong>Smoother Touch & Drag:</strong> Touch listeners now attach only while dragging a tile (fixing a page-wide scroll-blocking violation), and drag snap-targets are measured once per drag instead of on every mouse move.</li>
+                        <li><strong>Leaner Deployment:</strong> ~87MB of non-runtime files (videos, documents, screenshots) are excluded from the live site deploy.</li>
+                    </ul>
+                </div>
+                <div class="changelog-version" style="margin-top: 15px;">
                     <h4>v1.7.0 - Hybrid Save System</h4>
                     <ul>
                         <li><strong>Address-Keyed Autosave:</strong> In-progress game state (score, level, category, streak) is now saved to <code>localStorage</code> under your wallet address after every correct answer — no fee, instant.</li>
@@ -509,7 +657,19 @@
         <div class="theme-modal" onclick="event.stopPropagation()">
             <h3>Visual Effects Menu</h3>
             <div class="effects-settings-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
-                
+
+                <!-- Performance Mode Toggle -->
+                <div class="toggle-container" style="border-bottom: 2px solid var(--teak-dark) !important; padding-bottom: 12px; margin-bottom: 4px;">
+                    <div class="toggle-label">
+                        <span style="font-weight: 900; font-size: 0.95rem;">⚡ Performance Mode</span>
+                        <span class="toggle-description" style="font-size: 0.75rem; opacity: 0.85;">Strips heavy shadows & blur for smoother play on slower devices</span>
+                    </div>
+                    <label class="retro-switch">
+                        <input type="checkbox" id="fx-switch-performanceMode" onclick="game.toggleEffect('performanceMode')">
+                        <span class="retro-slider"></span>
+                    </label>
+                </div>
+
                 <!-- Custom Tile Effect Selection Button Row -->
                 <div class="toggle-container" style="border-bottom: 2px solid var(--teak-dark) !important; padding-bottom: 12px; margin-bottom: 4px;">
                     <div class="toggle-label">

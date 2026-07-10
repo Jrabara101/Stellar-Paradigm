@@ -1,0 +1,15 @@
+OpenDyslexic is licensed under the SIL Open Font License, Version 1.1.
+
+Full license text: https://scripts.sil.org/OFL
+Font source: https://opendyslexic.org/
+Distributed via npm package "open-dyslexic" (https://www.npmjs.com/package/open-dyslexic)
+File used in this project: woff/OpenDyslexic-Bold.woff (v1.0.3)
+
+Copyright (c) 2011-2015, Abbie Gonzalez (http://www.opendyslexic.org/),
+with Reserved Font Name OpenDyslexic.
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license permits use, study, modification, and redistribution, free of
+charge, provided the font itself is not sold on its own and any modified
+versions carry a different name. See https://scripts.sil.org/OFL for the
+full license terms.

@@ -10,12 +10,35 @@ const STELLAR_CONFIG = {
     rewardContractId: 'CDXIWPK4YYUTZPSXEBLELBBQIJ6X3UKJSDO4CJIH2KZXFWCBH6KXLIOQ',
 };
 
+// --- Analytics & error monitoring (GoatCounter custom events) ---
+// Fires a custom event to the GoatCounter dashboard configured in index.html.
+// Wrapped in try/catch so analytics can never break wallet or game functionality.
+function trackEvent(name, props = {}) {
+    try {
+        if (!window.goatcounter || !window.goatcounter.count) return;
+        const query = Object.entries(props)
+            .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+            .join('&');
+        window.goatcounter.count({
+            path: query ? `${name}?${query}` : name,
+            title: name,
+            event: true,
+        });
+    } catch (e) { /* never let analytics break the app */ }
+}
+window.trackEvent = trackEvent;
+
 class StellarWallet {
     constructor() {
         this.address = null;
         this.connected = false;
         this._sdk = null;
         this._kit = null;
+        // Cached result of the last fetchBadges() call, kept fresh by
+        // _updateBadgeUI() (runs on connect/disconnect/score submit) so
+        // features like the tile font picker can check badge gates
+        // synchronously instead of firing their own RPC call.
+        this.cachedBadges = [];
     }
 
     async _getKit() {
@@ -90,6 +113,7 @@ class StellarWallet {
                         this._saveWalletRecord(address, option.id);
                         this._updateWalletUI();
                         this._showStatus(`Wallet connected: ${this._short(address)}`, 'success');
+                        trackEvent('wallet_connect', { wallet: option.id });
 
                         // Auto-fund on Testnet if needed — works for any wallet
                         await this._ensureFunded(address);
@@ -107,6 +131,7 @@ class StellarWallet {
                         if (window.game) window.game.onWalletConnected(address);
                     } catch (e) {
                         this._showStatus(`Connection failed: ${e.message}`, 'error');
+                        trackEvent('error_wallet_connect', { message: e.message });
                     }
                 },
                 onClosed: (err) => {
@@ -116,6 +141,7 @@ class StellarWallet {
             return true;
         } catch (err) {
             this._showStatus(`Connection failed: ${err.message}`, 'error');
+            trackEvent('error_wallet_connect', { message: err.message });
             return false;
         }
     }
@@ -196,19 +222,32 @@ class StellarWallet {
 
             if (result.status === 'SUCCESS') {
                 this._showStatus(`Score ${score} saved on-chain! Tx: ${this._short(response.hash)}`, 'success');
+                this.invalidateLeaderboardCache(); // our own score changed the board
                 this._updateBalanceUI();
                 this._updateBadgeUI(); // refresh badge in case a new one was earned
+                trackEvent('score_submitted', { score, level });
+                if (window.showFeedbackPrompt) window.showFeedbackPrompt();
                 return true;
             } else {
                 throw new Error('Transaction not confirmed in time.');
             }
         } catch (err) {
             this._showStatus(`Failed to save score: ${err.message}`, 'error');
+            trackEvent('error_submit_score', { message: err.message });
             return false;
         }
     }
 
     async fetchLeaderboard() {
+        // Serve from a short-lived cache so re-opening the leaderboard modal
+        // doesn't re-simulate the contract call every time. The cache is
+        // invalidated when the event stream sees a new score or when this
+        // player submits one.
+        const CACHE_TTL_MS = 15000;
+        if (this._lbCache && (Date.now() - this._lbCacheAt) < CACHE_TTL_MS) {
+            return this._lbCache;
+        }
+
         try {
             const sdk = await this._getSDK();
             const rpc = new sdk.rpc.Server(STELLAR_CONFIG.rpcUrl);
@@ -231,17 +270,25 @@ class StellarWallet {
             const raw = sim.result?.retval;
             if (!raw) return [];
 
-            const entries = sdk.scValToNative(raw);
-            return entries.map((e, i) => ({
+            const entries = sdk.scValToNative(raw).map((e, i) => ({
                 rank: i + 1,
                 address: e.player.toString(),
                 score: Number(e.score),
                 level: Number(e.level),
             }));
+
+            this._lbCache = entries;
+            this._lbCacheAt = Date.now();
+            return entries;
         } catch (err) {
             console.error('Leaderboard fetch failed:', err);
             return [];
         }
+    }
+
+    invalidateLeaderboardCache() {
+        this._lbCache = null;
+        this._lbCacheAt = 0;
     }
 
     // Fetch the connected wallet's native XLM balance from Horizon
@@ -272,7 +319,7 @@ class StellarWallet {
     }
 
     async startEventStream() {
-        if (this._streamInterval) return;
+        if (this._streamActive) return;
         try {
             const sdk = await this._getSDK();
             const rpc = new sdk.rpc.Server(STELLAR_CONFIG.rpcUrl);
@@ -280,35 +327,63 @@ class StellarWallet {
             this._lastLedger = latest.sequence;
         } catch (e) { return; }
 
+        this._streamActive = true;
         this._updateLiveIndicator(true);
 
-        this._streamInterval = setInterval(async () => {
-            try {
-                const sdk = await this._getSDK();
-                const rpc = new sdk.rpc.Server(STELLAR_CONFIG.rpcUrl);
-                const latest = await rpc.getLatestLedger();
-                const checkFrom = Math.max(this._lastLedger, latest.sequence - 50);
+        // Poll fast (5s) while the tab is visible, slow (30s) when hidden.
+        // On returning to the tab, poll immediately to catch up.
+        this._onVisibilityChange = () => {
+            if (!document.hidden && this._streamActive) {
+                clearTimeout(this._streamTimer);
+                this._pollEvents();
+            }
+        };
+        document.addEventListener('visibilitychange', this._onVisibilityChange);
 
-                const res = await rpc.getEvents({
-                    startLedger: checkFrom,
-                    filters: [{ type: 'contract', contractIds: [STELLAR_CONFIG.contractId] }],
-                    limit: 20,
-                });
+        this._scheduleNextPoll();
+    }
 
-                this._lastLedger = latest.sequence;
+    _scheduleNextPoll() {
+        if (!this._streamActive) return;
+        clearTimeout(this._streamTimer);
+        const delay = document.hidden ? 30000 : 5000;
+        this._streamTimer = setTimeout(() => this._pollEvents(), delay);
+    }
 
-                if (res.events?.length > 0) {
-                    this._flashLive();
-                    this._showStatus('🔴 New score submitted on-chain! Leaderboard updated.', 'info');
-                    window.dispatchEvent(new CustomEvent('stellar:scoreEvent', { detail: res.events }));
-                }
-            } catch (e) { /* silent — don't interrupt gameplay */ }
-        }, 5000);
+    async _pollEvents() {
+        if (!this._streamActive) return;
+        try {
+            const sdk = await this._getSDK();
+            const rpc = new sdk.rpc.Server(STELLAR_CONFIG.rpcUrl);
+            const latest = await rpc.getLatestLedger();
+            const checkFrom = Math.max(this._lastLedger, latest.sequence - 50);
+
+            const res = await rpc.getEvents({
+                startLedger: checkFrom,
+                filters: [{ type: 'contract', contractIds: [STELLAR_CONFIG.contractId] }],
+                limit: 20,
+            });
+
+            this._lastLedger = latest.sequence;
+
+            if (res.events?.length > 0) {
+                this.invalidateLeaderboardCache();
+                this._flashLive();
+                this._showStatus('🔴 New score submitted on-chain! Leaderboard updated.', 'info');
+                window.dispatchEvent(new CustomEvent('stellar:scoreEvent', { detail: res.events }));
+            }
+        } catch (e) { /* silent — don't interrupt gameplay */ }
+        this._scheduleNextPoll();
     }
 
     stopEventStream() {
-        clearInterval(this._streamInterval);
-        this._streamInterval = null;
+        this._streamActive = false;
+        clearTimeout(this._streamTimer);
+        this._streamTimer = null;
+        if (this._onVisibilityChange) {
+            document.removeEventListener('visibilitychange', this._onVisibilityChange);
+            this._onVisibilityChange = null;
+        }
         this._updateLiveIndicator(false);
     }
 
@@ -486,11 +561,13 @@ class StellarWallet {
     }
 
     async _updateBadgeUI() {
+        // Cache is written before the element early-return so cosmetic
+        // features (tile font picker) can read cachedBadges even on pages
+        // without the #stellar-badge element.
+        this.cachedBadges = this.connected ? await this.fetchBadges() : [];
         const badgeEl = document.getElementById('stellar-badge');
         if (!badgeEl) return;
-        if (!this.connected) { badgeEl.textContent = ''; return; }
-        const badges = await this.fetchBadges();
-        badgeEl.textContent = this._badgeEmoji(badges);
+        badgeEl.textContent = this.connected ? this._badgeEmoji(this.cachedBadges) : '';
     }
 
     _saveWalletRecord(address, walletId) {

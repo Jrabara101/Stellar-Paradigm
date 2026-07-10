@@ -183,8 +183,14 @@ body {
     flex-direction: column; 
     justify-content: center; 
     align-items: center;
-    height: 100vh; 
-    overflow: hidden; 
+    /* Grow and scroll instead of clipping: with a fixed 100vh + overflow hidden,
+       centered content taller than the viewport overflowed out the TOP and hid
+       the title under the fixed wallet bar. */
+    min-height: 100vh;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 50px 8px 16px; /* top clears the fixed stellar bar */
     font-family: 'Jost', 'Futura', sans-serif;
 
     /* Victory and Shockwave visual effects theme colors default (turquoise) */
@@ -215,14 +221,140 @@ body {
     z-index: 10;
 }
 
-h1 { 
-    margin: 0; 
-    font-size: 2.5rem; 
-    text-transform: uppercase; 
-    letter-spacing: 5px; 
-    color: var(--teak-dark); 
+h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    color: var(--teak-dark);
     font-weight: 900;
     text-shadow: 2px 2px 0px var(--off-white), 4px 4px 0px var(--turquoise);
+}
+
+/* --- Header MENU dropdown (collapses the 5 action chips) --- */
+.menu-dropdown {
+    position: relative;
+    width: fit-content;
+    z-index: 500;
+}
+
+/* While the menu is open, lift the whole header above the board (z 10)
+   and the wood tiles (z 100-200) so the panel is clickable */
+.header-container.menu-open {
+    z-index: 300;
+}
+
+/* --- Daily Challenge banner (shown only while a daily run is active) --- */
+.daily-banner {
+    display: none; /* toggled to flex by game.updateDailyBanner() */
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    padding: 6px 12px;
+    background: var(--turquoise);
+    color: var(--teak-dark);
+    border: 1.5px solid var(--teak-dark);
+    border-radius: 4px;
+    box-shadow: 0 3px 0 var(--turquoise-dark);
+    font-size: 0.75rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+.daily-banner:active {
+    transform: translateY(3px);
+    box-shadow: 0 0px 0 var(--turquoise-dark);
+}
+.daily-banner-exit {
+    opacity: 0.6;
+    font-size: 0.85rem;
+}
+
+.menu-toggle-btn {
+    font-size: 0.8rem;
+    padding: 8px 14px;
+    border-radius: 4px;
+    border: 1.5px solid var(--teak-dark);
+    background: var(--mustard);
+    color: var(--teak-dark);
+    font-weight: 900;
+    box-shadow: 0 3px 0 var(--mustard-dark);
+    cursor: pointer;
+    text-transform: uppercase;
+    font-family: inherit;
+    letter-spacing: 0.5px;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.menu-toggle-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 0px 0 var(--mustard-dark);
+}
+
+.menu-caret {
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+.menu-dropdown.open .menu-caret {
+    transform: rotate(180deg);
+}
+
+.menu-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 230px;
+    background: var(--off-white, #F5F1E8);
+    border: 2px solid var(--teak-dark);
+    border-radius: 8px;
+    padding: 8px;
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+    z-index: 600;
+}
+
+.menu-dropdown.open .menu-panel {
+    display: flex;
+    animation: menuPanelIn 0.16s ease-out;
+}
+
+@keyframes menuPanelIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.menu-item {
+    font-size: 0.8rem;
+    padding: 9px 12px;
+    border-radius: 4px;
+    border: 1.5px solid var(--teak-dark);
+    color: var(--teak-dark);
+    font-weight: 900;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-family: inherit;
+    text-align: left;
+    width: 100%;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+/* Preserve the original alternating turquoise / mustard chip colors */
+.menu-item:nth-child(odd) {
+    background: var(--turquoise);
+    box-shadow: 0 3px 0 var(--turquoise-dark);
+}
+.menu-item:nth-child(even) {
+    background: var(--mustard);
+    box-shadow: 0 3px 0 var(--mustard-dark);
+}
+.menu-item:active {
+    transform: translateY(3px);
+    box-shadow: 0 0 0 transparent;
 }
 
 /* Stats Container & Bubbles (Larger and Positioned Beside Each Other) */
@@ -414,7 +546,10 @@ h1 {
 
 /* Inlaid Status/Clue Vacuum Tube Monitor */
 .clue-panel {
-    width: 100%;
+    /* Match the 10x10 grid width (10x40px + 9x2px gaps + padding + border = 430px)
+       so long definitions wrap instead of stretching the whole board plate wider. */
+    width: 430px;
+    max-width: 100%;
     background: rgba(40, 20, 10, 0.45);
     border: 2.5px solid var(--teak-dark);
     border-radius: 8px;
@@ -424,7 +559,8 @@ h1 {
     text-shadow: 0 0 4px rgba(255, 183, 77, 0.4);
     text-align: center;
     min-height: 96px;
-    height: 96px;
+    height: auto;
+    max-height: 150px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -433,6 +569,25 @@ h1 {
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
     font-family: inherit;
     line-height: 1.35;
+}
+
+/* Long definitions scroll inside the panel instead of expanding it */
+#clue-text {
+    width: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 183, 77, 0.35) transparent;
+}
+#clue-text::-webkit-scrollbar {
+    width: 6px;
+}
+#clue-text::-webkit-scrollbar-thumb {
+    background: rgba(255, 183, 77, 0.35);
+    border-radius: 3px;
+}
+#clue-text::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 /* Clue Progress HUD Indicators (Vacuum Tube Aesthetic) */
@@ -554,6 +709,42 @@ h1 {
     touch-action: none;
 }
 
+/* --- Tile Font Picker --- */
+/* No rule for "jost" — it is the body's default font-family, so the
+   default selection simply removes the data-tile-font attribute. */
+body[data-tile-font="courier"]    .wood-tile { font-family: 'Courier Prime', 'Courier New', monospace; }
+body[data-tile-font="grotesk"]    .wood-tile { font-family: 'Space Grotesk', sans-serif; }
+body[data-tile-font="montserrat"] .wood-tile { font-family: 'Montserrat', sans-serif; }
+body[data-tile-font="dyslexic"]   .wood-tile { font-family: 'OpenDyslexic', sans-serif; }
+body[data-tile-font="bungee"]     .wood-tile { font-family: 'Bungee', sans-serif; }
+body[data-tile-font="pressstart"] .wood-tile { font-family: 'Press Start 2P', monospace; }
+
+/* Per-font size scale, read by syncViewPositions() so wide/tall glyphs
+   (Press Start 2P especially) don't overflow the tile bounds. */
+body { --tile-font-scale: 0.55; }
+body[data-tile-font="pressstart"] { --tile-font-scale: 0.40; }
+body[data-tile-font="bungee"]     { --tile-font-scale: 0.50; }
+
+/* --- Performance Mode --- */
+/* Strips the layered box-shadows (tiles, cells, slots) and modal blur that
+   cost the most on low-end/older devices. Scoped narrowly so it doesn't
+   touch layout, color, or the artistic effect toggles (shockwave/particles/
+   etc.), which stay independently controllable in the Effects menu. */
+body[data-performance-mode="true"] .wood-tile,
+body[data-performance-mode="true"] .wood-tile:hover,
+body[data-performance-mode="true"] .wood-tile.dragging,
+body[data-performance-mode="true"] .wood-tile.inlaid,
+body[data-performance-mode="true"] .wood-tile.locked,
+body[data-performance-mode="true"] .grid-cell,
+body[data-performance-mode="true"] .dashed-slot {
+    box-shadow: none !important;
+}
+body[data-performance-mode="true"] .modal-backdrop,
+body[data-performance-mode="true"] .instructions-panel,
+body[data-performance-mode="true"] .hint-info-panel {
+    backdrop-filter: none !important;
+}
+
 .wood-tile:hover {
     --tile-extra-transform: scale(1.05) translateY(-2px) rotate(0deg);
     transform: scale(1.05) translateY(-2px);
@@ -645,9 +836,10 @@ button:active {
 
 /* Letter Tray (Bottom Right) */
 .rack-container {
-    position: fixed;
-    bottom: 25px;
-    right: 35px;
+    /* Sits in the page flow directly below the board (body is a centered
+       flex column), instead of floating in the bottom-right corner */
+    position: static;
+    margin-top: 18px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -656,13 +848,13 @@ button:active {
 }
 .rack-slots {
     display: flex;
-    gap: 6px;
-    padding: 0 10px;
+    gap: 7px;
+    padding: 0 12px;
     margin-bottom: 2px;
 }
 .rack-slot {
-    width: 38px;
-    height: 38px;
+    width: 52px;
+    height: 52px;
     background: transparent;
 }
 .rack-shelf {
@@ -681,15 +873,15 @@ button:active {
     background: rgba(245, 245, 240, 0.95);
     border: 3.5px solid var(--teak-dark);
     border-radius: 12px;
-    padding: 18px;
+    padding: 22px;
     color: var(--teak-dark);
     box-shadow: 
         0 12px 24px var(--shadow-deep),
         inset 0 1px 3px rgba(255,255,255,0.6);
-    width: 280px;
+    width: 340px;
     position: fixed;
     left: 35px;
-    top: 140px;
+    top: 120px;
     z-index: 10;
     backdrop-filter: blur(4px);
     box-sizing: border-box;
@@ -697,7 +889,7 @@ button:active {
 
 .instructions-panel h3 {
     font-family: 'Montserrat', sans-serif;
-    font-size: 1.15rem;
+    font-size: 1.35rem;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -719,20 +911,20 @@ button:active {
 
 .instructions-panel li {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     align-items: flex-start;
-    font-size: 0.8rem;
-    line-height: 1.4;
+    font-size: 0.95rem;
+    line-height: 1.55;
 }
 
 .instructions-panel .step-num {
     background: var(--mustard);
     color: var(--teak-dark);
     font-weight: 900;
-    font-size: 0.85rem;
+    font-size: 1rem;
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    width: 26px;
+    height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -751,15 +943,15 @@ button:active {
     background: rgba(245, 245, 240, 0.95);
     border: 3.5px solid var(--teak-dark);
     border-radius: 12px;
-    padding: 18px;
+    padding: 22px;
     color: var(--teak-dark);
     box-shadow: 
         0 12px 24px var(--shadow-deep),
         inset 0 1px 3px rgba(255,255,255,0.6);
-    width: 280px;
+    width: 340px;
     position: fixed;
     right: 35px;
-    top: 140px;
+    top: 120px;
     z-index: 10;
     backdrop-filter: blur(4px);
     box-sizing: border-box;
@@ -767,7 +959,7 @@ button:active {
 
 .hint-info-panel h3 {
     font-family: 'Montserrat', sans-serif;
-    font-size: 1.15rem;
+    font-size: 1.35rem;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -789,20 +981,20 @@ button:active {
 
 .hint-info-panel li {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     align-items: flex-start;
-    font-size: 0.8rem;
-    line-height: 1.4;
+    font-size: 0.95rem;
+    line-height: 1.55;
 }
 
 .hint-info-panel .step-num {
     background: var(--turquoise);
     color: var(--teak-dark);
     font-weight: 900;
-    font-size: 0.85rem;
+    font-size: 1rem;
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    width: 26px;
+    height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -944,7 +1136,7 @@ button:active {
 }
 
 /* Wrap layout and enable scrolling for medium/small screens */
-@media (max-width: 1100px) {
+@media (max-width: 1240px) {
     body {
         overflow-y: auto;
         height: auto;
@@ -1043,6 +1235,33 @@ button:active {
 .victory-btn:active {
     transform: translateY(5px);
     box-shadow: 0 0px 0 var(--teak-dark);
+}
+
+/* --- Daily Challenge result / share block on the victory screen --- */
+.daily-share-block {
+    display: none; /* toggled by game.completeDailyChallenge() / showDailyAlreadyCompleted() */
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.daily-emoji-grid {
+    font-size: 1.8rem;
+    letter-spacing: 4px;
+}
+.daily-exit-btn {
+    background: none;
+    border: none;
+    color: var(--off-white);
+    opacity: 0.75;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 4px;
+}
+.daily-exit-btn:hover {
+    opacity: 1;
 }
 
 /* Canvas Particle Layer */
@@ -1451,8 +1670,8 @@ button:active {
         width: 100%;
     }
     .rack-slot {
-        width: min(36px, 8.5vw);
-        height: min(36px, 8.5vw);
+        width: min(42px, 9.5vw);
+        height: min(42px, 9.5vw);
     }
     /* Removed level-panel responsive overrides */
         body {
@@ -1591,6 +1810,15 @@ button:active {
     border-color: var(--turquoise);
     box-shadow: 0 0 15px rgba(64, 224, 208, 0.4);
 }
+.theme-card.locked {
+    opacity: 0.55;
+    filter: grayscale(0.6);
+}
+.theme-card.locked:hover {
+    transform: none;
+    border-color: rgba(255,255,255,0.1);
+    background: rgba(0, 0, 0, 0.25);
+}
 .theme-preview {
     width: 100%;
     height: 90px;
@@ -1598,6 +1826,15 @@ button:active {
     border-radius: 6px;
     border: 2px solid rgba(0,0,0,0.3);
     box-sizing: border-box;
+    position: relative; /* anchors .font-lock in the tile font grid */
+}
+.font-lock {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 20px;
+    color: var(--off-white);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
 }
 .theme-name {
     font-size: 0.75rem;
@@ -2645,7 +2882,7 @@ input:checked + .retro-slider:before {
 
 /* --- VICTORY TITLE GLOW PULSE --- */
 .victory-screen.active.victory-glow-active .victory-box h2 {
-    animation: victory-title-glow 1.8s ease-in-out forwards;
+    animation: victory-title-glow 1.8s ease-in-out infinite;
 }
 
 @keyframes victory-title-glow {
@@ -2793,7 +3030,7 @@ input:checked + .retro-slider:before {
 .mini-victory-title.active {
     opacity: 1 !important;
     transform: translate(-50%, -50%) scale(1) !important;
-    animation: victory-title-glow 1.8s ease-in-out forwards;
+    animation: victory-title-glow 1.8s ease-in-out infinite;
 }
 
 /* ==========================================================================
@@ -3507,12 +3744,99 @@ body[data-tile-effect="stained-glass"] {
     --shockwave-color: rgba(139, 92, 246, 0.85);
     --shockwave-glow: rgba(6, 182, 212, 0.7);
     --shockwave-inner: rgba(245, 158, 11, 0.5);
-    
+
     --victory-glow-color1: #8b5cf6;
     --victory-glow-color2: rgba(6, 182, 212, 0.6);
 }
 
+/* --- FEEDBACK WIDGET --- */
+.feedback-fab {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 1002;
+    padding: 10px 16px;
+    border-radius: 24px;
+    border: 1.5px solid var(--mustard, #E1AD01);
+    background: var(--teak-dark, #5C3A21);
+    color: var(--mustard, #E1AD01);
+    font-family: inherit;
+    font-weight: 900;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 4px 10px var(--shadow-deep, rgba(40, 20, 10, 0.45));
+    transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+.feedback-fab:hover {
+    background: var(--mustard, #E1AD01);
+    color: var(--teak-dark, #5C3A21);
+    transform: translateY(-2px);
+}
 
+.feedback-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1003;
+    align-items: center;
+    justify-content: center;
+    background: rgba(20, 12, 6, 0.6);
+    padding: 16px;
+}
+.feedback-overlay--open {
+    display: flex;
+}
+.feedback-box {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--off-white, #F5F5F0);
+    border: 2px solid var(--teak-dark, #5C3A21);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 30px var(--shadow-deep, rgba(40, 20, 10, 0.45));
+}
+.feedback-box h3 {
+    margin: 0 0 12px;
+    padding-right: 28px;
+    font-family: 'Jost', 'Futura', sans-serif;
+    color: var(--teak-dark, #5C3A21);
+    font-size: 1.1rem;
+}
+.feedback-box iframe {
+    border-radius: 4px;
+    display: block;
+}
+.feedback-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: var(--teak-dark, #5C3A21);
+    cursor: pointer;
+}
+
+@media (max-width: 520px) {
+    .feedback-fab {
+        right: 10px;
+        bottom: 10px;
+        padding: 8px 12px;
+        font-size: 0.65rem;
+    }
+    .feedback-box {
+        padding: 14px;
+    }
+    .feedback-box iframe {
+        height: 60vh;
+    }
+}
 
 
 

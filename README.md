@@ -215,6 +215,23 @@ GitHub Actions runs automatically on every push to `main`:
 
 ---
 
+## 📊 Analytics, Monitoring & User Feedback
+
+Added for Level 4 — Product Quality and User Onboarding requirements.
+
+**Analytics/monitoring:** [GoatCounter](https://www.goatcounter.com) (free, privacy-friendly, no cookie banner) is wired in via [`index.html`](index.html) and tracked from [`stellar.js`](stellar.js) through a shared `trackEvent()` helper (~line 12). It fires custom events for:
+- `wallet_connect` — every successful wallet connection, tagged with wallet type
+- `score_submitted` — every on-chain score save, tagged with score/level
+- `error_wallet_connect` / `error_submit_score` — failures, tagged with the error message (doubles as lightweight error monitoring, no separate Sentry account needed)
+
+**Setup required:** create a free site at [goatcounter.com](https://www.goatcounter.com) and replace the placeholder `data-goatcounter` URL in `index.html`'s `<head>` with your own site code.
+
+**Feedback collection:** [`feedback.js`](feedback.js) adds a persistent "Feedback" button (bottom-right) plus an auto-prompt shown ~2.5s after a player's first successful score submission, opening an embedded Google Form. Dismissal is remembered in `localStorage` so it never nags a returning player.
+
+**Setup required:** create a 1-2 question Google Form, copy its embed `src` URL, and replace `FEEDBACK_FORM_URL` at the top of `feedback.js`.
+
+---
+
 ## 📂 Project Structure
 
 ```
@@ -223,6 +240,7 @@ GitHub Actions runs automatically on every push to `main`:
 ├── style.css                           # Mid-century styling, themes, responsive
 ├── script.js                           # Game logic (tiles, scoring, leaderboard UI)
 ├── stellar.js                          # Wallet connection + Soroban calls + event stream
+├── feedback.js                         # Feedback widget (Google Form modal + FAB)
 ├── word-scramble-contract/
 │   ├── contracts/
 │   │   ├── hello-world/src/lib.rs      # WordScramble contract (leaderboard + events)
