@@ -30,10 +30,15 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <!-- Analytics + Error Monitoring (GoatCounter — free, no cookies/consent banner needed) -->
-    <!-- Sign up free at https://www.goatcounter.com, create a site, then replace WORD-SCRAMBLE-STELLAR below with your site code -->
-    <script async src="//gc.zgo.at/count.js"
-            data-goatcounter="https://word-scramble-stellar.goatcounter.com/count"></script>
+    <script>
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = "//gc.zgo.at/count.js";
+            script.dataset.goatcounter = "https://word-scramble-stellar.goatcounter.com/count";
+            document.head.appendChild(script);
+        }
+    </script>
 
     <script type="module" src="stellar.js"></script>
     <script src="script.js" defer></script>
@@ -84,6 +89,7 @@
                     <button class="menu-item" id="customize-chips-btn" role="menuitem" onclick="game.openChipModal()">Customize Chips</button>
                     <button class="menu-item" id="leaderboard-btn" role="menuitem" onclick="game.openLeaderboardModal()">Leaderboard</button>
                     <button class="menu-item" id="effects-btn" role="menuitem" onclick="game.openEffectsModal()">Effects</button>
+                    <button class="menu-item" id="api-settings-btn" role="menuitem" onclick="game.openApiSettingsModal()">⚙️ API Settings</button>
                 </div>
             </div>
             <div class="daily-banner" id="daily-banner" onclick="game.exitDailyChallenge()" title="Click to exit Daily Challenge and return to regular play">
@@ -454,6 +460,45 @@
                 </div>
             </div>
             <button class="theme-close-btn" style="margin-top: 20px;" onclick="game.closeTileEffectsModal(null)">Close Menu</button>
+        </div>
+    </div>
+
+    <!-- API Settings Modal -->
+    <div class="modal-backdrop" id="api-settings-modal-backdrop" onclick="game.closeApiSettingsModal(event)">
+        <div class="theme-modal api-settings-modal" onclick="event.stopPropagation()" style="max-width: 440px;">
+            <h3>API Settings</h3>
+            <p style="font-size: 0.85rem; color: var(--off-white); margin-bottom: 15px; opacity: 0.9; text-align: left; line-height: 1.4;">
+                Enable WordsAPI and Wordnik API to load longer words (up to 10 letters) and fetch rich dictionary descriptions for hints. API keys are stored locally in your browser.
+            </p>
+            
+            <div style="text-align: left; display: flex; flex-direction: column; gap: 15px;">
+                <!-- WordsAPI Block -->
+                <div class="api-config-section" style="border-bottom: 1px dashed rgba(255,255,255,0.15); padding-bottom: 12px;">
+                    <label class="api-checkbox-label" style="display: flex; align-items: center; gap: 8px; font-weight: bold; color: var(--off-white); margin-bottom: 6px; cursor: pointer;">
+                        <input type="checkbox" id="api-words-enabled" style="cursor: pointer;"> Enable WordsAPI
+                    </label>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <input type="password" id="api-words-key" placeholder="Enter RapidAPI Key" class="api-key-input" style="background: rgba(0,0,0,0.3); border: 1.5px solid var(--teak-dark); border-radius: 6px; color: var(--off-white); padding: 8px 12px; font-family: inherit; font-size: 0.9rem; width: 100%; box-sizing: border-box;">
+                        <span style="font-size: 0.75rem; color: #a5d8ff;">Get a key on <a href="https://rapidapi.com/wordsapi/api/wordsapi/" target="_blank" rel="noopener noreferrer" style="color: var(--turquoise); text-decoration: underline;">RapidAPI WordsAPI</a></span>
+                    </div>
+                </div>
+
+                <!-- Wordnik API Block -->
+                <div class="api-config-section">
+                    <label class="api-checkbox-label" style="display: flex; align-items: center; gap: 8px; font-weight: bold; color: var(--off-white); margin-bottom: 6px; cursor: pointer;">
+                        <input type="checkbox" id="api-wordnik-enabled" style="cursor: pointer;"> Enable Wordnik API
+                    </label>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <input type="password" id="api-wordnik-key" placeholder="Enter Wordnik API Key" class="api-key-input" style="background: rgba(0,0,0,0.3); border: 1.5px solid var(--teak-dark); border-radius: 6px; color: var(--off-white); padding: 8px 12px; font-family: inherit; font-size: 0.9rem; width: 100%; box-sizing: border-box;">
+                        <span style="font-size: 0.75rem; color: #a5d8ff;">Register for a key on <a href="https://developer.wordnik.com/" target="_blank" rel="noopener noreferrer" style="color: var(--turquoise); text-decoration: underline;">Wordnik Portal</a></span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button class="theme-close-btn" style="flex: 1; margin: 0; background: var(--turquoise); color: var(--teak-dark);" onclick="game.saveApiSettings()">Save & Apply</button>
+                <button class="theme-close-btn" style="flex: 1; margin: 0;" onclick="game.closeApiSettingsModal(null)">Cancel</button>
+            </div>
         </div>
     </div>
 

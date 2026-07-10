@@ -36,7 +36,7 @@ class SoundController {
         if (!this.audioCtx || this.isMuted || this.isPlayingMusic) return;
 
         if (this.audioCtx.state === 'suspended') {
-            this.audioCtx.resume();
+            this.audioCtx.resume().catch(() => {});
         }
 
         if (!this.musicGainNode) {
@@ -161,7 +161,7 @@ class SoundController {
         if (!this.audioCtx || this.isMuted) return;
 
         if (this.audioCtx.state === 'suspended') {
-            this.audioCtx.resume();
+            this.audioCtx.resume().catch(() => {});
         }
 
         const now = this.audioCtx.currentTime;
@@ -644,6 +644,7 @@ class TeakScrambleGame {
         this.dragOffset = { x: 0, y: 0 };
         this.dragStartRect = null;
         this.hoveredCell = null;
+        this.loadApiSettings();
         
         this.buildCheckerboard();
         this.registerGlobalEvents();
@@ -741,7 +742,10 @@ class TeakScrambleGame {
     }
 
     async initLevel() {
-        const wordLength = Math.min(3 + this.level, 8);
+        const hasCustomApi = (this.apiSettings.wordsEnabled && this.apiSettings.wordsKey) || 
+                             (this.apiSettings.wordnikEnabled && this.apiSettings.wordnikKey);
+        const maxLen = hasCustomApi ? 10 : 8;
+        const wordLength = Math.min(3 + this.level, maxLen);
         this.levelElement.innerText = this.level + " ...";
         
         let word = "";
@@ -760,7 +764,20 @@ class TeakScrambleGame {
             if (this.isEntranceLoad || isOffline) {
                 console.log("First load or offline: using offline fallback for instant start");
             } else {
-                if (cat === 'general') {
+                // Try Custom APIs first if configured
+                let customFetched = null;
+                if (this.apiSettings.wordsEnabled && this.apiSettings.wordsKey) {
+                    customFetched = await this.fetchFromWordsAPI(wordLength);
+                }
+                if (!customFetched && this.apiSettings.wordnikEnabled && this.apiSettings.wordnikKey) {
+                    customFetched = await this.fetchFromWordnikAPI(wordLength);
+                }
+                
+                if (customFetched) {
+                    word = customFetched.word;
+                    clue = customFetched.clue;
+                    console.log("Fetched using Custom API:", word);
+                } else if (cat === 'general') {
                     try {
                         const controller = new AbortController();
                         const timeoutId = setTimeout(() => controller.abort(), 1000);
@@ -837,7 +854,7 @@ class TeakScrambleGame {
                                     if (rawTitle.toLowerCase().startsWith('list of') || rawTitle.toLowerCase().startsWith('category:')) return;
                                     let cleanTitle = rawTitle.replace(/\s*\(.*?\)\s*/g, '');
                                     cleanTitle = cleanTitle.replace(/[^a-zA-Z]/g, '').toUpperCase();
-                                    if (cleanTitle.length >= 4 && cleanTitle.length <= 8) {
+                                    if (cleanTitle.length >= 4 && cleanTitle.length <= maxLen) {
                                         candidates.push({ originalTitle: rawTitle, cleanTitle: cleanTitle });
                                     }
                                 });
@@ -864,13 +881,16 @@ class TeakScrambleGame {
         }
 
         // Offline Fallback
-        if (!word || !/^[A-Z]+$/.test(word) || word.length < 4 || word.length > 8) {
+        if (!word || !/^[A-Z]+$/.test(word) || word.length < 4 || word.length > maxLen) {
             console.log("Using offline fallback dictionary...");
             const levelKey = Math.min(this.level, 5);
             const wordPool = (this.dictionary[cat] && this.dictionary[cat][levelKey]) 
                 ? this.dictionary[cat][levelKey] 
                 : this.dictionary.general[levelKey];
             word = wordPool[Math.floor(Math.random() * wordPool.length)].toUpperCase();
+            if (word.length > maxLen) {
+                word = word.substring(0, maxLen);
+            }
         }
         
         this.targetWord = word;
@@ -938,7 +958,10 @@ class TeakScrambleGame {
             return; // completely silent and skip when offline
         }
         const nextLevel = this.level + 1;
-        const wordLength = Math.min(3 + nextLevel, 8);
+        const hasCustomApi = (this.apiSettings.wordsEnabled && this.apiSettings.wordsKey) || 
+                             (this.apiSettings.wordnikEnabled && this.apiSettings.wordnikKey);
+        const maxLen = hasCustomApi ? 10 : 8;
+        const wordLength = Math.min(3 + nextLevel, maxLen);
         const cat = this.currentCategory;
         
         let word = "";
@@ -946,7 +969,20 @@ class TeakScrambleGame {
         
         console.log(`Pre-fetching next word for Level ${nextLevel} in Category ${cat}...`);
         
-        if (cat === 'general') {
+        // Try Custom APIs first if configured
+        let customFetched = null;
+        if (this.apiSettings.wordsEnabled && this.apiSettings.wordsKey) {
+            customFetched = await this.fetchFromWordsAPI(wordLength);
+        }
+        if (!customFetched && this.apiSettings.wordnikEnabled && this.apiSettings.wordnikKey) {
+            customFetched = await this.fetchFromWordnikAPI(wordLength);
+        }
+        
+        if (customFetched) {
+            word = customFetched.word;
+            clue = customFetched.clue;
+            console.log(`Pre-fetched word using Custom API: ${word}`);
+        } else if (cat === 'general') {
             try {
                 const response = await fetch(`https://random-word-api.herokuapp.com/word?length=${wordLength}`);
                 if (response.ok) {
@@ -1014,7 +1050,7 @@ class TeakScrambleGame {
                             if (rawTitle.toLowerCase().startsWith('list of') || rawTitle.toLowerCase().startsWith('category:')) return;
                             let cleanTitle = rawTitle.replace(/\s*\(.*?\)\s*/g, '');
                             cleanTitle = cleanTitle.replace(/[^a-zA-Z]/g, '').toUpperCase();
-                            if (cleanTitle.length >= 4 && cleanTitle.length <= 8) {
+                            if (cleanTitle.length >= 4 && cleanTitle.length <= maxLen) {
                                 candidates.push({ originalTitle: rawTitle, cleanTitle: cleanTitle });
                             }
                         });
@@ -1032,7 +1068,7 @@ class TeakScrambleGame {
             }
         }
         
-        if (word && /^[A-Z]+$/.test(word) && word.length >= 4 && word.length <= 8) {
+        if (word && /^[A-Z]+$/.test(word) && word.length >= 4 && word.length <= maxLen) {
             this.prefetchedData = {
                 level: nextLevel,
                 category: cat,
@@ -2243,6 +2279,121 @@ class TeakScrambleGame {
                 tile.style.removeProperty('--tilt-y');
             }
         });
+    }
+
+    /* --- API SETTINGS & CUSTOM API INTEGRATIONS --- */
+    loadApiSettings() {
+        this.apiSettings = {
+            wordsEnabled: localStorage.getItem('ws_api_words_enabled') === 'true',
+            wordsKey: localStorage.getItem('ws_api_words_key') || '',
+            wordnikEnabled: localStorage.getItem('ws_api_wordnik_enabled') === 'true',
+            wordnikKey: localStorage.getItem('ws_api_wordnik_key') || ''
+        };
+    }
+
+    openApiSettingsModal() {
+        this.sound.play('select');
+        document.getElementById('api-words-enabled').checked = this.apiSettings.wordsEnabled;
+        document.getElementById('api-words-key').value = this.apiSettings.wordsKey;
+        document.getElementById('api-wordnik-enabled').checked = this.apiSettings.wordnikEnabled;
+        document.getElementById('api-wordnik-key').value = this.apiSettings.wordnikKey;
+        document.getElementById('api-settings-modal-backdrop').classList.add('active');
+    }
+
+    closeApiSettingsModal(event) {
+        if (!event || event.target === document.getElementById('api-settings-modal-backdrop')) {
+            this.sound.play('select');
+            document.getElementById('api-settings-modal-backdrop').classList.remove('active');
+        }
+    }
+
+    saveApiSettings() {
+        this.sound.play('select');
+        
+        const wordsEnabled = document.getElementById('api-words-enabled').checked;
+        const wordsKey = document.getElementById('api-words-key').value.trim();
+        const wordnikEnabled = document.getElementById('api-wordnik-enabled').checked;
+        const wordnikKey = document.getElementById('api-wordnik-key').value.trim();
+        
+        this.apiSettings.wordsEnabled = wordsEnabled;
+        this.apiSettings.wordsKey = wordsKey;
+        this.apiSettings.wordnikEnabled = wordnikEnabled;
+        this.apiSettings.wordnikKey = wordnikKey;
+        
+        localStorage.setItem('ws_api_words_enabled', wordsEnabled);
+        localStorage.setItem('ws_api_words_key', wordsKey);
+        localStorage.setItem('ws_api_wordnik_enabled', wordnikEnabled);
+        localStorage.setItem('ws_api_wordnik_key', wordnikKey);
+        
+        // Clear pre-fetched data so that the next level fetches using newly configured APIs immediately
+        this.prefetchedData = null;
+        
+        document.getElementById('api-settings-modal-backdrop').classList.remove('active');
+        window.stellarWallet._showStatus('API Settings saved!', 'success');
+    }
+
+    async fetchFromWordsAPI(wordLength) {
+        if (!this.apiSettings.wordsKey) return null;
+        try {
+            const url = `https://wordsapiv1.p.rapidapi.com/words/?random=true&letters=${wordLength}&hasDetails=definitions`;
+            const response = await fetch(url, {
+                headers: {
+                    'X-RapidAPI-Key': this.apiSettings.wordsKey,
+                    'X-RapidAPI-Host': 'wordsapiv1.p.rapidapi.com'
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.word) {
+                    const cleanWord = data.word.replace(/[^a-zA-Z]/g, '').toUpperCase();
+                    if (cleanWord.length === wordLength) {
+                        let clue = '';
+                        if (data.results && data.results.length > 0) {
+                            const validDef = data.results.find(r => r.definition);
+                            if (validDef) {
+                                clue = validDef.definition;
+                            }
+                        }
+                        return { word: cleanWord, clue: clue };
+                    }
+                }
+            }
+        } catch (err) {
+            console.log('WordsAPI fetch failed:', err);
+        }
+        return null;
+    }
+
+    async fetchFromWordnikAPI(wordLength) {
+        if (!this.apiSettings.wordnikKey) return null;
+        try {
+            const randomUrl = `https://api.wordnik.com/v4/words.json/randomWords?hasDictionaryDef=true&minCorpusCount=2000&minLength=${wordLength}&maxLength=${wordLength}&limit=1&api_key=${this.apiSettings.wordnikKey}`;
+            const randomRes = await fetch(randomUrl);
+            if (randomRes.ok) {
+                const randomData = await randomRes.json();
+                if (randomData && randomData[0] && randomData[0].word) {
+                    const cleanWord = randomData[0].word.replace(/[^a-zA-Z]/g, '').toUpperCase();
+                    if (cleanWord.length === wordLength) {
+                        const defUrl = `https://api.wordnik.com/v4/word.json/${cleanWord.toLowerCase()}/definitions?limit=3&includeRelated=false&sourceDictionaries=all&useCanonical=false&includeTags=false&api_key=${this.apiSettings.wordnikKey}`;
+                        const defRes = await fetch(defUrl);
+                        let clue = '';
+                        if (defRes.ok) {
+                            const defData = await defRes.json();
+                            if (defData && defData.length > 0) {
+                                const validDef = defData.find(d => d.text);
+                                if (validDef) {
+                                    clue = validDef.text.replace(/<[^>]*>/g, '');
+                                }
+                            }
+                        }
+                        return { word: cleanWord, clue: clue };
+                    }
+                }
+            }
+        } catch (err) {
+            console.log('Wordnik API fetch failed:', err);
+        }
+        return null;
     }
 
     spawnNeonGhost(char, x, y, size) {
