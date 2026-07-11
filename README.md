@@ -224,11 +224,13 @@ Added for Level 4 — Product Quality and User Onboarding requirements.
 - `score_submitted` — every on-chain score save, tagged with score/level
 - `error_wallet_connect` / `error_submit_score` — failures, tagged with the error message (doubles as lightweight error monitoring, no separate Sentry account needed)
 
-**Setup required:** create a free site at [goatcounter.com](https://www.goatcounter.com) and replace the placeholder `data-goatcounter` URL in `index.html`'s `<head>` with your own site code.
+**Live at:** [word-scramble-stellar.goatcounter.com](https://word-scramble-stellar.goatcounter.com) ✅
 
-**Feedback collection:** [`feedback.js`](feedback.js) adds a persistent "Feedback" button (bottom-right) plus an auto-prompt shown ~2.5s after a player's first successful score submission, opening an embedded Google Form. Dismissal is remembered in `localStorage` so it never nags a returning player.
+**Feedback collection:** [`feedback.js`](feedback.js) adds a persistent "Feedback" button (bottom-right) plus an auto-prompt shown ~2.5s after a player's first successful score submission, opening an embedded Google Form (Name, Wallet Address, rating, open feedback, and a retention question). Dismissal is remembered in `localStorage` so it never nags a returning player. Because the form also collects wallet address, its response sheet doubles as the "10+ wallet interactions" proof required for submission.
 
-**Setup required:** create a 1-2 question Google Form, copy its embed `src` URL, and replace `FEEDBACK_FORM_URL` at the top of `feedback.js`.
+**Setup required:** copy the form's embed `src` URL and replace `FEEDBACK_FORM_URL` at the top of `feedback.js`.
+
+**First-time wallet guide:** [`wallet-guide.js`](wallet-guide.js) adds a 5-slide carousel (using real screenshots from `screenshots/`) explaining what a wallet is, how to install Freighter, how to connect, and what happens when a score is submitted on-chain — aimed at players with no prior crypto experience. Reachable anytime via the "❓ Guide" button in the wallet bar, and auto-shown once to first-time visitors. It deliberately waits for the game's own first-visit "how to play" tutorial (`#onboarding-modal-backdrop` in `script.js`) to close first, so the two guides never stack on top of each other.
 
 ---
 
@@ -241,6 +243,7 @@ Added for Level 4 — Product Quality and User Onboarding requirements.
 ├── script.js                           # Game logic (tiles, scoring, leaderboard UI)
 ├── stellar.js                          # Wallet connection + Soroban calls + event stream
 ├── feedback.js                         # Feedback widget (Google Form modal + FAB)
+├── wallet-guide.js                     # First-time wallet walkthrough (5-slide carousel)
 ├── word-scramble-contract/
 │   ├── contracts/
 │   │   ├── hello-world/src/lib.rs      # WordScramble contract (leaderboard + events)

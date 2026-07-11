@@ -43,6 +43,7 @@
     <script type="module" src="stellar.js"></script>
     <script src="script.js" defer></script>
     <script src="feedback.js" defer></script>
+    <script src="wallet-guide.js" defer></script>
 
     <!-- Register the service worker for instant repeat loads + offline shell -->
     <script>
@@ -68,6 +69,7 @@
             <span id="stellar-balance" class="stellar-balance"></span>
         </div>
         <span id="stellar-live" class="stellar-live" style="display:none;">● LIVE</span>
+        <button id="stellar-how-btn" class="stellar-how-btn" onclick="window.showWalletGuide && window.showWalletGuide(true)">❓ Guide</button>
         <button id="stellar-connect-btn" class="stellar-connect-btn" onclick="window.stellarWallet && window.stellarWallet.connect()">Connect Wallet</button>
     </div>
     <div id="stellar-status" class="stellar-status" style="display:none;"></div>
@@ -211,8 +213,10 @@
             <div class="daily-share-block" id="daily-share-block">
                 <div class="daily-emoji-grid" id="daily-emoji-grid"></div>
                 <button class="victory-btn" id="daily-share-btn" onclick="game.shareDailyResult()">📤 Share Result</button>
+                <button class="victory-btn" id="daily-card-btn" onclick="game.generateVictoryCard()">🖼️ Share Card</button>
                 <button class="daily-exit-btn" onclick="game.exitDailyChallenge()">Back to Regular Play</button>
             </div>
+            <button class="victory-btn" id="victory-card-btn" onclick="game.generateVictoryCard()">🖼️ Share Card</button>
             <button class="victory-btn" id="victory-next-btn" onclick="game.nextLevel()">Next Scramble</button>
         </div>
     </div>
@@ -428,35 +432,39 @@
                     </div>
                     <div class="theme-name">Neon Arcade</div>
                 </div>
-                <!-- Tile Effect: Volcanic Forge -->
-                <div class="theme-card" id="tile-effect-card-volcanic" onclick="game.switchTileEffect('volcanic')">
+                <!-- Tile Effect: Volcanic Forge (premium, GOLD/LEGEND-gated) -->
+                <div class="theme-card locked" id="tile-effect-card-volcanic" onclick="game.switchTileEffect('volcanic')">
                     <div class="theme-preview" style="background: #262220; border: 2px solid #1c1816; border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: 0 3px 0 #ff4500, 0 6px 10px rgba(0,0,0,0.7); margin-bottom: 4px;">
                         <div style="font-weight: 800; font-size: 2.5rem; color: #ff8c00; text-shadow: 0 -1.5px 0 rgba(0,0,0,0.8); font-family: inherit;">C</div>
+                        <span class="font-lock material-symbols-outlined">lock</span>
                     </div>
-                    <div class="theme-name">Volcanic Forge</div>
+                    <div class="theme-name">Volcanic Forge 🔒</div>
                 </div>
-                <!-- Tile Effect: Holographic Foil -->
-                <div class="theme-card" id="tile-effect-card-holographic" onclick="game.switchTileEffect('holographic')">
+                <!-- Tile Effect: Holographic Foil (premium, GOLD/LEGEND-gated) -->
+                <div class="theme-card locked" id="tile-effect-card-holographic" onclick="game.switchTileEffect('holographic')">
                     <div class="theme-preview" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 15%, #a1c4fd 30%, #c2e9fb 45%, #e0c3fc 60%, #fbc2eb 75%, #ff9a9e 100%); background-size: 200% 200%; border: 2px solid var(--teak-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; margin-bottom: 4px; animation: holo-flow 3s linear infinite;">
                         <div style="font-weight: 800; font-size: 2.5rem; color: #ffffff; text-shadow: -1px -1px 0 var(--teak-dark), 1px -1px 0 var(--teak-dark), -1px 1px 0 var(--teak-dark), 1px 1px 0 var(--teak-dark); font-family: inherit;">D</div>
+                        <span class="font-lock material-symbols-outlined">lock</span>
                     </div>
-                    <div class="theme-name">Holographic</div>
+                    <div class="theme-name">Holographic 🔒</div>
                 </div>
-                <!-- Tile Effect: Ice Crystal -->
-                <div class="theme-card" id="tile-effect-card-ice-crystal" onclick="game.switchTileEffect('ice-crystal')">
+                <!-- Tile Effect: Ice Crystal (premium, GOLD/LEGEND-gated) -->
+                <div class="theme-card locked" id="tile-effect-card-ice-crystal" onclick="game.switchTileEffect('ice-crystal')">
                     <div class="theme-preview" style="background: rgba(224, 242, 254, 0.75); border: 2.5px solid #93c5fd; border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: inset 0 0 8px rgba(255,255,255,0.6); margin-bottom: 4px; position: relative; overflow: hidden;">
                         <!-- Static corner frost simulation for preview -->
                         <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at top left, #ffffff 0%, transparent 40%), radial-gradient(circle at top right, #ffffff 0%, transparent 40%), radial-gradient(circle at bottom left, #ffffff 0%, transparent 40%), radial-gradient(circle at bottom right, #ffffff 0%, transparent 40%); opacity: 0.7; pointer-events: none;"></div>
                         <div style="font-weight: 800; font-size: 2.5rem; color: #1e3a8a; font-family: inherit; z-index: 1;">E</div>
+                        <span class="font-lock material-symbols-outlined">lock</span>
                     </div>
-                    <div class="theme-name">Ice Crystal</div>
+                    <div class="theme-name">Ice Crystal 🔒</div>
                 </div>
-                <!-- Tile Effect: Stained Glass -->
-                <div class="theme-card" id="tile-effect-card-stained-glass" onclick="game.switchTileEffect('stained-glass')">
+                <!-- Tile Effect: Stained Glass (premium, GOLD/LEGEND-gated) -->
+                <div class="theme-card locked" id="tile-effect-card-stained-glass" onclick="game.switchTileEffect('stained-glass')">
                     <div class="theme-preview" style="background: rgba(139, 92, 246, 0.45); border: 2.5px solid #1e293b; border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.35); margin-bottom: 4px; position: relative;">
                         <div style="font-weight: 800; font-size: 2.5rem; color: #1e293b; font-family: inherit;">F</div>
+                        <span class="font-lock material-symbols-outlined">lock</span>
                     </div>
-                    <div class="theme-name">Stained Glass</div>
+                    <div class="theme-name">Stained Glass 🔒</div>
                 </div>
             </div>
             <button class="theme-close-btn" style="margin-top: 20px;" onclick="game.closeTileEffectsModal(null)">Close Menu</button>
@@ -508,6 +516,17 @@
             <h3>Game Updates</h3>
             <div class="changelog-content">
                 <div class="changelog-version">
+                    <h4>v1.10.0 - Visual Polish, Achievements & Combo Scoring</h4>
+                    <ul>
+                        <li><strong>Tile Settle Physics:</strong> Tiles now bounce gently into place when dropped onto the board or rack.</li>
+                        <li><strong>Premium Tile Effects:</strong> Volcanic Forge, Holographic, Ice Crystal, and Stained Glass tile effects are now unlockable for players holding a GOLD or LEGEND badge — None and Neon Arcade stay free.</li>
+                        <li><strong>Shareable Victory Card:</strong> Turn any win — regular or Daily Challenge — into a shareable image with your word, score, streak, and badge tier.</li>
+                        <li><strong>Ambient Backgrounds:</strong> Each board theme now has a subtle drifting glow behind the board (respects Performance Mode and reduced-motion settings).</li>
+                        <li><strong>Achievements:</strong> Earn one-time achievements for a no-hint solve and a sub-10-second solve, shown in the victory score breakdown.</li>
+                        <li><strong>Combo Multiplier:</strong> Win two scrambles within 60 seconds of each other to build up to a 3x combo on your base score.</li>
+                    </ul>
+                </div>
+                <div class="changelog-version" style="margin-top: 15px;">
                     <h4>v1.9.0 - Daily Challenge, Performance Mode & Onboarding</h4>
                     <ul>
                         <li><strong>Daily Challenge:</strong> A new word every day, the same for every player — accessible from ☰ Menu. Solve it, then share your result with a Wordle-style emoji grid showing how many hints you needed.</li>

@@ -55,4 +55,5 @@ jobs:
           test -f script.js    && echo "✅ script.js"  || (echo "❌ script.js missing"  && exit 1)
           test -f stellar.js   && echo "✅ stellar.js" || (echo "❌ stellar.js missing" && exit 1)
           test -f feedback.js  && echo "✅ feedback.js" || (echo "❌ feedback.js missing" && exit 1)
+          test -f wallet-guide.js && echo "✅ wallet-guide.js" || (echo "❌ wallet-guide.js missing" && exit 1)
           echo "All required files present."

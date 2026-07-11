@@ -599,6 +599,12 @@ class TeakScrambleGame {
         this.clueLevel = 1;
         this.clue3Exhausted = false;
         this.showingPureDefinition = false;
+
+        // Achievements + combo timer (Phase 5.1/5.2)
+        this.levelStartTime = Date.now();
+        this.lastSolveTimestamp = null;
+        this.comboMultiplier = 1;
+        this._newlyEarnedAchievements = [];
         
         this.sound = new SoundController();
         this.particles = new ParticleSystem(document.getElementById('effects-canvas'));
@@ -947,6 +953,7 @@ class TeakScrambleGame {
         this.clueLevel = 1;
         this.clue3Exhausted = false;
         this.showingPureDefinition = false;
+        this.levelStartTime = Date.now();
         this.updateClueUI();
 
         // Start pre-fetching the word for the next level asynchronously in the background
@@ -1393,6 +1400,16 @@ class TeakScrambleGame {
         }
 
         this.hoveredCell = null;
+
+        // Overshoot-and-settle bounce on drop (see .wood-tile.settling in style.css).
+        tileObj.element.classList.add('settling');
+        const clearSettle = (ev) => {
+            if (ev.target !== tileObj.element || ev.propertyName !== 'transform') return;
+            tileObj.element.classList.remove('settling');
+            tileObj.element.removeEventListener('transitionend', clearSettle);
+        };
+        tileObj.element.addEventListener('transitionend', clearSettle);
+
         this.syncViewPositions(true);
     }
 
@@ -1487,12 +1504,27 @@ class TeakScrambleGame {
                 this.particles.burst(badgeRect.left + 30, badgeRect.top + 30);
             }
 
+            // Combo multiplier: consecutive wins within 60s of each other
+            // stack (capped 3x) and multiply the base 100 points; a slow
+            // win or a loss resets it back to 1x (see the loss branch and
+            // switchCategory()/resetScore() below for the other reset points).
+            const solveNow = Date.now();
+            if (this.lastSolveTimestamp && (solveNow - this.lastSolveTimestamp) < 60000) {
+                this.comboMultiplier = Math.min(3, this.comboMultiplier + 1);
+            } else {
+                this.comboMultiplier = 1;
+            }
+            this.lastSolveTimestamp = solveNow;
+
             this.winStreak++;
             const streakBonus = this.getStreakBonus();
-            this.score += 100 + streakBonus;
+            const basePoints = 100 * this.comboMultiplier;
+            this.score += basePoints + streakBonus;
             this.scoreElement.innerText = this.score.toString().padStart(3, '0');
             if (this.streakElement) this.streakElement.innerText = this.winStreak;
-            this.updateVictoryBreakdown(100, streakBonus);
+
+            const newAchievements = this.checkAchievements();
+            this.updateVictoryBreakdown(basePoints, streakBonus, this.comboMultiplier, newAchievements);
 
             const streakBubble = document.querySelector('.streak-bubble');
             if (streakBubble) {
@@ -1520,7 +1552,8 @@ class TeakScrambleGame {
                     const rect = scoreTextElem.getBoundingClientRect();
                     const startX = rect.left + rect.width / 2;
                     const startY = rect.top + rect.height / 2;
-                    this.particles.addFloatingText(`+100 PTS`, startX, startY, '#FFFFFF', 0, 'bold 20px Jost');
+                    const comboSuffix = this.comboMultiplier > 1 ? ` (${this.comboMultiplier}x)` : '';
+                    this.particles.addFloatingText(`+${basePoints} PTS${comboSuffix}`, startX, startY, '#FFFFFF', 0, 'bold 20px Jost');
                     if (streakBonus > 0) {
                         this.particles.addFloatingText(`+${streakBonus} STREAK`, startX, startY, '#FF9A6C', 120, 'bold 20px Jost');
                     }
@@ -1566,6 +1599,8 @@ class TeakScrambleGame {
         } else {
             this.sound.play('error');
             this.winStreak = 0;
+            this.comboMultiplier = 1;
+            this.lastSolveTimestamp = null;
             if (this.streakElement) this.streakElement.innerText = this.winStreak;
 
             const streakBubble = document.querySelector('.streak-bubble');
@@ -1825,17 +1860,50 @@ class TeakScrambleGame {
         return '';
     }
 
-    updateVictoryBreakdown(basePoints, streakBonus) {
+    updateVictoryBreakdown(basePoints, streakBonus, comboMultiplier = 1, achievements = []) {
         const breakdown = document.getElementById('victory-breakdown');
         if (!breakdown) return;
         const total = basePoints + streakBonus;
-        let html = `<div class="breakdown-row"><span>Word Solved</span><span>+${basePoints}</span></div>`;
+        const comboSuffix = comboMultiplier > 1 ? ` (${comboMultiplier}x combo)` : '';
+        let html = `<div class="breakdown-row"><span>Word Solved${comboSuffix}</span><span>+${basePoints}</span></div>`;
         if (streakBonus > 0) {
             html += `<div class="breakdown-row streak-row"><span>${this.getStreakTierLabel(this.winStreak)} x${this.winStreak}</span><span>+${streakBonus}</span></div>`;
         }
+        achievements.forEach(a => {
+            html += `<div class="breakdown-row achievement-row"><span>${a.label}</span><span>NEW!</span></div>`;
+        });
         html += `<div class="breakdown-divider"></div>`;
         html += `<div class="breakdown-row total-row"><span>Points Earned</span><span>+${total}</span></div>`;
         breakdown.innerHTML = html;
+    }
+
+    // Client-side achievements (Phase 5.1). IDs persist per-wallet-address
+    // in localStorage; each ID fires its toast/breakdown line only once.
+    static ACHIEVEMENTS = {
+        no_hint: { label: '🎯 No-Hint Solve', check: (g) => g.clueLevel === 1 },
+        speed_solve: { label: '⚡ Speed Solver (<10s)', check: (g) => (Date.now() - g.levelStartTime) < 10000 },
+    };
+
+    checkAchievements() {
+        const key = `ws_achievements_${this._addrKey()}`;
+        const earned = JSON.parse(localStorage.getItem(key) || '[]');
+        const newlyEarned = [];
+
+        Object.entries(TeakScrambleGame.ACHIEVEMENTS).forEach(([id, def]) => {
+            if (!earned.includes(id) && def.check(this)) {
+                earned.push(id);
+                newlyEarned.push({ id, label: def.label });
+            }
+        });
+
+        if (newlyEarned.length > 0) {
+            localStorage.setItem(key, JSON.stringify(earned));
+            newlyEarned.forEach(a => {
+                window.stellarWallet?._showStatus(`Achievement unlocked: ${a.label}`, 'success');
+            });
+        }
+
+        return newlyEarned;
     }
 
     async nextLevel() {
@@ -2094,10 +2162,16 @@ class TeakScrambleGame {
     // Google Fonts gated behind a badge).
     static TILE_FONT_LAZY = ['dyslexic', 'bungee', 'pressstart'];
     static TILE_FONT_PREMIUM = ['bungee', 'pressstart'];
+    static TILE_EFFECT_PREMIUM = ['volcanic', 'holographic', 'ice-crystal', 'stained-glass'];
 
-    isTileFontUnlocked() {
+    // Shared badge gate for cosmetic unlocks (tile fonts, tile effects, ...).
+    isCosmeticUnlocked() {
         const badges = (window.stellarWallet && window.stellarWallet.cachedBadges) || [];
         return badges.includes('GOLD') || badges.includes('LEGEND');
+    }
+
+    isTileFontUnlocked() {
+        return this.isCosmeticUnlocked();
     }
 
     // Injects the premium Google Fonts stylesheet + the self-hosted
@@ -2198,9 +2272,28 @@ class TeakScrambleGame {
         });
         const activeCard = document.getElementById(`tile-effect-card-${this.currentTileEffect}`);
         if (activeCard) activeCard.classList.add('current');
+
+        const unlocked = this.isCosmeticUnlocked();
+        TeakScrambleGame.TILE_EFFECT_PREMIUM.forEach(effectId => {
+            const card = document.getElementById(`tile-effect-card-${effectId}`);
+            if (card) card.classList.toggle('locked', !unlocked);
+        });
     }
 
     switchTileEffect(effectId) {
+        const isPremium = TeakScrambleGame.TILE_EFFECT_PREMIUM.includes(effectId);
+        if (isPremium && !this.isCosmeticUnlocked()) {
+            this.sound.play('select');
+            if (window.stellarWallet) {
+                const msg = window.stellarWallet.connected
+                    ? 'Effect locked — earn the GOLD badge on the leaderboard to unlock it.'
+                    : 'Connect your wallet and earn the GOLD badge to unlock this effect.';
+                window.stellarWallet._showStatus(msg, 'error');
+            }
+            this.updateTileEffectsModalHighlight(); // keep lock state in sync, modal stays open
+            return;
+        }
+
         if (effectId === this.currentTileEffect) {
             document.getElementById('tile-effects-modal-backdrop').classList.remove('active');
             return;
@@ -2486,6 +2579,8 @@ class TeakScrambleGame {
                 this.score = 0;
                 this.level = 1;
                 this.winStreak = 0;
+                this.comboMultiplier = 1;
+                this.lastSolveTimestamp = null;
                 this.scoreElement.innerText = '000';
                 this.levelElement.innerText = '1';
                 if (this.streakElement) this.streakElement.innerText = '0';
@@ -2699,6 +2794,8 @@ class TeakScrambleGame {
 
         this.currentCategory = category;
         this.winStreak = 0;
+        this.comboMultiplier = 1;
+        this.lastSolveTimestamp = null;
         if (this.streakElement) this.streakElement.innerText = this.winStreak;
 
         const streakBubble = document.querySelector('.streak-bubble');
@@ -2800,6 +2897,7 @@ class TeakScrambleGame {
         this.clueLevel = 1;
         this.clue3Exhausted = false;
         this.showingPureDefinition = false;
+        this.levelStartTime = Date.now();
         this.updateClueUI();
 
         this.resetVictoryScreenUI();
@@ -2856,6 +2954,7 @@ class TeakScrambleGame {
         document.getElementById('daily-emoji-grid').innerText = this.buildDailyEmojiGrid(hintsUsed);
         document.getElementById('daily-share-block').style.display = 'flex';
         document.getElementById('victory-next-btn').style.display = 'none';
+        document.getElementById('victory-card-btn').style.display = 'none';
 
         this.updateDailyBanner();
     }
@@ -2870,6 +2969,7 @@ class TeakScrambleGame {
         document.getElementById('daily-emoji-grid').innerText = this.buildDailyEmojiGrid(stored.hintsUsed);
         document.getElementById('daily-share-block').style.display = 'flex';
         document.getElementById('victory-next-btn').style.display = 'none';
+        document.getElementById('victory-card-btn').style.display = 'none';
 
         this.victoryScreen.classList.add('active');
         this.updateDailyBanner();
@@ -2890,6 +2990,89 @@ class TeakScrambleGame {
         }
     }
 
+    // Renders a shareable PNG summarizing the current win (regular or Daily
+    // Challenge). Uses a fresh offscreen canvas — never the live particle
+    // canvases (#effects-canvas / #mini-effects-canvas), which are
+    // continuously animated and not export targets.
+    generateVictoryCard() {
+        const isDaily = this.isDailyChallenge && this._lastDailyResult;
+        const word = isDaily ? this._lastDailyResult.word : this.targetWord;
+        const streak = isDaily ? this._lastDailyResult.streak : this.winStreak;
+        const streakLabel = isDaily ? 'Daily Streak' : 'Win Streak';
+
+        const badges = (window.stellarWallet && window.stellarWallet.cachedBadges) || [];
+        const tierOrder = ['LEGEND', 'GOLD', 'SILVER', 'BRONZE'];
+        const badgeTier = tierOrder.find(t => badges.includes(t)) || null;
+        const badgeLabel = { LEGEND: '⭐ LEGEND', GOLD: '🥇 GOLD', SILVER: '🥈 SILVER', BRONZE: '🥉 BRONZE' }[badgeTier];
+
+        const bodyStyle = getComputedStyle(document.body);
+        const bg = (bodyStyle.getPropertyValue('--teak-dark') || '#5C3A21').trim();
+        const accent = (bodyStyle.getPropertyValue('--turquoise') || '#40E0D0').trim();
+        const gold = (bodyStyle.getPropertyValue('--mustard') || '#E1AD01').trim();
+        const light = (bodyStyle.getPropertyValue('--off-white') || '#F5F5F0').trim();
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 1080;
+        canvas.height = 1080;
+        const ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, 1080, 1080);
+
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 10;
+        ctx.strokeRect(30, 30, 1020, 1020);
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = light;
+        ctx.font = '700 48px Jost, sans-serif';
+        ctx.fillText(isDaily ? `DAILY CHALLENGE #${this._lastDailyResult.dayIndex}` : 'WORD SCRAMBLE', 540, 190);
+
+        ctx.fillStyle = accent;
+        ctx.font = '900 130px Jost, sans-serif';
+        ctx.fillText(word, 540, 400);
+
+        ctx.fillStyle = light;
+        ctx.font = '600 56px Jost, sans-serif';
+        ctx.fillText(`Score: ${this.score}`, 540, 560);
+
+        ctx.fillStyle = gold;
+        ctx.font = '600 44px Jost, sans-serif';
+        ctx.fillText(`🔥 ${streakLabel}: ${streak}`, 540, 640);
+
+        if (badgeLabel) {
+            ctx.fillStyle = light;
+            ctx.font = '600 40px Jost, sans-serif';
+            ctx.fillText(badgeLabel, 540, 720);
+        }
+
+        ctx.fillStyle = light;
+        ctx.globalAlpha = 0.7;
+        ctx.font = '400 32px Jost, sans-serif';
+        ctx.fillText(window.location.origin.replace(/^https?:\/\//, ''), 540, 980);
+        ctx.globalAlpha = 1;
+
+        canvas.toBlob((blob) => {
+            if (!blob) return;
+            const file = new File([blob], 'word-scramble-result.png', { type: 'image/png' });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({ files: [file], title: 'Word Scramble' }).catch(() => {});
+                return;
+            }
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'word-scramble-result.png';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            window.stellarWallet?._showStatus('Card downloaded!', 'success');
+        }, 'image/png');
+    }
+
     // Restores the victory screen's default (non-daily) content. Called at
     // win-time for a regular solve, in case a previous Daily Challenge win
     // left it showing daily-specific text.
@@ -2898,10 +3081,12 @@ class TeakScrambleGame {
         const subEl = document.getElementById('victory-subtitle');
         const shareBlock = document.getElementById('daily-share-block');
         const nextBtn = document.getElementById('victory-next-btn');
+        const cardBtn = document.getElementById('victory-card-btn');
         if (titleEl) titleEl.innerText = 'Spectacular!';
         if (subEl) subEl.innerText = 'You have unscrambled the atomic matrix.';
         if (shareBlock) shareBlock.style.display = 'none';
         if (nextBtn) nextBtn.style.display = '';
+        if (cardBtn) cardBtn.style.display = '';
     }
 
     async fetchDictionaryDefinition(word) {
