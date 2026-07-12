@@ -209,7 +209,7 @@ class StellarWallet {
             const response = await rpc.sendTransaction(signedTx);
 
             if (response.status === 'ERROR') {
-                throw new Error(`Transaction failed: ${response.errorResult}`);
+                throw new Error(`Transaction failed: ${this._describeTxError(response.errorResult)}`);
             }
 
             let result = await rpc.getTransaction(response.hash);
@@ -228,6 +228,10 @@ class StellarWallet {
                 trackEvent('score_submitted', { score, level });
                 if (window.showFeedbackPrompt) window.showFeedbackPrompt();
                 return true;
+            } else if (result.status === 'FAILED') {
+                // Distinct from a timeout: the network did confirm it, but the
+                // transaction itself reverted (e.g. signed for the wrong network).
+                throw new Error(`Transaction failed on-chain: ${this._describeTxError(result.resultXdr)}`);
             } else {
                 throw new Error('Transaction not confirmed in time.');
             }
@@ -600,6 +604,23 @@ class StellarWallet {
 
     _short(address) {
         return `${address.slice(0, 4)}...${address.slice(-4)}`;
+    }
+
+    // Best-effort human-readable text for a thrown/returned error value.
+    // RPC failures (response.errorResult, result.resultXdr) are XDR objects,
+    // not strings — interpolating them directly into a template literal
+    // silently produces "[object Object]" instead of anything actionable.
+    _describeTxError(value) {
+        if (value == null) return 'unknown error';
+        if (typeof value === 'string') return value;
+        if (typeof value.toXDR === 'function') {
+            try { return value.toXDR('base64'); } catch (e) { /* fall through */ }
+        }
+        try {
+            return JSON.stringify(value, (_, v) => typeof v === 'bigint' ? v.toString() : v);
+        } catch (e) {
+            return String(value);
+        }
     }
 
     _showStatus(message, type = 'info') {
