@@ -2014,9 +2014,11 @@ body[data-theme="nordic"] .hint-info-panel {
    RUSTIC RECLAIMED THEME OVERRIDES
    ========================================================================== */
 body[data-theme="rustic"] {
+    /* CSS-generated wood grain (no remote images — works offline/PWA) */
     background-color: #1a1614;
-    background: linear-gradient(rgba(26, 22, 20, 0.9), rgba(26, 22, 20, 0.9)), url('https://images.unsplash.com/photo-1524704654690-b56c05c78a00?q=80&w=2069&auto=format&fit=crop');
-    background-size: cover;
+    background-image:
+        linear-gradient(rgba(26, 22, 20, 0.82), rgba(26, 22, 20, 0.82)),
+        repeating-linear-gradient(92deg, #2a211b 0px, #1c1512 14px, #272019 27px, #191310 42px);
     background-attachment: fixed;
     color: #dee3e4;
     font-family: 'Work Sans', sans-serif;
@@ -2029,8 +2031,9 @@ body[data-theme="rustic"] h1 {
     text-shadow: 2px 2px 0px #000, 4px 4px 0px #2d1b15;
 }
 body[data-theme="rustic"] .board-plate {
-    background: linear-gradient(rgba(45, 27, 21, 0.85), rgba(45, 27, 21, 0.85)), url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop');
-    background-size: cover;
+    background:
+        linear-gradient(rgba(45, 27, 21, 0.72), rgba(45, 27, 21, 0.72)),
+        repeating-linear-gradient(88deg, #4a3428 0px, #3a2419 12px, #503a2b 25px, #33200f 40px);
     border: 4px solid #2d1b15;
     outline: 6px solid #20130f;
     box-shadow: inset 0 10px 20px rgba(0,0,0,0.8), 0 15px 25px rgba(0,0,0,0.6);
@@ -2071,8 +2074,10 @@ body[data-theme="rustic"] .wood-tile::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
-    opacity: 0.35;
+    background: repeating-linear-gradient(93deg,
+        rgba(0,0,0,0.16) 0px, rgba(255,255,255,0.05) 3px,
+        rgba(0,0,0,0.10) 7px, rgba(255,255,255,0.03) 11px);
+    opacity: 0.5;
     pointer-events: none;
 }
 body[data-theme="rustic"] .wood-tile:hover {
@@ -4062,6 +4067,301 @@ body[data-tile-effect="stained-glass"] {
     }
     .wallet-guide-slide p {
         font-size: 0.82rem;
+    }
+}
+
+/* ==========================================================================
+   NATIVE FEEDBACK FORM (fallback while the Google Form URL is unset)
+   ========================================================================== */
+.feedback-hint {
+    margin: 0 0 10px;
+    font-size: 0.85rem;
+    color: var(--teak-base, #8B5A2B);
+}
+.feedback-text {
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 110px;
+    padding: 10px 12px;
+    border: 2px solid var(--teak-dark, #5C3A21);
+    border-radius: 6px;
+    background: #ffffff;
+    color: var(--teak-dark, #5C3A21);
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+.feedback-text:focus {
+    outline: 2px solid var(--turquoise, #40E0D0);
+    outline-offset: 1px;
+}
+.feedback-send {
+    margin-top: 12px;
+    width: 100%;
+    padding: 10px 0;
+    border: none;
+    border-radius: 8px;
+    background: var(--turquoise, #40E0D0);
+    color: var(--teak-dark, #5C3A21);
+    font-family: inherit;
+    font-weight: 900;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--turquoise-dark, #00CED1);
+}
+.feedback-send:hover {
+    background: #5CE6D6;
+}
+.feedback-send:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--turquoise-dark, #00CED1);
+}
+
+/* ==========================================================================
+   AUTUMN HARVEST THEME OVERRIDES
+   ========================================================================== */
+body[data-theme="autumn"] {
+    background-color: #33170A;
+    background-image:
+        radial-gradient(rgba(225, 173, 1, 0.55) 1px, transparent 1px),
+        radial-gradient(rgba(180, 83, 31, 0.75) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: 0 0, 20px 20px;
+    color: #F5E6C8;
+}
+body[data-theme="autumn"] .ambient-glow {
+    background: radial-gradient(circle, rgba(224, 122, 47, 0.18) 0%, rgba(180, 83, 31, 0.07) 50%, rgba(0,0,0,0) 70%);
+}
+body[data-theme="autumn"] h1 {
+    color: #F5E6C8;
+    text-shadow: 2px 2px 0px #7A3010, 4px 4px 0px #4A1B08;
+}
+body[data-theme="autumn"] .board-plate {
+    background: linear-gradient(135deg, #8A3B12 0%, #5C2410 100%);
+    border: 4px solid #4A1B08;
+    outline: 6px solid #381305;
+    box-shadow: inset 0 6px 14px rgba(0,0,0,0.5), 0 15px 25px rgba(0,0,0,0.5);
+}
+/* Re-scoping the checkerboard vars keeps the two-tone cell pattern
+   (buildCheckerboard sets cell colors inline from these variables). */
+body[data-theme="autumn"] .grid-container {
+    --teak-light: #6B2E12;
+    --teak-base: #571F0B;
+    background-color: #4A1B08;
+    border: 4px solid #4A1B08;
+    box-shadow: inset 0 6px 14px rgba(0,0,0,0.55);
+}
+body[data-theme="autumn"] .dashed-slot {
+    border-color: var(--mustard);
+    background-color: rgba(225, 173, 1, 0.16);
+}
+body[data-theme="autumn"] .wood-tile {
+    background: linear-gradient(145deg, #F5D9A0 0%, #E8B96A 100%);
+    color: #5C2E0C;
+    border: 2px solid #8A5A1E;
+    box-shadow:
+        0 5px 0 #A5732C,
+        0 8px 10px rgba(0,0,0,0.4);
+    text-shadow: 0px 1px 0px rgba(255,255,255,0.35);
+}
+body[data-theme="autumn"] .wood-tile:hover {
+    box-shadow: 0 8px 0 #A5732C, 0 12px 14px rgba(0,0,0,0.45);
+}
+body[data-theme="autumn"] .wood-tile.locked {
+    background: linear-gradient(145deg, #E1AD01, #C99500);
+    border-color: #8A6914;
+    color: #4A2C05;
+}
+body[data-theme="autumn"] .rack-shelf {
+    background: linear-gradient(to bottom, #8A3B12 0%, #4A1B08 100%);
+    border: 2px solid #4A1B08;
+}
+body[data-theme="autumn"] .clue-panel {
+    background: rgba(30, 12, 4, 0.55);
+    border: 2.5px solid #4A1B08;
+    color: #FFD98A;
+    text-shadow: 0 0 6px rgba(255, 176, 59, 0.35);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.55);
+}
+body[data-theme="autumn"] button {
+    background: linear-gradient(to bottom, #A54A18, #7A3010);
+    color: #F5E6C8;
+    border: 2px solid #4A1B08;
+    box-shadow: 0 5px 0 #4A1B08;
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.35);
+}
+body[data-theme="autumn"] button:hover {
+    background: linear-gradient(to bottom, #B85520, #8A3B12);
+}
+body[data-theme="autumn"] button.btn-submit {
+    background: linear-gradient(to bottom, #F0BE23, #D9A408);
+    color: #4A2C05;
+    border-color: #8A6914;
+    box-shadow: 0 5px 0 #8A6914;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+}
+body[data-theme="autumn"] button.btn-submit:hover {
+    background: linear-gradient(to bottom, #FFCC33, #E8B312);
+}
+body[data-theme="autumn"] .instructions-panel,
+body[data-theme="autumn"] .hint-info-panel {
+    background: rgba(46, 20, 8, 0.95);
+    border: 3px solid #4A1B08;
+    color: #F5E6C8;
+}
+body[data-theme="autumn"] .instructions-panel h3,
+body[data-theme="autumn"] .hint-info-panel h3 {
+    border-bottom: 2px solid var(--mustard);
+    color: #F5E6C8;
+}
+
+/* ==========================================================================
+   NEW CHIP MATERIALS: BRASS / JADE / MOTHER-OF-PEARL
+   ========================================================================== */
+/* 9. Brass Chip */
+body[data-chip-material="brass"] .wood-tile {
+    background: linear-gradient(160deg, #F2D479 0%, #C9A227 55%, #A67C1A 100%);
+    color: #3E2A08;
+    border: 2px solid #8A6914;
+}
+
+/* 10. Jade Chip */
+body[data-chip-material="jade"] .wood-tile {
+    background: linear-gradient(145deg, #7BC9A6 0%, #2E8B6A 100%);
+    color: #0D3B2B;
+    border: 2px solid #1D6B4E;
+    text-shadow: 0px 1px 0px rgba(255,255,255,0.25);
+}
+
+/* 11. Mother-of-Pearl Chip */
+body[data-chip-material="pearl"] .wood-tile {
+    background: linear-gradient(120deg, #F8F4FA 0%, #E9F5F1 28%, #FBEFF2 52%, #EDF0FB 76%, #FAF7EF 100%);
+    color: #8A7580;
+    border: 2px solid #C9BCC4;
+    text-shadow: 0px 1px 0px rgba(255,255,255,0.8);
+}
+
+/* ==========================================================================
+   WIN CASCADE GOLD RIPPLE (rides the bounce cascade stagger)
+   ========================================================================== */
+.grid-cell.cascade-gold::after {
+    animation: cascade-gold-flash 0.55s ease-out;
+}
+@keyframes cascade-gold-flash {
+    0% {
+        opacity: 0;
+        background-color: rgba(253, 187, 17, 0);
+    }
+    30% {
+        opacity: 1;
+        background-color: rgba(253, 187, 17, 0.75);
+        box-shadow: inset 0 0 14px rgba(255, 214, 90, 0.9);
+    }
+    100% {
+        opacity: 0;
+        background-color: rgba(253, 187, 17, 0);
+    }
+}
+
+/* ==========================================================================
+   SCORE ODOMETER COUNT-UP PULSE
+   ========================================================================== */
+.score-bubble.score-counting {
+    animation: score-count-pulse 0.6s ease-out;
+}
+@keyframes score-count-pulse {
+    0%   { transform: rotate(10deg) scale(1); }
+    35%  { transform: rotate(12deg) scale(1.12); }
+    100% { transform: rotate(10deg) scale(1); }
+}
+
+/* ==========================================================================
+   STREAK GLOW TIERS (3+ mustard, 7+ orange; 10+ keeps the red pulse)
+   ========================================================================== */
+.streak-bubble.streak-tier-1 {
+    border-color: var(--mustard) !important;
+    animation: streak-tier1-glow 2.4s infinite ease-in-out;
+}
+@keyframes streak-tier1-glow {
+    0%, 100% {
+        box-shadow:
+            0 8px 16px var(--shadow-deep),
+            inset 0 3px 6px rgba(255,255,255,0.4),
+            inset 0 -3px 6px rgba(0,0,0,0.2),
+            0 0 6px rgba(225, 173, 1, 0.45);
+    }
+    50% {
+        box-shadow:
+            0 8px 20px var(--shadow-deep),
+            inset 0 3px 6px rgba(255,255,255,0.4),
+            inset 0 -3px 6px rgba(0,0,0,0.2),
+            0 0 14px rgba(225, 173, 1, 0.85);
+    }
+}
+.streak-bubble.streak-tier-2 {
+    border-color: #ff9800 !important;
+    animation: streak-tier2-glow 1.9s infinite ease-in-out;
+}
+@keyframes streak-tier2-glow {
+    0%, 100% {
+        box-shadow:
+            0 8px 16px var(--shadow-deep),
+            inset 0 3px 6px rgba(255,255,255,0.4),
+            inset 0 -3px 6px rgba(0,0,0,0.2),
+            0 0 10px rgba(255, 152, 0, 0.6);
+    }
+    50% {
+        box-shadow:
+            0 8px 22px var(--shadow-deep),
+            inset 0 3px 6px rgba(255,255,255,0.4),
+            inset 0 -3px 6px rgba(0,0,0,0.2),
+            0 0 22px rgba(255, 152, 0, 0.95),
+            0 0 30px rgba(255, 152, 0, 0.4);
+        transform: rotate(7deg) scale(1.06);
+    }
+}
+
+/* ==========================================================================
+   MODAL SPRING ENTRANCE (lift + overshoot; close still fades/settles out)
+   ========================================================================== */
+.category-modal, .theme-modal, .leaderboard-modal, .changelog-modal, .api-settings-modal {
+    transform: scale(0.85) translateY(26px);
+    transition: transform 0.38s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.modal-backdrop.active .category-modal,
+.modal-backdrop.active .theme-modal,
+.modal-backdrop.active .leaderboard-modal,
+.modal-backdrop.active .changelog-modal,
+.modal-backdrop.active .api-settings-modal {
+    transform: scale(1) translateY(0);
+}
+
+/* ==========================================================================
+   PERFORMANCE MODE + REDUCED MOTION GUARDS FOR THE NEW EFFECTS
+   ========================================================================== */
+body[data-performance-mode="true"] .streak-bubble.streak-tier-1,
+body[data-performance-mode="true"] .streak-bubble.streak-tier-2,
+body[data-performance-mode="true"] .score-bubble.score-counting,
+body[data-performance-mode="true"] .grid-cell.cascade-gold::after {
+    animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .streak-bubble.streak-tier-1,
+    .streak-bubble.streak-tier-2,
+    .score-bubble.score-counting,
+    .grid-cell.cascade-gold::after {
+        animation: none !important;
+    }
+    .category-modal, .theme-modal, .leaderboard-modal, .changelog-modal, .api-settings-modal,
+    .modal-backdrop.active .category-modal,
+    .modal-backdrop.active .theme-modal,
+    .modal-backdrop.active .leaderboard-modal,
+    .modal-backdrop.active .changelog-modal,
+    .modal-backdrop.active .api-settings-modal {
+        transform: none;
+        transition: none;
     }
 }
 

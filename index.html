@@ -41,6 +41,7 @@
     </script>
 
     <script type="module" src="stellar.js"></script>
+    <script src="daily-words.js" defer></script>
     <script src="script.js" defer></script>
     <script src="feedback.js" defer></script>
     <script src="wallet-guide.js" defer></script>
@@ -286,6 +287,15 @@
                     <img class="theme-preview" data-src="Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/coastal_board_focus_updated/screen.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'%3E%3C/svg%3E" loading="lazy" alt="Coastal Driftwood">
                     <div class="theme-name">Coastal Driftwood</div>
                 </div>
+                <!-- Autumn Harvest -->
+                <div class="theme-card" id="theme-card-autumn" onclick="game.switchTheme('autumn')">
+                    <div class="theme-preview" style="background: radial-gradient(rgba(225,173,1,0.6) 1px, #33170A 1px); background-size: 8px 8px; border: 2px solid rgba(0,0,0,0.3); border-radius: 6px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; position: relative;">
+                        <div style="background: linear-gradient(135deg, #8A3B12, #5C2410); width: 60%; height: 60%; border-radius: 4px; border: 1.5px solid #A54A18; display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 16px; height: 16px; background: linear-gradient(145deg, #F5D9A0, #E8B96A); border: 1.2px solid #8A5A1E; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 900; color: #5C2E0C;">A</div>
+                        </div>
+                    </div>
+                    <div class="theme-name">Autumn Harvest</div>
+                </div>
             </div>
             <button class="theme-close-btn" onclick="game.closeThemeModal(null)">Close Theme Menu</button>
         </div>
@@ -351,6 +361,27 @@
                         <div style="font-weight: 800; font-size: 2.5rem; color: #ffffff; text-shadow: 0px 1px 0px rgba(255,255,255,0.3); font-family: inherit;">H</div>
                     </div>
                     <div class="theme-name">Smoked Glass</div>
+                </div>
+                <!-- Chip: Brass -->
+                <div class="theme-card" id="chip-card-brass" onclick="game.switchChipMaterial('brass')">
+                    <div class="theme-preview" style="background: linear-gradient(160deg, #F2D479 0%, #C9A227 55%, #A67C1A 100%); border: 2px solid var(--teak-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: inset 0 -3px 4px rgba(0,0,0,0.2); border-top: 1.5px solid rgba(255,255,255,0.4); margin-bottom: 4px;">
+                        <div style="font-weight: 800; font-size: 2.5rem; color: #3E2A08; text-shadow: 0px 1px 0px rgba(255,255,255,0.3); font-family: inherit;">I</div>
+                    </div>
+                    <div class="theme-name">Brass</div>
+                </div>
+                <!-- Chip: Jade -->
+                <div class="theme-card" id="chip-card-jade" onclick="game.switchChipMaterial('jade')">
+                    <div class="theme-preview" style="background: linear-gradient(145deg, #7BC9A6 0%, #2E8B6A 100%); border: 2px solid var(--teak-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: inset 0 -3px 4px rgba(0,0,0,0.2); border-top: 1.5px solid rgba(255,255,255,0.4); margin-bottom: 4px;">
+                        <div style="font-weight: 800; font-size: 2.5rem; color: #0D3B2B; text-shadow: 0px 1px 0px rgba(255,255,255,0.25); font-family: inherit;">J</div>
+                    </div>
+                    <div class="theme-name">Jade</div>
+                </div>
+                <!-- Chip: Mother-of-Pearl -->
+                <div class="theme-card" id="chip-card-pearl" onclick="game.switchChipMaterial('pearl')">
+                    <div class="theme-preview" style="background: linear-gradient(120deg, #F8F4FA 0%, #E9F5F1 28%, #FBEFF2 52%, #EDF0FB 76%, #FAF7EF 100%); border: 2px solid var(--teak-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: inset 0 -3px 4px rgba(0,0,0,0.2); border-top: 1.5px solid rgba(255,255,255,0.4); margin-bottom: 4px;">
+                        <div style="font-weight: 800; font-size: 2.5rem; color: #8A7580; text-shadow: 0px 1px 0px rgba(255,255,255,0.8); font-family: inherit;">K</div>
+                    </div>
+                    <div class="theme-name">Mother-of-Pearl</div>
                 </div>
             </div>
 
@@ -516,6 +547,20 @@
             <h3>Game Updates</h3>
             <div class="changelog-content">
                 <div class="changelog-version">
+                    <h4>v1.11.0 - Autumn Theme, New Chips & Smarter Feedback</h4>
+                    <ul>
+                        <li><strong>Autumn Harvest Theme:</strong> A warm burnt-orange board with amber tiles joins the theme collection.</li>
+                        <li><strong>New Chip Materials:</strong> Brass, Jade, and Mother-of-Pearl chips are now available in the Customize Chips menu.</li>
+                        <li><strong>Bigger Daily Challenge:</strong> The daily word pool grew from 33 to over 1,100 curated words — years of dailies with no repeats.</li>
+                        <li><strong>Near-Miss Feedback:</strong> Wrong guesses now flash correctly-placed letters amber (with a gentler sound) so you know what to keep.</li>
+                        <li><strong>Golden Cascade:</strong> Solving a word sends a golden ripple across the board cells under the bouncing tiles.</li>
+                        <li><strong>Score Odometer:</strong> Points now count up with a satisfying pulse instead of snapping to the new total.</li>
+                        <li><strong>Streak Glow Tiers:</strong> The streak bubble now glows mustard at 3 wins, orange at 7, and catches fire at 10.</li>
+                        <li><strong>New Sounds:</strong> Combo blips that rise with your multiplier, an achievement fanfare, and a daily-streak bell.</li>
+                        <li><strong>Offline Fix:</strong> The Rustic theme no longer depends on remote images — every theme now works fully offline.</li>
+                    </ul>
+                </div>
+                <div class="changelog-version" style="margin-top: 15px;">
                     <h4>v1.10.0 - Visual Polish, Achievements & Combo Scoring</h4>
                     <ul>
                         <li><strong>Tile Settle Physics:</strong> Tiles now bounce gently into place when dropped onto the board or rack.</li>

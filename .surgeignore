@@ -10,11 +10,29 @@ word-scramble-contract/
 
 # Documentation / submission assets — not needed at runtime (~87MB)
 Video/
-Word Scramble Boards Inspired/
 Test Mobile UI/
 Idea Submissions/
-screenshots/
 *.docx
+
+# Theme board mockups — only the 4 screen.png previews are used at runtime
+# (loaded via data-src in the theme picker modal, see script.js applyTheme);
+# everything else here (mockup source HTML, design notes) is unused.
+Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/atomic_woodcraft/
+Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/coastal_board_focus_updated/code.html
+Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/nordic_oak_board_focus_empty/code.html
+Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/rustic_reclaimed_board_focus/code.html
+Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/vintage_parchment_board_regenerated_grid/code.html
+
+# Wallet-connect walkthrough screenshots — only 3 are referenced by
+# wallet-guide.js; the rest are unused extras/alternates.
+screenshots/README.txt
+screenshots/balance-displayed.png
+screenshots/balance-displayed-2.png
+screenshots/transaction-result.png
+screenshots/transaction-result-2.png
+screenshots/successful-transaction-2.png
+screenshots/wallet-approval.png
+screenshots/wallet-balance.png
 
 # Tooling / editor config
 .claude/

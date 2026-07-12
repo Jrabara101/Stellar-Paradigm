@@ -1,7 +1,7 @@
 // Word Scramble service worker — network-first with cache fallback.
 // Gives instant repeat loads and lets the game shell open offline,
 // while always preferring fresh files when the network is available.
-const CACHE_NAME = 'word-scramble-v1';
+const CACHE_NAME = 'word-scramble-v2';
 
 const PRECACHE = [
     './',
@@ -9,6 +9,7 @@ const PRECACHE = [
     'style.css',
     'script.js',
     'stellar.js',
+    'daily-words.js',
     'feedback.js',
     'manifest.json',
     'icons/icon-192.png',

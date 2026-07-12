@@ -156,7 +156,7 @@ class SoundController {
         }
     }
 
-    play(type) {
+    play(type, opt) {
         this.init();
         if (!this.audioCtx || this.isMuted) return;
 
@@ -239,18 +239,121 @@ class SoundController {
                 const osc = this.audioCtx.createOscillator();
                 const gain = this.audioCtx.createGain();
                 osc.type = 'sine';
-                
+
                 const time = now + idx * 0.08;
                 osc.frequency.setValueAtTime(freq, time);
-                
+
                 gain.gain.setValueAtTime(0.15, time);
                 gain.gain.exponentialRampToValueAtTime(0.001, time + 0.4);
-                
+
                 osc.connect(gain);
                 gain.connect(this.audioCtx.destination);
-                
+
                 osc.start(time);
                 osc.stop(time + 0.4);
+            });
+        }
+        else if (type === 'nearmiss') {
+            // Soft thud-hum: gentler than 'error' — "close, keep going"
+            const osc1 = this.audioCtx.createOscillator();
+            const osc2 = this.audioCtx.createOscillator();
+            const gain = this.audioCtx.createGain();
+
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(140, now);
+            osc1.frequency.exponentialRampToValueAtTime(95, now + 0.2);
+            osc2.type = 'triangle';
+            osc2.frequency.setValueAtTime(220, now);
+
+            gain.gain.setValueAtTime(0.16, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(this.audioCtx.destination);
+            osc1.start(now);
+            osc2.start(now);
+            osc1.stop(now + 0.22);
+            osc2.stop(now + 0.22);
+        }
+        else if (type === 'combo') {
+            // Rising blips — pitch climbs with the combo multiplier (opt)
+            const level = Math.max(2, Math.min(4, opt || 2));
+            const base = 440 * (1 + 0.25 * (level - 2));
+            for (let i = 0; i < level; i++) {
+                const osc = this.audioCtx.createOscillator();
+                const gain = this.audioCtx.createGain();
+                osc.type = 'triangle';
+                const time = now + i * 0.07;
+                osc.frequency.setValueAtTime(base * Math.pow(2, (i * 4) / 12), time);
+
+                gain.gain.setValueAtTime(0.12, time);
+                gain.gain.exponentialRampToValueAtTime(0.001, time + 0.09);
+
+                osc.connect(gain);
+                gain.connect(this.audioCtx.destination);
+                osc.start(time);
+                osc.stop(time + 0.09);
+            }
+        }
+        else if (type === 'fanfare') {
+            // Achievement/badge fanfare: staccato arpeggio + closing chord
+            const steps = [523.25, 659.25, 783.99, 1046.50]; // C5 E5 G5 C6
+            steps.forEach((freq, idx) => {
+                const osc = this.audioCtx.createOscillator();
+                const gain = this.audioCtx.createGain();
+                osc.type = 'triangle';
+                const time = now + idx * 0.1;
+                osc.frequency.setValueAtTime(freq, time);
+
+                gain.gain.setValueAtTime(0.13, time);
+                gain.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
+
+                osc.connect(gain);
+                gain.connect(this.audioCtx.destination);
+                osc.start(time);
+                osc.stop(time + 0.18);
+            });
+            // Closing chord (C major, held)
+            [523.25, 659.25, 783.99].forEach(freq => {
+                const osc = this.audioCtx.createOscillator();
+                const gain = this.audioCtx.createGain();
+                osc.type = 'sine';
+                const time = now + 0.42;
+                osc.frequency.setValueAtTime(freq, time);
+
+                gain.gain.setValueAtTime(0.1, time);
+                gain.gain.exponentialRampToValueAtTime(0.001, time + 0.7);
+
+                osc.connect(gain);
+                gain.connect(this.audioCtx.destination);
+                osc.start(time);
+                osc.stop(time + 0.7);
+            });
+        }
+        else if (type === 'chime') {
+            // Daily-streak bell: two soft strikes with long ring-out
+            [[987.77, 0], [1318.51, 0.16]].forEach(([freq, delay]) => {
+                const osc = this.audioCtx.createOscillator();
+                const partial = this.audioCtx.createOscillator();
+                const gain = this.audioCtx.createGain();
+                const time = now + delay;
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, time);
+                partial.type = 'sine';
+                partial.frequency.setValueAtTime(freq * 2.76, time); // bell overtone
+
+                gain.gain.setValueAtTime(0.14, time);
+                gain.gain.exponentialRampToValueAtTime(0.001, time + 1.1);
+
+                osc.connect(gain);
+                partial.connect(gain);
+                gain.connect(this.audioCtx.destination);
+                osc.start(time);
+                partial.start(time);
+                osc.stop(time + 1.1);
+                partial.stop(time + 1.1);
             });
         }
     }
@@ -700,15 +803,7 @@ class TeakScrambleGame {
             this.scoreElement.innerText = this.score.toString().padStart(3, '0');
             this.levelElement.innerText = this.level;
             if (this.streakElement) this.streakElement.innerText = this.winStreak;
-
-            const streakBubble = document.querySelector('.streak-bubble');
-            if (streakBubble) {
-                if (this.winStreak >= 10) {
-                    streakBubble.classList.add('streak-glow-active');
-                } else {
-                    streakBubble.classList.remove('streak-glow-active');
-                }
-            }
+            this.updateStreakGlow();
 
             if (progress.category) {
                 this.currentCategory = progress.category;
@@ -1496,6 +1591,19 @@ class TeakScrambleGame {
                         }, i * 100); // 100ms delay between each letter
                     }
                 });
+
+                // Golden lock-in ripple under the word cells, riding the same
+                // stagger so cell flash and tile bounce read as one celebration
+                this.targetCellIndices.forEach((cellIdx, i) => {
+                    const cell = this.boardGrid.children[cellIdx];
+                    if (!cell) return;
+                    setTimeout(() => {
+                        cell.classList.add('cascade-gold');
+                        cell.addEventListener('animationend', () => {
+                            cell.classList.remove('cascade-gold');
+                        }, { once: true });
+                    }, i * 100);
+                });
             }
 
             if (this.effectsSettings.particles) {
@@ -1516,24 +1624,23 @@ class TeakScrambleGame {
             }
             this.lastSolveTimestamp = solveNow;
 
+            // Rising combo blips layered over the win arpeggio
+            if (this.comboMultiplier > 1) {
+                this.sound.play('combo', this.comboMultiplier);
+            }
+
             this.winStreak++;
             const streakBonus = this.getStreakBonus();
             const basePoints = 100 * this.comboMultiplier;
             this.score += basePoints + streakBonus;
-            this.scoreElement.innerText = this.score.toString().padStart(3, '0');
+            this.animateScoreTo(this.score);
             if (this.streakElement) this.streakElement.innerText = this.winStreak;
 
             const newAchievements = this.checkAchievements();
             this.updateVictoryBreakdown(basePoints, streakBonus, this.comboMultiplier, newAchievements);
 
+            this.updateStreakGlow();
             const streakBubble = document.querySelector('.streak-bubble');
-            if (streakBubble) {
-                if (this.winStreak >= 10) {
-                    streakBubble.classList.add('streak-glow-active');
-                } else {
-                    streakBubble.classList.remove('streak-glow-active');
-                }
-            }
 
             // Streak fire effect (3+ streak only)
             if (this.winStreak >= 3 && this.effectsSettings.streakFire) {
@@ -1597,21 +1704,42 @@ class TeakScrambleGame {
                 this.victoryScreen.classList.add('active');
             }, 1200); // Wait for the cascade bounce animation to finish beautifully
         } else {
-            this.sound.play('error');
+            // Near-miss: letters sitting in their correct slots (excluding
+            // hint-locked ones) flash amber instead of red, so a wrong guess
+            // tells the player what to keep instead of just punishing them.
+            const correctlyPlaced = new Set();
+            this.targetCellIndices.forEach((cellIdx, i) => {
+                const tile = this.boardOccupants[cellIdx];
+                if (tile && tile.char === this.targetWord[i] && !tile.element.classList.contains('locked')) {
+                    correctlyPlaced.add(tile);
+                }
+            });
+            const isNearMiss = correctlyPlaced.size >= 2;
+
+            this.sound.play(isNearMiss ? 'nearmiss' : 'error');
             this.winStreak = 0;
             this.comboMultiplier = 1;
             this.lastSolveTimestamp = null;
             if (this.streakElement) this.streakElement.innerText = this.winStreak;
+            this.updateStreakGlow();
 
-            const streakBubble = document.querySelector('.streak-bubble');
-            if (streakBubble) streakBubble.classList.remove('streak-glow-active');
-            
-            // Shake and highlight incorrect board tiles red
+            if (isNearMiss && this.effectsSettings.scorePop) {
+                const boardRect = this.mainBoard.getBoundingClientRect();
+                this.particles.addFloatingText(
+                    `${correctlyPlaced.size} IN PLACE!`,
+                    boardRect.left + boardRect.width / 2,
+                    boardRect.top + 40,
+                    '#E1AD01', 0, 'bold 20px Jost'
+                );
+            }
+
+            // Shake board tiles — amber for correct-slot letters, red for the rest
             this.tilesData.forEach(t => {
                 if (t.currentLocation === 'board' && !t.element.classList.contains('locked')) {
+                    const isRight = correctlyPlaced.has(t);
                     t.element.style.transition = 'none';
-                    t.element.style.backgroundColor = '#ef5350';
-                    t.element.style.color = '#ffffff';
+                    t.element.style.backgroundColor = isRight ? '#E1AD01' : '#ef5350';
+                    t.element.style.color = isRight ? '#4A2C05' : '#ffffff';
                     
                     const side = 5;
                     const tileX = parseFloat(t.element.style.transform.match(/translate3d\(([^px]+)px/)[1]);
@@ -1898,12 +2026,63 @@ class TeakScrambleGame {
 
         if (newlyEarned.length > 0) {
             localStorage.setItem(key, JSON.stringify(earned));
+            // Delay the fanfare so it lands after the win arpeggio finishes
+            setTimeout(() => this.sound.play('fanfare'), 700);
             newlyEarned.forEach(a => {
                 window.stellarWallet?._showStatus(`Achievement unlocked: ${a.label}`, 'success');
             });
         }
 
         return newlyEarned;
+    }
+
+    // Tween the score display up to its new value with a bubble pulse.
+    // Falls back to an instant update when Score Pop is toggled off or the
+    // OS asks for reduced motion.
+    animateScoreTo(target) {
+        const setInstant = () => {
+            this.scoreElement.innerText = target.toString().padStart(3, '0');
+        };
+        if (!this.effectsSettings.scorePop ||
+            (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+            setInstant();
+            return;
+        }
+
+        const from = parseInt(this.scoreElement.innerText, 10) || 0;
+        if (from === target) { setInstant(); return; }
+        if (this._scoreTweenId) cancelAnimationFrame(this._scoreTweenId);
+
+        const duration = 600;
+        const start = performance.now();
+        const bubble = document.querySelector('.score-bubble');
+        if (bubble) {
+            bubble.classList.remove('score-counting');
+            void bubble.offsetWidth; // restart the pulse if one is mid-flight
+            bubble.classList.add('score-counting');
+            bubble.addEventListener('animationend', () => {
+                bubble.classList.remove('score-counting');
+            }, { once: true });
+        }
+
+        const step = (now) => {
+            const t = Math.min(1, (now - start) / duration);
+            const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+            const val = Math.round(from + (target - from) * eased);
+            this.scoreElement.innerText = val.toString().padStart(3, '0');
+            this._scoreTweenId = t < 1 ? requestAnimationFrame(step) : null;
+        };
+        this._scoreTweenId = requestAnimationFrame(step);
+    }
+
+    // Tiered streak glow: 3+ mustard shimmer, 7+ orange pulse, 10+ keeps the
+    // original red fire pulse. Single source of truth for the bubble classes.
+    updateStreakGlow() {
+        const bubble = document.querySelector('.streak-bubble');
+        if (!bubble) return;
+        bubble.classList.toggle('streak-tier-1', this.winStreak >= 3 && this.winStreak < 7);
+        bubble.classList.toggle('streak-tier-2', this.winStreak >= 7 && this.winStreak < 10);
+        bubble.classList.toggle('streak-glow-active', this.winStreak >= 10);
     }
 
     async nextLevel() {
@@ -2798,8 +2977,7 @@ class TeakScrambleGame {
         this.lastSolveTimestamp = null;
         if (this.streakElement) this.streakElement.innerText = this.winStreak;
 
-        const streakBubble = document.querySelector('.streak-bubble');
-        if (streakBubble) streakBubble.classList.remove('streak-glow-active');
+        this.updateStreakGlow();
 
         // Clear pre-fetched data since we changed category
         this.prefetchedData = null;
@@ -2823,10 +3001,12 @@ class TeakScrambleGame {
 
     _dailyPool() {
         if (!this._dailyWordPool) {
-            // Flatten all difficulty tiers of the general dictionary into one
-            // pool (33 words) so the daily word varies in length day to day
-            // and the cycle is longer than any single tier alone.
-            this._dailyWordPool = Object.values(this.dictionary.general).flat();
+            // Prefer the dedicated curated pool (daily-words.js, 1000+ words
+            // — years without a repeat). Fall back to flattening the offline
+            // general dictionary if that file failed to load.
+            this._dailyWordPool = (Array.isArray(window.DAILY_WORDS) && window.DAILY_WORDS.length > 0)
+                ? window.DAILY_WORDS
+                : Object.values(this.dictionary.general).flat();
         }
         return this._dailyWordPool;
     }
@@ -2853,7 +3033,10 @@ class TeakScrambleGame {
         this.sound.play('select');
 
         const pool = this._dailyPool();
-        const word = pool[dayIndex % pool.length].toUpperCase();
+        // Knuth multiplicative hash de-linearizes the day index so the daily
+        // sequence jumps around the pool instead of walking it in file order
+        // (still deterministic — everyone gets the same word on a given day).
+        const word = pool[(dayIndex * 2654435761) % pool.length].toUpperCase();
         this.targetWord = word;
 
         this.wordClue = `Today's Daily Challenge — a word starting with '${word[0]}' and ending with '${word[word.length - 1]}'.`;
@@ -2948,6 +3131,9 @@ class TeakScrambleGame {
         const result = { dayIndex: this.dailyDayIndex, word: this.targetWord, hintsUsed, streak: streakData.count };
         localStorage.setItem(`ws_daily_result_${addrKey}`, JSON.stringify(result));
         this._lastDailyResult = result;
+
+        // Streak bell after the win arpeggio rings out
+        setTimeout(() => this.sound.play('chime'), 800);
 
         document.getElementById('victory-title').innerText = 'Daily Challenge Complete!';
         document.getElementById('victory-subtitle').innerText = `You solved Day #${result.dayIndex} — "${result.word}"`;
