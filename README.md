@@ -44,7 +44,7 @@ Word Scramble is a fully client-side browser game (no backend) that integrates W
 ## 🏗️ Smart Contracts
 
 ### WordScramble Contract
-**Contract ID (Testnet):** `CBU2ZJVRKYZCUFGUCMHXEK7S4V6HK3ZP47WXJEXIP4VTUGLLRNJ2MIEE`
+**Contract ID (Testnet):** `CD2XXLJBFBVYAGJYUHQR4XH6ZYWQUMR6A22TUFY4R2S3VU2NCY7KPJEG`
 
 | Function | Description |
 |---|---|
@@ -231,6 +231,10 @@ Added for Level 4 — Product Quality and User Onboarding requirements.
 **Setup required:** copy the form's embed `src` URL and replace `FEEDBACK_FORM_URL` at the top of `feedback.js`.
 
 **First-time wallet guide:** [`wallet-guide.js`](wallet-guide.js) adds a 5-slide carousel (using real screenshots from `screenshots/`) explaining what a wallet is, how to install Freighter, how to connect, and what happens when a score is submitted on-chain — aimed at players with no prior crypto experience. Reachable anytime via the "❓ Guide" button in the wallet bar, and auto-shown once to first-time visitors. It deliberately waits for the game's own first-visit "how to play" tutorial (`#onboarding-modal-backdrop` in `script.js`) to close first, so the two guides never stack on top of each other.
+
+**Proof of 10+ real users:** [`WALLET_VERIFICATION.md`](WALLET_VERIFICATION.md) lists 10 distinct testers, each with their wallet address cross-checked directly against Stellar Horizon to confirm a real, successful `submit_score` transaction — not just self-reported form data.
+
+**User feedback summary:** [`FEEDBACK_SUMMARY.md`](FEEDBACK_SUMMARY.md) — 4.9/5 average rating, 9/10 would play again, synthesized from the same 10 testers' responses.
 
 ---
 

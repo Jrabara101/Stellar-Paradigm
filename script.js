@@ -858,7 +858,6 @@ class TeakScrambleGame {
             word = this.prefetchedData.word;
             clue = this.prefetchedData.clue;
             this.prefetchedData = null;
-            console.log("Using pre-fetched level data:", word);
         } else {
             const isOffline = (typeof navigator !== 'undefined' && !navigator.onLine);
             // To make initial load (LCP) extremely fast, we use the offline fallback on the first entrance load or when offline
@@ -877,7 +876,6 @@ class TeakScrambleGame {
                 if (customFetched) {
                     word = customFetched.word;
                     clue = customFetched.clue;
-                    console.log("Fetched using Custom API:", word);
                 } else if (cat === 'general') {
                     try {
                         const controller = new AbortController();
@@ -1068,9 +1066,7 @@ class TeakScrambleGame {
         
         let word = "";
         let clue = "";
-        
-        console.log(`Pre-fetching next word for Level ${nextLevel} in Category ${cat}...`);
-        
+
         // Try Custom APIs first if configured
         let customFetched = null;
         if (this.apiSettings.wordsEnabled && this.apiSettings.wordsKey) {
@@ -1083,7 +1079,6 @@ class TeakScrambleGame {
         if (customFetched) {
             word = customFetched.word;
             clue = customFetched.clue;
-            console.log(`Pre-fetched word using Custom API: ${word}`);
         } else if (cat === 'general') {
             try {
                 const response = await fetch(`https://random-word-api.herokuapp.com/word?length=${wordLength}`);
@@ -1177,7 +1172,6 @@ class TeakScrambleGame {
                 word: word,
                 clue: clue
             };
-            console.log(`Pre-fetched word for Level ${nextLevel}: ${word}`);
         }
     }
 
@@ -1339,8 +1333,13 @@ class TeakScrambleGame {
     // --- DRAG AND DROP CONTROLS ---
     dragStart(e, tileObj) {
         if (tileObj.element.classList.contains('locked')) return;
-        
-        e.preventDefault();
+
+        // A touchstart delivered while a scroll is already in flight arrives with
+        // cancelable=false; calling preventDefault() on it triggers a Chrome
+        // [Intervention] warning, so only cancel when the browser allows it.
+        if (e.cancelable) {
+            e.preventDefault();
+        }
         this.sound.play('select');
         this.activeDragTile = tileObj;
         this.draggedDistance = 0;
@@ -1957,16 +1956,27 @@ class TeakScrambleGame {
         const lastChar = this.targetWord[this.targetWord.length - 1];
         const wordLength = this.targetWord.length;
 
-        if (this.clueLevel === 1) {
-            panel.innerHTML = `<strong>Definition:</strong> ${this.wordClue || 'Fetching definition...'}`;
-        } else if (this.clueLevel === 2) {
-            panel.innerHTML = `🔍 <strong>Clue 2:</strong> Starts with "${firstChar}" (${wordLength} letters)<br/><strong>Definition:</strong> ${this.wordClue}`;
-        } else if (this.clueLevel === 3) {
+        // Stacked hint list: every unlocked clue stays visible at once so the
+        // player can review all their hints at a glance.
+        const lines = [`📖 <strong>Definition:</strong> ${this.wordClue || 'Fetching definition...'}`];
+        if (this.clueLevel >= 2) {
+            lines.push(`🔍 <strong>Clue 2:</strong> Starts with "${firstChar}" (${wordLength} letters)`);
+        }
+        if (this.clueLevel >= 3) {
             if (this.clue3Exhausted) {
-                panel.innerHTML = `🚫 <strong>No clues left!</strong> You must solve: <strong>${firstChar}${'_'.repeat(wordLength - 2)}${lastChar}</strong><br/><strong>Definition:</strong> ${this.wordClue}`;
+                lines.push(`🚫 <strong>No clues left!</strong> You must solve: <strong>${firstChar}${'_'.repeat(wordLength - 2)}${lastChar}</strong>`);
             } else {
-                panel.innerHTML = `🔥 <strong>Trump Card:</strong> Starts with "${firstChar}", Ends with "${lastChar}" (${wordLength} letters)<br/><strong>Scrambled:</strong> <span style="letter-spacing: 2px;">${this.scrambledWord}</span><br/><strong>Definition:</strong> ${this.wordClue}`;
+                lines.push(`🔥 <strong>Trump Card:</strong> Starts with "${firstChar}", Ends with "${lastChar}" — <strong>Scrambled:</strong> <span style="letter-spacing: 2px;">${this.scrambledWord}</span>`);
             }
+        }
+        panel.innerHTML = lines.join('<br/>');
+
+        // Brief glow pulse so a freshly unlocked clue catches the eye
+        const cluePanel = panel.closest('.clue-panel');
+        if (cluePanel && this.clueLevel >= 2) {
+            cluePanel.classList.remove('clue-flash');
+            void cluePanel.offsetWidth; // restart the animation
+            cluePanel.classList.add('clue-flash');
         }
         this.syncViewPositions(true);
     }
