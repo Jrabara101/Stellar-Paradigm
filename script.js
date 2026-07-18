@@ -717,9 +717,22 @@ class TeakScrambleGame {
         }
         this.streakElement = document.getElementById('streak-val');
 
-        // Custom board theme initialization
-        this.currentTheme = localStorage.getItem('word_scramble_theme') || 'teak';
+        // Custom board theme initialization.
+        // First-visit dark-mode default: only when the user has never
+        // explicitly picked ANY theme (including explicitly picking 'teak')
+        // do we consult the OS preference. Once word_scramble_theme exists
+        // in storage — no matter its value — it always wins, and nothing
+        // here ever writes to storage (the OS-driven default stays "soft").
+        const savedTheme = localStorage.getItem('word_scramble_theme');
+        if (savedTheme) {
+            this.currentTheme = savedTheme;
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            this.currentTheme = 'midnight-walnut';
+        } else {
+            this.currentTheme = 'teak';
+        }
         this.applyTheme(this.currentTheme, false);
+        this.updateQuickToggleIcon();
 
         // Custom chip material initialization
         this.currentChipMaterial = localStorage.getItem('word_scramble_chip_material') || 'bone';
@@ -2234,7 +2247,8 @@ class TeakScrambleGame {
     openThemeModal() {
         this.sound.play('select');
         document.getElementById('theme-modal-backdrop').classList.add('active');
-        
+        this._ensureLazyThemeCSS();
+
         // Lazy load theme preview images on modal open
         document.querySelectorAll('.theme-modal img[data-src]').forEach(img => {
             img.src = img.getAttribute('data-src');
@@ -2263,6 +2277,12 @@ class TeakScrambleGame {
         }
 
         this.sound.play('win');
+        // Remember the last non-dark theme so the sun/moon quick-toggle can
+        // restore it later, regardless of whether this change came from the
+        // toggle or from picking a card in the full modal.
+        if (this.currentTheme !== 'midnight-walnut') {
+            localStorage.setItem('word_scramble_last_light_theme', this.currentTheme);
+        }
         this.currentTheme = themeId;
         localStorage.setItem('word_scramble_theme', themeId);
 
@@ -2274,6 +2294,7 @@ class TeakScrambleGame {
         if (activeCard) activeCard.classList.add('current');
 
         this.applyTheme(themeId, true);
+        this.updateQuickToggleIcon();
         document.getElementById('theme-modal-backdrop').classList.remove('active');
     }
 
@@ -2281,6 +2302,7 @@ class TeakScrambleGame {
         if (themeId === 'teak') {
             document.body.removeAttribute('data-theme');
         } else {
+            this._ensureLazyThemeCSS();
             document.body.setAttribute('data-theme', themeId);
         }
 
@@ -2288,6 +2310,28 @@ class TeakScrambleGame {
         setTimeout(() => {
             this.syncViewPositions(animate);
         }, 120);
+    }
+
+    // Sun/moon header quick-toggle: flips between Midnight Walnut and
+    // whichever non-dark theme the player was last using (defaulting to
+    // teak), rather than always landing on teak.
+    toggleQuickTheme() {
+        if (this.currentTheme === 'midnight-walnut') {
+            const lastLight = localStorage.getItem('word_scramble_last_light_theme') || 'teak';
+            this.switchTheme(lastLight);
+        } else {
+            this.switchTheme('midnight-walnut');
+        }
+    }
+
+    updateQuickToggleIcon() {
+        const icon = document.getElementById('theme-quick-toggle-icon');
+        if (!icon) return;
+        const isDark = this.currentTheme === 'midnight-walnut';
+        const sun = icon.querySelector('.icon-sun');
+        const moon = icon.querySelector('.icon-moon');
+        if (sun) sun.style.display = isDark ? 'none' : '';
+        if (moon) moon.style.display = isDark ? '' : 'none';
     }
 
     openChipModal() {
@@ -2343,6 +2387,19 @@ class TeakScrambleGame {
         setTimeout(() => {
             this.syncViewPositions(animate);
         }, 120);
+    }
+
+    // Injects the lazy-loaded board theme stylesheet exactly once. Called
+    // both when a non-teak theme is applied (boot-restore or live switch)
+    // and when the theme modal opens, mirroring _ensureLazyTileFonts().
+    _ensureLazyThemeCSS() {
+        if (this._themeCSSInjected) return;
+        this._themeCSSInjected = true;
+
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'themes.css';
+        document.head.appendChild(link);
     }
 
     // --- Tile Font Picker ---

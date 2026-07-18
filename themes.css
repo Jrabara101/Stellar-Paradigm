@@ -1,0 +1,482 @@
+/* ==========================================================================
+   BOARD THEME OVERRIDES (lazy-loaded)
+   Each theme sets --theme-* custom properties consumed by the base rules
+   in style.css (body, .board-plate, .grid-container, .wood-tile, buttons,
+   panels, ...). A property a theme doesn't set simply falls back to the
+   teak default via the var() fallback in style.css. See _ensureLazyThemeCSS()
+   in script.js for how this file gets attached.
+   ========================================================================== */
+
+/* ==========================================================================
+   NORDIC OAK THEME OVERRIDES
+   ========================================================================== */
+body[data-theme="nordic"] {
+    --theme-body-bg-color: #faf9f6;
+    --theme-body-bg-image:
+        linear-gradient(#f0ebe1 1px, transparent 1px),
+        linear-gradient(90deg, #f0ebe1 1px, transparent 1px);
+    --theme-body-bg-size: 30px 30px;
+    --theme-body-color: #333333;
+    --theme-body-font: 'Inter', sans-serif;
+
+    --theme-ambient-glow: radial-gradient(circle, rgba(144, 164, 174, 0.15) 0%, rgba(200, 200, 200, 0.05) 50%, rgba(0,0,0,0) 70%);
+
+    --theme-h1-color: #333333;
+    --theme-h1-shadow: 2px 2px 0px #ffffff, 4px 4px 0px #cbd5e1;
+
+    --theme-board-plate-bg: #f1ebd9;
+    --theme-board-plate-border: 1px solid rgba(255,255,255,0.5);
+    --theme-board-plate-outline: 4px solid #e3dec9;
+    --theme-board-plate-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), inset 0 2px 10px rgba(255,255,255,0.9);
+
+    --theme-grid-bg: #e3dec9;
+    --theme-grid-border: 4px solid #e3dec9;
+    --theme-grid-shadow: inset 0 4px 8px rgba(0,0,0,0.1);
+    --theme-cell-shadow: inset 1px 1px 2px rgba(0,0,0,0.05);
+
+    --theme-slot-border: #90a4ae;
+    --theme-slot-bg: rgba(144, 164, 174, 0.15);
+
+    --theme-tile-bg: linear-gradient(145deg, #ffffff 0%, #f9f9f9 100%);
+    --theme-tile-color: #333333;
+    --theme-tile-border: 1px solid rgba(0,0,0,0.1);
+    --theme-tile-shadow: 0 4px 8px rgba(0,0,0,0.1), inset 0 1px 0px rgba(255,255,255,0.9);
+    --theme-tile-radius: 6px;
+    --theme-tile-hover-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    --theme-tile-locked-bg: #d0e7ee;
+    --theme-tile-locked-border: #b0d8e2;
+    --theme-tile-locked-color: #004d40;
+    --theme-tile-locked-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+    --theme-rack-bg: linear-gradient(to bottom, #f1ebd9 0%, #e3dec9 100%);
+    --theme-rack-border: 2px solid #e3dec9;
+
+    --theme-clue-bg: rgba(0, 0, 0, 0.04);
+    --theme-clue-border: 2.5px solid rgba(0,0,0,0.1);
+    --theme-clue-color: #555555;
+    --theme-clue-text-shadow: none;
+
+    --theme-button-bg: #e0d8c3;
+    --theme-button-color: #333333;
+    --theme-button-border: 2px solid rgba(0,0,0,0.15);
+    --theme-button-shadow: 0 5px 0 #c2baa6;
+    --theme-button-hover-bg: #d4ccb6;
+
+    --theme-submit-bg: #333333;
+    --theme-submit-color: #ffffff;
+    --theme-submit-shadow: 0 5px 0 #1a1a1a;
+    --theme-submit-hover-bg: #444444;
+
+    --theme-panel-bg: rgba(255, 255, 255, 0.95);
+    --theme-panel-border: 2.5px solid rgba(0,0,0,0.15);
+    --theme-panel-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+body[data-theme="nordic"] .grid-container {
+    --teak-light: #e3dec9;
+    --teak-base: #e3dec9;
+}
+
+/* ==========================================================================
+   RUSTIC RECLAIMED THEME OVERRIDES
+   ========================================================================== */
+body[data-theme="rustic"] {
+    /* CSS-generated wood grain (no remote images — works offline/PWA) */
+    --theme-body-bg-color: #1a1614;
+    --theme-body-bg-image:
+        linear-gradient(rgba(26, 22, 20, 0.82), rgba(26, 22, 20, 0.82)),
+        repeating-linear-gradient(92deg, #2a211b 0px, #1c1512 14px, #272019 27px, #191310 42px);
+    --theme-body-bg-attachment: fixed;
+    --theme-body-color: #dee3e4;
+    --theme-body-font: 'Work Sans', sans-serif;
+
+    --theme-ambient-glow: radial-gradient(circle, rgba(176, 141, 87, 0.15) 0%, rgba(92, 64, 51, 0.05) 50%, rgba(0,0,0,0) 70%);
+
+    --theme-h1-color: #dee3e4;
+    --theme-h1-shadow: 2px 2px 0px #000, 4px 4px 0px #2d1b15;
+
+    --theme-board-plate-bg:
+        linear-gradient(rgba(45, 27, 21, 0.72), rgba(45, 27, 21, 0.72)),
+        repeating-linear-gradient(88deg, #4a3428 0px, #3a2419 12px, #503a2b 25px, #33200f 40px);
+    --theme-board-plate-border: 4px solid #2d1b15;
+    --theme-board-plate-outline: 6px solid #20130f;
+    --theme-board-plate-shadow: inset 0 10px 20px rgba(0,0,0,0.8), 0 15px 25px rgba(0,0,0,0.6);
+
+    --theme-grid-bg: #20130f;
+    --theme-grid-border: 4px solid #20130f;
+    --theme-grid-shadow: inset 0 8px 20px rgba(0,0,0,0.9);
+    --theme-cell-shadow: inset 2px 2px 4px rgba(0,0,0,0.6);
+
+    --theme-slot-border: #b08d57;
+    --theme-slot-bg: rgba(176, 141, 87, 0.15);
+
+    --theme-tile-bg: #5c4033;
+    --theme-tile-color: #1a0f0a;
+    --theme-tile-border: 2px solid #20130f;
+    --theme-tile-shadow: 0 4px 6px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.1);
+    --theme-tile-radius: 4px;
+    --theme-tile-text-shadow: 0px 1px 0px rgba(255,255,255,0.15);
+    --theme-tile-hover-shadow: 0 6px 12px rgba(0,0,0,0.8);
+    --theme-tile-locked-bg: #b08d57;
+    --theme-tile-locked-border: #8c6a3b;
+    --theme-tile-locked-color: #1a0f0a;
+    --theme-tile-locked-shadow: 0 2px 0 #8c6a3b;
+
+    --theme-rack-bg: linear-gradient(to bottom, #5c4033 0%, #20130f 100%);
+    --theme-rack-border: 2px solid #20130f;
+
+    --theme-clue-bg: rgba(20, 10, 5, 0.7);
+    --theme-clue-border: 2.5px solid #20130f;
+    --theme-clue-color: #d9d0c1;
+    --theme-clue-text-shadow: none;
+
+    --theme-button-bg: linear-gradient(to bottom, #4a4a4a, #2a2a2a);
+    --theme-button-border: 2px solid #1a1a1a;
+    --theme-button-shadow: 0 5px 0 #111111;
+    --theme-button-color: #d9d0c1;
+    --theme-button-text-shadow: -1px -1px 0 #000;
+    --theme-button-hover-bg: linear-gradient(to bottom, #555555, #333333);
+
+    --theme-submit-bg: linear-gradient(to bottom, #b08d57, #8c6a3b);
+    --theme-submit-border: #6a4f2b;
+    --theme-submit-shadow: 0 5px 0 #4e381c;
+    --theme-submit-color: #1a0f0a;
+    --theme-submit-text-shadow: 0px 1px 0px rgba(255,255,255,0.2);
+    --theme-submit-hover-bg: linear-gradient(to bottom, #c09e67, #9c7b4c);
+
+    --theme-panel-bg: rgba(30, 26, 24, 0.95);
+    --theme-panel-border: 3px solid #2d1b15;
+    --theme-panel-color: #dee3e4;
+    --theme-panel-h3-border: 2px solid #b08d57;
+    --theme-panel-h3-shadow: 0.5px 0.5px 0px #000;
+    --theme-panel-h3-color: #dee3e4;
+}
+body[data-theme="rustic"] .grid-container {
+    --teak-light: #20130f;
+    --teak-base: #20130f;
+}
+body[data-theme="rustic"] .board-plate::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle, transparent 60%, rgba(0,0,0,0.65) 100%);
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 1;
+}
+body[data-theme="rustic"] .wood-tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(93deg,
+        rgba(0,0,0,0.16) 0px, rgba(255,255,255,0.05) 3px,
+        rgba(0,0,0,0.10) 7px, rgba(255,255,255,0.03) 11px);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   VINTAGE PARCHMENT THEME OVERRIDES
+   ========================================================================== */
+body[data-theme="parchment"] {
+    --theme-body-bg-color: #2b1d14;
+    --theme-body-bg-image: radial-gradient(circle at 50% 50%, #3a1a0b 0%, #1a0b05 100%);
+    --theme-body-color: #2b1d14;
+    --theme-body-font: 'Courier Prime', 'Courier New', Courier, monospace;
+
+    --theme-ambient-glow: radial-gradient(circle, rgba(200, 90, 23, 0.12) 0%, rgba(244, 232, 210, 0.05) 50%, rgba(0,0,0,0) 70%);
+
+    --theme-h1-color: #f4e8d2;
+    --theme-h1-shadow: 2px 2px 0px #3a1a0b, 4px 4px 0px #c85a17;
+
+    --theme-board-plate-bg: #e8dcc4;
+    --theme-board-plate-border: 16px solid #5c2e16;
+    --theme-board-plate-outline: 4px solid #3a1a0b;
+    --theme-board-plate-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(92, 46, 22, 0.3), inset 0 2px 5px rgba(255,255,255,0.5);
+
+    --theme-grid-bg: rgba(92, 46, 22, 0.15);
+    --theme-grid-border: 2px solid rgba(92, 46, 22, 0.4);
+    --theme-grid-shadow: inset 0 10px 30px rgba(0,0,0,0.3);
+    --theme-cell-shadow: inset 3px 3px 8px rgba(0,0,0,0.4), inset -2px -2px 4px rgba(255,255,255,0.4);
+
+    --theme-slot-border: #c85a17;
+    --theme-slot-bg: rgba(200, 90, 23, 0.15);
+
+    --theme-tile-bg: #f4e8d2;
+    --theme-tile-color: #2b1d14;
+    --theme-tile-border: 2px solid #5c2e16;
+    --theme-tile-shadow: 0 6px 0 #5c2e16, 0 10px 15px rgba(43, 29, 20, 0.4);
+    --theme-tile-radius: 4px;
+    --theme-tile-hover-shadow: 0 8px 0 #5c2e16, 0 12px 18px rgba(43, 29, 20, 0.5);
+    --theme-tile-locked-bg: #c85a17;
+    --theme-tile-locked-border: #9c450f;
+    --theme-tile-locked-color: #ffffff;
+    --theme-tile-locked-shadow: 0 2px 0 #9c450f;
+
+    --theme-rack-bg: linear-gradient(to bottom, #5c2e16 0%, #3a1a0b 100%);
+    --theme-rack-border: 2px solid #3a1a0b;
+
+    --theme-clue-bg: rgba(92, 46, 22, 0.08);
+    --theme-clue-border: 2.5px solid rgba(92, 46, 22, 0.3);
+    --theme-clue-color: #5c2e16;
+    --theme-clue-text-shadow: none;
+
+    --theme-button-bg: #e8dcc4;
+    --theme-button-color: #2b1d14;
+    --theme-button-border: 2px solid #5c2e16;
+    --theme-button-shadow: 0 5px 0 #5c2e16;
+    --theme-button-hover-bg: #f4e8d2;
+
+    --theme-submit-bg: #c85a17;
+    --theme-submit-color: #ffffff;
+    --theme-submit-border: #9c450f;
+    --theme-submit-shadow: 0 5px 0 #9c450f;
+    --theme-submit-hover-bg: #e06820;
+
+    --theme-panel-bg: #f4e8d2;
+    --theme-panel-border: 3.5px solid #5c2e16;
+    --theme-panel-color: #2b1d14;
+    --theme-panel-h3-border: 2px solid #c85a17;
+    --theme-panel-h3-color: #2b1d14;
+}
+body[data-theme="parchment"] .grid-container {
+    --teak-light: rgba(220, 205, 180, 0.3);
+    --teak-base: rgba(220, 205, 180, 0.3);
+}
+
+/* ==========================================================================
+   COASTAL DRIFTWOOD THEME OVERRIDES
+   ========================================================================== */
+body[data-theme="coastal"] {
+    --theme-body-bg-color: #d2c8b8;
+    --theme-body-bg-image: url('https://www.transparenttextures.com/patterns/sandpaper.png');
+    --theme-body-color: #333333;
+    --theme-body-font: 'Montserrat', sans-serif;
+
+    --theme-ambient-glow: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, rgba(184, 184, 184, 0.06) 50%, rgba(0,0,0,0) 70%);
+
+    --theme-h1-color: #3e3d3a;
+    --theme-h1-shadow: 2px 2px 0px #ffffff, 4px 4px 0px #b8b8b8;
+
+    --theme-board-plate-border: 4px solid #5c5a55;
+    --theme-board-plate-outline: 6px solid #4a4944;
+    --theme-board-plate-shadow: 0 10px 30px rgba(0,0,0,0.5);
+
+    --theme-grid-bg: #4a4944;
+    --theme-grid-border: 4px solid #4a4944;
+    --theme-grid-shadow: inset 0 8px 15px rgba(0,0,0,0.5);
+    --theme-cell-shadow: inset 2px 2px 5px rgba(0,0,0,0.4), inset -1px -1px 2px rgba(255,255,255,0.1);
+
+    --theme-slot-border: #e0e0e0;
+    --theme-slot-bg: rgba(255,255,255,0.1);
+
+    --theme-tile-bg: linear-gradient(135deg, #e0e0e0 0%, #b8b8b8 100%);
+    --theme-tile-color: #333333;
+    --theme-tile-border: none;
+    --theme-tile-shadow: 2px 4px 6px rgba(0,0,0,0.3), inset -1px -2px 3px rgba(0,0,0,0.2), inset 1px 2px 3px rgba(255,255,255,0.8);
+    --theme-tile-radius: 40% 60% 50% 50% / 50% 40% 60% 50%;
+    --theme-tile-hover-shadow: 3px 6px 10px rgba(0,0,0,0.4);
+    --theme-tile-locked-bg: linear-gradient(to bottom, #b87333, #8b4513);
+    --theme-tile-locked-color: #ffffff;
+    --theme-tile-locked-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+
+    --theme-rack-bg: linear-gradient(to bottom, #8a8883 0%, #4a4944 100%);
+    --theme-rack-border: 2px solid #4a4944;
+
+    --theme-clue-bg: rgba(0, 0, 0, 0.05);
+    --theme-clue-border: 2px solid #5c5a55;
+    --theme-clue-color: #3e3d3a;
+    --theme-clue-text-shadow: none;
+
+    --theme-button-bg: #b8b8b8;
+    --theme-button-color: #333333;
+    --theme-button-border: 2px solid #8a8883;
+    --theme-button-shadow: 0 5px 0 #5c5a55;
+    --theme-button-hover-bg: #c8c8c8;
+
+    --theme-submit-bg: linear-gradient(to bottom, #b87333, #8b4513);
+    --theme-submit-color: #ffffff;
+    --theme-submit-border: #5c2e0b;
+    --theme-submit-shadow: 0 5px 0 #5c2e0b;
+    --theme-submit-hover-bg: linear-gradient(to bottom, #c98444, #9c5624);
+
+    --theme-panel-bg: rgba(240, 235, 225, 0.95);
+    --theme-panel-border: 3.5px solid #8a8883;
+    --theme-panel-color: #3e3d3a;
+}
+body[data-theme="coastal"] .grid-container {
+    --teak-light: #3d3c38;
+    --teak-base: #3d3c38;
+}
+/* Coastal's board plate uses a multi-layer background (grid lines + vignette)
+   that doesn't reduce to the single-gradient --theme-board-plate-bg var, so
+   it's set directly here rather than through the shared custom property. */
+body[data-theme="coastal"] .board-plate {
+    background-color: #8a8883;
+    background-image:
+        linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px),
+        radial-gradient(ellipse at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.2) 100%);
+    background-size: 20px 20px, 20px 20px, 100% 100%;
+    padding: 24px;
+}
+body[data-theme="coastal"] .board-plate::before {
+    content: '';
+    position: absolute;
+    top: 8px; left: 8px; right: 8px;
+    border-bottom: 4px dashed #8b7355;
+    opacity: 0.7;
+    pointer-events: none;
+}
+body[data-theme="coastal"] .board-plate::after {
+    content: '';
+    position: absolute;
+    bottom: 8px; left: 8px; right: 8px;
+    border-bottom: 4px dashed #8b7355;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   AUTUMN HARVEST THEME OVERRIDES
+   ========================================================================== */
+body[data-theme="autumn"] {
+    --theme-body-bg-color: #33170A;
+    --theme-body-bg-image:
+        radial-gradient(rgba(225, 173, 1, 0.55) 1px, transparent 1px),
+        radial-gradient(rgba(180, 83, 31, 0.75) 1px, transparent 1px);
+    --theme-body-bg-size: 40px 40px;
+    --theme-body-bg-position: 0 0, 20px 20px;
+    --theme-body-color: #F5E6C8;
+
+    --theme-ambient-glow: radial-gradient(circle, rgba(224, 122, 47, 0.18) 0%, rgba(180, 83, 31, 0.07) 50%, rgba(0,0,0,0) 70%);
+
+    --theme-h1-color: #F5E6C8;
+    --theme-h1-shadow: 2px 2px 0px #7A3010, 4px 4px 0px #4A1B08;
+
+    --theme-board-plate-bg: linear-gradient(135deg, #8A3B12 0%, #5C2410 100%);
+    --theme-board-plate-border: 4px solid #4A1B08;
+    --theme-board-plate-outline: 6px solid #381305;
+    --theme-board-plate-shadow: inset 0 6px 14px rgba(0,0,0,0.5), 0 15px 25px rgba(0,0,0,0.5);
+
+    --theme-grid-bg: #4A1B08;
+    --theme-grid-border: 4px solid #4A1B08;
+    --theme-grid-shadow: inset 0 6px 14px rgba(0,0,0,0.55);
+
+    --theme-slot-border: var(--mustard);
+    --theme-slot-bg: rgba(225, 173, 1, 0.16);
+
+    --theme-tile-bg: linear-gradient(145deg, #F5D9A0 0%, #E8B96A 100%);
+    --theme-tile-color: #5C2E0C;
+    --theme-tile-border: 2px solid #8A5A1E;
+    --theme-tile-shadow: 0 5px 0 #A5732C, 0 8px 10px rgba(0,0,0,0.4);
+    --theme-tile-text-shadow: 0px 1px 0px rgba(255,255,255,0.35);
+    --theme-tile-hover-shadow: 0 8px 0 #A5732C, 0 12px 14px rgba(0,0,0,0.45);
+    --theme-tile-locked-bg: linear-gradient(145deg, #E1AD01, #C99500);
+    --theme-tile-locked-border: #8A6914;
+    --theme-tile-locked-color: #4A2C05;
+
+    --theme-rack-bg: linear-gradient(to bottom, #8A3B12 0%, #4A1B08 100%);
+    --theme-rack-border: 2px solid #4A1B08;
+
+    --theme-clue-bg: rgba(30, 12, 4, 0.55);
+    --theme-clue-border: 2.5px solid #4A1B08;
+    --theme-clue-color: #FFD98A;
+    --theme-clue-text-shadow: 0 0 6px rgba(255, 176, 59, 0.35);
+
+    --theme-button-bg: linear-gradient(to bottom, #A54A18, #7A3010);
+    --theme-button-color: #F5E6C8;
+    --theme-button-border: 2px solid #4A1B08;
+    --theme-button-shadow: 0 5px 0 #4A1B08;
+    --theme-button-text-shadow: 0 -1px 0 rgba(0,0,0,0.35);
+    --theme-button-hover-bg: linear-gradient(to bottom, #B85520, #8A3B12);
+
+    --theme-submit-bg: linear-gradient(to bottom, #F0BE23, #D9A408);
+    --theme-submit-color: #4A2C05;
+    --theme-submit-border: #8A6914;
+    --theme-submit-shadow: 0 5px 0 #8A6914;
+    --theme-submit-text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+    --theme-submit-hover-bg: linear-gradient(to bottom, #FFCC33, #E8B312);
+
+    --theme-panel-bg: rgba(46, 20, 8, 0.95);
+    --theme-panel-border: 3px solid #4A1B08;
+    --theme-panel-color: #F5E6C8;
+    --theme-panel-h3-border: var(--mustard);
+    --theme-panel-h3-color: #F5E6C8;
+}
+/* Re-scoping the checkerboard vars keeps the two-tone cell pattern
+   (buildCheckerboard sets cell colors inline from these variables). */
+body[data-theme="autumn"] .grid-container {
+    --teak-light: #6B2E12;
+    --teak-base: #571F0B;
+}
+
+/* ==========================================================================
+   MIDNIGHT WALNUT THEME OVERRIDES (dark mode)
+   ========================================================================== */
+body[data-theme="midnight-walnut"] {
+    --theme-body-bg-color: #1E1410;
+    --theme-body-bg-image:
+        radial-gradient(rgba(64, 224, 208, 0.08) 1px, transparent 1px),
+        radial-gradient(rgba(181, 136, 68, 0.08) 1px, transparent 1px);
+    --theme-body-bg-size: 40px 40px;
+    --theme-body-bg-position: 0 0, 20px 20px;
+    --theme-body-color: #F0E6D6;
+
+    --theme-ambient-glow: radial-gradient(circle, rgba(64, 224, 208, 0.15) 0%, rgba(181, 136, 68, 0.05) 50%, rgba(0,0,0,0) 70%);
+
+    --theme-h1-color: #F0E6D6;
+    --theme-h1-shadow: 2px 2px 0px #0C0806, 4px 4px 0px #40E0D0;
+
+    --theme-board-plate-bg: linear-gradient(135deg, #2E2118 0%, #17100C 100%);
+    --theme-board-plate-border: 4px solid #4A3826;
+    --theme-board-plate-outline: 6px solid #120C09;
+    --theme-board-plate-shadow: 0 30px 60px rgba(0,0,0,0.7), inset 0 2px 10px rgba(181,136,68,0.12);
+
+    --theme-grid-bg: #120C09;
+    --theme-grid-border: 4px solid #120C09;
+    --theme-grid-shadow: inset 0 6px 15px rgba(0,0,0,0.8);
+    --theme-cell-shadow: inset 1px 1px 1px rgba(181,136,68,0.08), inset -1px -1px 1px rgba(0,0,0,0.4);
+
+    --theme-slot-border: #40E0D0;
+    --theme-slot-bg: rgba(64, 224, 208, 0.12);
+
+    --theme-tile-bg: linear-gradient(145deg, #F0E6D6 0%, #E4D5B8 100%);
+    --theme-tile-color: #2E2118;
+    --theme-tile-border: 2px solid #4A3826;
+    --theme-tile-shadow: 0 6px 0 #17100C, 0 10px 15px rgba(0,0,0,0.7);
+    --theme-tile-hover-shadow: 0 8px 0 #17100C, 0 12px 18px rgba(0,0,0,0.75);
+    --theme-tile-locked-bg: #40E0D0;
+    --theme-tile-locked-color: #17100C;
+    --theme-tile-locked-border: #00CED1;
+    --theme-tile-locked-shadow: 0 2px 0 #00CED1, 0 4px 6px rgba(0,0,0,0.4);
+
+    --theme-rack-bg: linear-gradient(to bottom, #2E2118 0%, #17100C 100%);
+    --theme-rack-border: 2.5px solid #17100C;
+
+    --theme-clue-bg: rgba(10, 6, 4, 0.6);
+    --theme-clue-border: 2.5px solid #4A3826;
+    --theme-clue-color: #40E0D0;
+    --theme-clue-text-shadow: 0 0 6px rgba(64,224,208,0.4);
+
+    --theme-button-bg: linear-gradient(to bottom, #3A2C1F, #241a13);
+    --theme-button-color: #F0E6D6;
+    --theme-button-border: 2px solid #17100C;
+    --theme-button-shadow: 0 5px 0 #17100C;
+    --theme-button-hover-bg: linear-gradient(to bottom, #453424, #2E2118);
+
+    --theme-submit-bg: #40E0D0;
+    --theme-submit-color: #17100C;
+    --theme-submit-shadow: 0 5px 0 #00CED1;
+    --theme-submit-hover-bg: #5CE6D6;
+
+    --theme-panel-bg: rgba(23, 16, 12, 0.95);
+    --theme-panel-border: 3.5px solid #4A3826;
+    --theme-panel-color: #F0E6D6;
+    --theme-panel-h3-border: 2px solid #40E0D0;
+    --theme-panel-h3-color: #F0E6D6;
+    --theme-panel-h3-shadow: 0.5px 0.5px 0px #000;
+}
+body[data-theme="midnight-walnut"] .grid-container {
+    --teak-light: #241a13;
+    --teak-base: #1a120d;
+}

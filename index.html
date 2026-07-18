@@ -80,6 +80,14 @@
         <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
     </div>
 
+    <!-- Sun/Moon Dark Mode Quick-Toggle -->
+    <div class="theme-quick-toggle" id="theme-quick-toggle" onclick="game.toggleQuickTheme()" title="Toggle dark mode">
+        <svg id="theme-quick-toggle-icon" viewBox="0 0 24 24">
+            <path class="icon-sun" d="M12 7a5 5 0 100 10 5 5 0 000-10zM12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+            <path class="icon-moon" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill="currentColor" style="display:none"/>
+        </svg>
+    </div>
+
     <div class="header-container">
         <div style="display: flex; flex-direction: column; gap: 6px;">
             <h1>Word Scramble</h1>
@@ -295,6 +303,15 @@
                         </div>
                     </div>
                     <div class="theme-name">Autumn Harvest</div>
+                </div>
+                <!-- Midnight Walnut (dark mode) -->
+                <div class="theme-card" id="theme-card-midnight-walnut" onclick="game.switchTheme('midnight-walnut')">
+                    <div class="theme-preview" style="background: radial-gradient(rgba(64,224,208,0.35) 1px, #1E1410 1px); background-size: 8px 8px; border: 2px solid rgba(0,0,0,0.3); border-radius: 6px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; position: relative;">
+                        <div style="background: linear-gradient(135deg, #2E2118, #17100C); width: 60%; height: 60%; border-radius: 4px; border: 1.5px solid #4A3826; display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 16px; height: 16px; background: linear-gradient(145deg, #F0E6D6, #E4D5B8); border: 1.2px solid #4A3826; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 900; color: #2E2118;">M</div>
+                        </div>
+                    </div>
+                    <div class="theme-name">Midnight Walnut</div>
                 </div>
             </div>
             <button class="theme-close-btn" onclick="game.closeThemeModal(null)">Close Theme Menu</button>
