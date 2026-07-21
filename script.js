@@ -1018,7 +1018,8 @@ class TeakScrambleGame {
                     }
                 });
             }
-            clue = `A word starting with '${this.targetWord[0]}' and ending with '${this.targetWord[this.targetWord.length-1]}'.`;
+            const categoryLabel = cat.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+            clue = `No dictionary definition found for this ${categoryLabel} word — it's ${wordLength} letters, starting with '${this.targetWord[0]}' and ending with '${this.targetWord[this.targetWord.length-1]}'.`;
         }
         this.wordClue = this.censorWordInClue(clue, this.targetWord);
         
@@ -3106,7 +3107,7 @@ class TeakScrambleGame {
         const word = pool[(dayIndex * 2654435761) % pool.length].toUpperCase();
         this.targetWord = word;
 
-        this.wordClue = `Today's Daily Challenge — a word starting with '${word[0]}' and ending with '${word[word.length - 1]}'.`;
+        this.wordClue = `Today's Daily Challenge — a ${word.length}-letter word starting with '${word[0]}' and ending with '${word[word.length - 1]}'.`;
         this.fetchDictionaryDefinition(word).then(resolvedClue => {
             if (resolvedClue && this.isDailyChallenge && this.targetWord === word) {
                 this.wordClue = this.censorWordInClue(resolvedClue, this.targetWord);

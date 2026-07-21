@@ -66,17 +66,26 @@ function showFeedbackModal() {
     if (window.trackEvent) window.trackEvent('feedback_opened');
 }
 
+// A tap-outside or the X button both count as a "dismiss" — but a player can
+// easily close the modal by reflex before ever looking at it. Give it one
+// more chance on a later score submission before suppressing for good, so an
+// accidental first dismiss doesn't silently opt someone out of ever seeing
+// the feedback form.
+const FEEDBACK_DISMISS_LIMIT = 2;
+
 function hideFeedbackModal() {
     const el = document.getElementById('feedback-modal');
     if (el) el.classList.remove('feedback-overlay--open');
-    localStorage.setItem('feedback_dismissed_at', Date.now());
+    const count = Number(localStorage.getItem('feedback_dismiss_count') || '0') + 1;
+    localStorage.setItem('feedback_dismiss_count', String(count));
 }
 
-// Auto-prompt shortly after the player's first successful on-chain score save.
-// Suppressed permanently once dismissed, so it never nags a returning player.
+// Auto-prompt shortly after a successful on-chain score save. Suppressed once
+// dismissed FEEDBACK_DISMISS_LIMIT times, so it never nags a returning player.
 window.showFeedbackPrompt = function showFeedbackPrompt() {
     if (feedbackPromptQueued) return;
-    if (localStorage.getItem('feedback_dismissed_at')) return;
+    const count = Number(localStorage.getItem('feedback_dismiss_count') || '0');
+    if (count >= FEEDBACK_DISMISS_LIMIT) return;
     feedbackPromptQueued = true;
     setTimeout(showFeedbackModal, 2500);
 };

@@ -202,6 +202,19 @@ The on-chain result — the contract's invocation history and the player's accou
 
 ![Inter-contract transaction](screenshots/successful-transaction-2.png)
 
+### 6. Mobile Responsive Design
+The full game — board, wallet bar, hints, and modals — tested across four real device viewports:
+
+![iPhone SE](Test%20Mobile%20UI/127.0.0.1_5501_index.html%28iPhone%20SE%29.png)
+![iPhone 14 Pro Max](Test%20Mobile%20UI/127.0.0.1_5501_index.html%28iPhone%2014%20Pro%20Max%29.png)
+![Samsung Galaxy S20 Ultra](Test%20Mobile%20UI/127.0.0.1_5501_index.html%28Samsung%20Galaxy%20S20%20Ultra%29.png)
+![iPad Mini](Test%20Mobile%20UI/127.0.0.1_5501_index.html%28iPad%20Mini%29.png)
+
+### 7. Analytics / Monitoring Setup
+Live [GoatCounter](https://word-scramble-stellar.goatcounter.com) dashboard showing real custom events (`wallet_connect`, `score_submitted`, `feedback_opened`, `error_wallet_connect`) from real testers, not synthetic traffic:
+
+![GoatCounter analytics dashboard](screenshots/goatcounter-analytics-dashboard.png)
+
 ---
 
 ## ⚙️ CI/CD Pipeline
@@ -213,21 +226,21 @@ GitHub Actions runs automatically on every push to `main`:
 
 [![CI](https://github.com/Jrabara101/Stellar-Paradigm/actions/workflows/ci.yml/badge.svg)](https://github.com/Jrabara101/Stellar-Paradigm/actions/workflows/ci.yml)
 
-**11 workflow runs — 10 passing ✅ | 1 fixed early failure (wasm32 target, resolved in Run #2)**
+**23 workflow runs — all passing ✅ since Run #2 | 1 fixed early failure (wasm32 target, resolved in Run #2)**
 
-| Run | Commit | Result |
-|---|---|---|
-| #11 | Add demo video and update README | ✅ 35s |
-| #10 | Line tile visuals | ✅ 25s |
-| #9 | Redeploy Leaderboards | ✅ 1m 0s |
-| #8 | Effects on Tile and Visual Effects | ✅ 24s |
-| #7 | Add wallet type badges on leaderboard | ✅ 34s |
-| #6 | Add event streaming with real-time updates | ✅ 34s |
-| #5 | Add badge display in wallet bar | ✅ 21s |
-| #4 | Deploy RewardContract and update contract IDs | ✅ 21s |
-| #3 | Add RewardContract with inter-contract badge minting | ✅ 55s |
-| #2 | Fix CI: use wasm32v1-none target for Rust 1.82+ | ✅ 1m 54s |
-| #1 | Add CI/CD pipeline and 5 contract unit tests | ❌ Fixed in #2 |
+Recent runs, newest first:
+
+| Commit | Result |
+|---|---|
+| Fix broken IDEA_2_SUBMISSION links after Idea Submissions/ move | ✅ 2m 14s |
+| Add Level 4 demo video link to README | ✅ 2m 10s |
+| Midnight Update | ✅ 1m 58s |
+| Add Level 4 verification docs, fix stale contract ID, gameplay polish | ✅ 1m 58s |
+| Feedback Form | ✅ 1m 59s |
+| Daily Challenge | ✅ 1m 59s |
+| Added files | ✅ 1m 59s |
+| ... 16 earlier runs, all passing ... | ✅ |
+| Add CI/CD pipeline and 5 contract unit tests | ❌ Fixed in next run |
 
 🔗 [View all workflow runs](https://github.com/Jrabara101/Stellar-Paradigm/actions)
 

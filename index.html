@@ -151,14 +151,14 @@
                 <span class="clue-dot" data-clue="2" title="Clue 2: Starts With">2</span>
                 <span class="clue-dot" data-clue="3" title="Clue 3: Trump Card">3</span>
             </div>
-            <span id="clue-text">Need a definition? Click 'Word Hint'!</span>
+            <span id="clue-text">Need a definition? Click 'Definition'!</span>
         </div>
 
         <!-- Controls -->
         <div class="controls">
             <button class="btn-reset" onclick="game.resetTray(true)">Reset</button>
             <button class="btn-hint" onclick="game.giveLetterHint()">Hint</button>
-            <button class="btn-word-clue" onclick="game.showWordClue()">Word Hint</button>
+            <button class="btn-word-clue" onclick="game.showWordClue()">Definition</button>
             <button class="btn-submit" onclick="game.verifySolution()">Submit</button>
         </div>
     </div>
@@ -182,7 +182,7 @@
             </li>
             <li>
                 <span class="step-num">2</span>
-                <div><strong>Get Hints:</strong> Click <em>Word Hint</em> for a definition, or <em>Hint</em> to lock a correct tile (costs 10 pts).</div>
+                <div><strong>Get Hints:</strong> Click <em>Definition</em> (free) to reveal the word's meaning, or <em>Hint</em> to lock a correct tile (costs 10 pts).</div>
             </li>
             <li>
                 <span class="step-num">3</span>
@@ -235,7 +235,7 @@
         <div class="theme-modal" onclick="event.stopPropagation()" style="max-width: 420px; text-align: center;">
             <h3>Welcome to Word Scramble! 👋</h3>
             <p style="margin: 14px 0; line-height: 1.6; font-size: 0.9rem;">
-                Drag or tap the wooden tiles onto the highlighted board slots to unscramble the word. Stuck? Use <strong>Hint</strong> or <strong>Word Hint</strong> for help.
+                Drag or tap the wooden tiles onto the highlighted board slots to unscramble the word. Stuck? Use <strong>Hint</strong> (locks a letter, -10pts) or <strong>Definition</strong> (free) for help.
             </p>
             <p style="margin: 14px 0; line-height: 1.6; font-size: 0.9rem;">
                 <strong>No wallet needed to play!</strong> Jump right in — connect one anytime to save your score on-chain and earn badges.
