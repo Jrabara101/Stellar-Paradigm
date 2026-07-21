@@ -12,3 +12,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Hosted externally (Google Drive) — exceeds GitHub's 100MB per-file push limit
+Video/Level 4 Video.mp4

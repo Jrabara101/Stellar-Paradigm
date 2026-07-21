@@ -4,7 +4,9 @@ A retro, mid-century-themed word puzzle game with an **on-chain leaderboard** an
 
 **🔗 Live demo:** https://word-scramble-v1.surge.sh
 
-**🎬 Demo video:** [Video/Word Scramble Video.mp4](Video/Word%20Scramble%20Video.mp4)
+**🎬 Demo video (Level 3):** [Video/Word Scramble Video.mp4](Video/Word%20Scramble%20Video.mp4)
+
+**🎬 Demo video (Level 4 additions):** [Watch on Google Drive](https://drive.google.com/file/d/1x4F4o2Dro7le2TTLAXYFpeGHs1OeX42e/view?usp=sharing)
 
 **📄 Level 4 Idea Submission:** 
 - **Word Document:** [IDEA_2_SUBMISSION.docx](IDEA_2_SUBMISSION.docx) ⬅️ **Download this for submission**
@@ -130,6 +132,8 @@ npx serve .
 
 ## 🎬 Demo Video
 
+### Level 3 — Core Gameplay & Blockchain Integration
+
 A full walkthrough of the app end to end — wallet connection, solving a word, on-chain score submission, inter-contract badge minting, real-time event streaming across two tabs, leaderboard with wallet type badges, and CI/CD pipeline passing on GitHub Actions.
 
 📁 **File:** [Video/Word Scramble Video.mp4](Video/Word%20Scramble%20Video.mp4)
@@ -141,6 +145,22 @@ A full walkthrough of the app end to end — wallet connection, solving a word, 
 > 4. Tab 2 live event stream flash (● LIVE indicator via `rpc.getEvents`)
 > 5. Leaderboard showing scores, badges, and wallet type per player
 > 6. GitHub Actions CI — contract tests + frontend check passing
+
+### Level 4 — User Onboarding, Analytics & Verification
+
+Covers everything added for Level 4 — features not shown in the Level 3 video above.
+
+🔗 **Watch:** [Google Drive](https://drive.google.com/file/d/1x4F4o2Dro7le2TTLAXYFpeGHs1OeX42e/view?usp=sharing)
+
+> **What the video covers:**
+> 1. Intro to what's new since Level 3
+> 2. First-time wallet guide — a 5-slide walkthrough explaining wallets, installing Freighter, connecting, and on-chain submission for players new to crypto
+> 3. Connecting a wallet (auto-funded testnet account) and playing through several rounds
+> 4. A full solve → hint → Submit → Freighter approval → "Spectacular!" victory cycle, saved on-chain
+> 5. The in-app feedback survey — name, wallet address, rating, and open feedback — submitted live
+> 6. The GoatCounter analytics dashboard — live wallet connect, feedback, and score-submission events
+> 7. [`WALLET_VERIFICATION.md`](WALLET_VERIFICATION.md) on GitHub — all 10 testers' wallets cross-checked against real on-chain transactions
+> 8. Closing — live URL, public repo, and CI passing
 
 ---
 
