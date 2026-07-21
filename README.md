@@ -9,9 +9,9 @@ A retro, mid-century-themed word puzzle game with an **on-chain leaderboard** an
 **🎬 Demo video (Level 4 additions):** [Watch on Google Drive](https://drive.google.com/file/d/1x4F4o2Dro7le2TTLAXYFpeGHs1OeX42e/view?usp=sharing)
 
 **📄 Level 4 Idea Submission:** 
-- **Word Document:** [IDEA_2_SUBMISSION.docx](IDEA_2_SUBMISSION.docx) ⬅️ **Download this for submission**
-- Markdown: [IDEA_2_SUBMISSION.md](IDEA_2_SUBMISSION.md)
-- HTML: [IDEA_2_SUBMISSION.html](IDEA_2_SUBMISSION.html)
+- **Word Document:** [IDEA_2_SUBMISSION.docx](Idea%20Submissions/IDEA_2_SUBMISSION.docx) ⬅️ **Download this for submission**
+- Markdown: [IDEA_2_SUBMISSION.md](Idea%20Submissions/IDEA_2_SUBMISSION.md)
+- HTML: [IDEA_2_SUBMISSION.html](Idea%20Submissions/IDEA_2_SUBMISSION.html)
 
 ---
 
@@ -285,9 +285,9 @@ The complete **Level 4 Idea Submission** for the **On-Chain Vocabulary Credentia
 
 ### View the Submission
 
-1. **📥 Word Document (.docx):** [IDEA_2_SUBMISSION.docx](IDEA_2_SUBMISSION.docx) — **Click to download and submit**
-2. **HTML (Formatted):** [IDEA_2_SUBMISSION.html](IDEA_2_SUBMISSION.html) — Open in any browser
-3. **Markdown (GitHub):** [IDEA_2_SUBMISSION.md](IDEA_2_SUBMISSION.md) — Full text version
+1. **📥 Word Document (.docx):** [IDEA_2_SUBMISSION.docx](Idea%20Submissions/IDEA_2_SUBMISSION.docx) — **Click to download and submit**
+2. **HTML (Formatted):** [IDEA_2_SUBMISSION.html](Idea%20Submissions/IDEA_2_SUBMISSION.html) — Open in any browser
+3. **Markdown (GitHub):** [IDEA_2_SUBMISSION.md](Idea%20Submissions/IDEA_2_SUBMISSION.md) — Full text version
 
 ### Sections Included
 
@@ -302,7 +302,7 @@ The complete **Level 4 Idea Submission** for the **On-Chain Vocabulary Credentia
 
 ### Ready to Submit
 
-✅ **Word document is ready:** [IDEA_2_SUBMISSION.docx](IDEA_2_SUBMISSION.docx)
+✅ **Word document is ready:** [IDEA_2_SUBMISSION.docx](Idea%20Submissions/IDEA_2_SUBMISSION.docx)
 
 The `.docx` file has been automatically generated from the HTML submission with all formatting preserved:
 - Professional header and styling
@@ -315,8 +315,8 @@ The `.docx` file has been automatically generated from the HTML submission with 
 - Or open directly in Google Docs, LibreOffice, etc.
 
 **Alternative formats** (if needed):
-- [IDEA_2_SUBMISSION.html](IDEA_2_SUBMISSION.html) — Open in browser or Word
-- [IDEA_2_SUBMISSION.md](IDEA_2_SUBMISSION.md) — Plain text markdown version
+- [IDEA_2_SUBMISSION.html](Idea%20Submissions/IDEA_2_SUBMISSION.html) — Open in browser or Word
+- [IDEA_2_SUBMISSION.md](Idea%20Submissions/IDEA_2_SUBMISSION.md) — Plain text markdown version
 
 ---
 
