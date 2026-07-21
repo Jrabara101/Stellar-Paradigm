@@ -269,6 +269,21 @@ Added for Level 4 — Product Quality and User Onboarding requirements.
 
 **User feedback summary:** [`FEEDBACK_SUMMARY.md`](FEEDBACK_SUMMARY.md) — 4.9/5 average rating, 9/10 would play again, synthesized from the same 10 testers' responses.
 
+**Full response export (Excel):** ⚠️ *Not yet attached.* Export the linked Google Form's response sheet via Google Sheets → File → Download → Microsoft Excel (.xlsx), commit the file as `feedback-responses.xlsx` in the repo root, then replace this line with a link to it: `[feedback-responses.xlsx](feedback-responses.xlsx)`. This is the raw wallet/email/name/rating data backing the summary above.
+
+---
+
+## 🔄 Feedback → Action: Next-Phase Improvement Plan
+
+Real player feedback in [`FEEDBACK_SUMMARY.md`](FEEDBACK_SUMMARY.md) surfaced four concrete themes. Here's what's been done about each one, and what's next:
+
+| Feedback theme | Who flagged it | Status | Where |
+|---|---|---|---|
+| "Word Hint" button confusing (the one respondent who wouldn't play again cited this) | Dayniel Talusig | ✅ Fixed — renamed to "Definition" to disambiguate from the paid "Hint" button, updated everywhere in the UI | [`c02cee9`](https://github.com/Jrabara101/Stellar-Paradigm/commit/c02cee9) |
+| Not all words show a definition | Darid De Jesus | ✅ Partially addressed — the no-match fallback now names the category and word length instead of a generic stub; full curated-definition coverage for every offline word is still open | [`c02cee9`](https://github.com/Jrabara101/Stellar-Paradigm/commit/c02cee9) |
+| Board resets each word instead of persisting like real Scrabble / wants a bigger board | Ricky Mark Mercado, Darid De Jesus | 🗺️ Roadmap — scoped as a 2-player **Scrabble Duel** mode (persistent board, new turn engine) before a full 4-player 15×15 board | Tracked internally, not yet built |
+| Add more difficulty | Cedrick Cadence Cornejo | 🗺️ Roadmap — evaluated this cycle; word difficulty currently auto-scales with level rather than being player-selectable. A manual difficulty selector needs its own UI/state design rather than a rushed addition, so it's deferred to the next build pass instead of shipped half-finished | Not yet built |
+
 ---
 
 ## 📂 Project Structure
