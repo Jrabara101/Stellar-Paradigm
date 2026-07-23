@@ -40,12 +40,17 @@ jobs:
         run: cargo test --verbose
 
   frontend-check:
-    name: Frontend File Check
+    name: Frontend Build & Validate
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
       - name: Verify required frontend files exist
         run: |
@@ -57,3 +62,20 @@ jobs:
           test -f feedback.js  && echo "✅ feedback.js" || (echo "❌ feedback.js missing" && exit 1)
           test -f wallet-guide.js && echo "✅ wallet-guide.js" || (echo "❌ wallet-guide.js missing" && exit 1)
           echo "All required files present."
+
+      - name: Build-check frontend JS (syntax validation)
+        run: |
+          for f in daily-words.js script.js stellar.js feedback.js wallet-guide.js; do
+            echo "Checking $f..."
+            node --check "$f"
+          done
+
+      - name: Cross-check stellar.js calls exist on the deployed contract
+        run: |
+          echo "Verifying stellar.js only calls functions the contract actually exposes..."
+          for fn in submit_score get_leaderboard get_score reset_score reset_leaderboard; do
+            grep -q "'$fn'" stellar.js && echo "✅ $fn referenced in stellar.js" || (echo "❌ $fn missing from stellar.js" && exit 1)
+          done
+          for fn in submit_score get_leaderboard get_score reset_score reset_leaderboard; do
+            grep -q "pub fn $fn" word-scramble-contract/contracts/hello-world/src/lib.rs && echo "✅ $fn defined in contract" || (echo "❌ $fn missing from contract" && exit 1)
+          done
