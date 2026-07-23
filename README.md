@@ -24,7 +24,7 @@ A retro, mid-century-themed word puzzle game with an **on-chain leaderboard** an
 | **Wallet connection** | [`StellarWallet.connect()`](stellar.js#L76-L121) opens the Stellar Wallets Kit modal, retrieves the selected wallet's address via `kit.getAddress()`, and stores the session (supports Freighter, xBull, Albedo, LOBSTR, Hana, and more) |
 | **Contract initialization** | [`new sdk.Contract(STELLAR_CONFIG.contractId)`](stellar.js#L145) and [`new sdk.Contract(STELLAR_CONFIG.rewardContractId)`](stellar.js#L333) instantiate the two deployed Soroban contracts using the SDK loaded in [`_getSDK()`](stellar.js#L55-L60) |
 | **Transaction building** | [`submitScore()`](stellar.js#L133-L209) builds a transaction with `TransactionBuilder` → `simulateTransaction` → `assembleTransaction` → wallet `signTransaction` → `sendTransaction`, then polls `getTransaction` for confirmation. The same pattern repeats in [`resetScore()`](stellar.js#L354-L415) and [`resetLeaderboard()`](stellar.js#L418-L478) |
-| **Function matching** | Every `contract.call(...)` name matches an exported `pub fn` in the Rust contracts: `submit_score`, `get_leaderboard`, `get_score`, `reset_score`, `reset_leaderboard` in [`word-scramble-contract/contracts/hello-world/src/lib.rs`](word-scramble-contract/contracts/hello-world/src/lib.rs), and `get_badges` in the RewardContract |
+| **Function matching** | Every `contract.call(...)` name matches an exported `pub fn` in the Rust contracts: `submit_score`, `get_leaderboard`, `get_score`, `reset_score`, `reset_leaderboard` in [`word-scramble-contract/contracts/leaderboard-contract/src/lib.rs`](word-scramble-contract/contracts/leaderboard-contract/src/lib.rs), and `get_badges` in the RewardContract. This is enforced automatically in CI — see [`check-contract-calls.js`](.github/scripts/check-contract-calls.js) |
 
 CI also enforces that `stellar.js` exists on every push — see [`.github/workflows/ci.yml`](.github/workflows/ci.yml) and the "Frontend File Check" step referenced in the [CI/CD Pipeline](#️-cicd-pipeline) section below.
 
@@ -81,7 +81,7 @@ Word Scramble is a fully client-side browser game (no backend) that integrates W
 - **Blockchain SDK:** [`@stellar/stellar-sdk`](https://github.com/stellar/js-stellar-sdk) v15 (loaded via esm.sh CDN)
 - **Wallets:** [`@creit.tech/stellar-wallets-kit`](https://github.com/Creit-Tech/Stellar-Wallets-Kit) (multi-wallet)
 - **Smart contracts:** Soroban (Rust, `soroban-sdk` 26) — two contracts with inter-contract communication
-- **CI/CD:** GitHub Actions — contract unit tests + frontend file check on every push
+- **CI/CD:** GitHub Actions — CI runs contract unit tests + frontend build/validate on every push; CD deploys the frontend to surge.sh and packages the contract wasm after CI passes on `main`
 - **Network:** Stellar Testnet (Protocol 26)
 - **Hosting:** Surge (static)
 
@@ -123,7 +123,7 @@ npx serve .
 > ```bash
 > cd word-scramble-contract
 > stellar contract build
-> stellar contract deploy --wasm target/wasm32v1-none/release/hello_world.wasm --network testnet --source <your-key>
+> stellar contract deploy --wasm target/wasm32v1-none/release/leaderboard_contract.wasm --network testnet --source <your-key>
 > stellar contract deploy --wasm target/wasm32v1-none/release/reward_contract.wasm --network testnet --source <your-key>
 > ```
 > Then update `contractId` and `rewardContractId` in `stellar.js`.
@@ -219,12 +219,18 @@ Live [GoatCounter](https://word-scramble-stellar.goatcounter.com) dashboard show
 
 ## ⚙️ CI/CD Pipeline
 
-GitHub Actions runs automatically on every push to `main`:
+**CI** (`.github/workflows/ci.yml`) runs automatically on every push to `main`:
 
-1. **Soroban Contract Tests** — builds both contracts targeting `wasm32v1-none` and runs all 6 unit tests with `cargo test`
-2. **Frontend File Check** — verifies `index.html`, `style.css`, `script.js`, and `stellar.js` are present
+1. **Soroban Contract Tests** — builds both contracts targeting `wasm32v1-none` and runs all 9 unit tests with `cargo test`
+2. **Frontend Build & Validate** — verifies `index.html`, `style.css`, `script.js`, `stellar.js`, `feedback.js`, and `wallet-guide.js` are present, syntax-checks every JS file with `node --check`, and cross-checks that every `contract.call(...)` in `stellar.js` matches a real `pub fn` on one of the two contracts ([`check-contract-calls.js`](.github/scripts/check-contract-calls.js))
+
+**CD** (`.github/workflows/cd.yml`) runs after CI succeeds on `main`:
+
+1. **Deploy Frontend (surge.sh)** — publishes the static site to the live demo URL
+2. **Build & Package Smart Contract** — builds the release wasm and uploads it as a versioned build artifact (no automatic live contract redeploy, to avoid contract-ID drift)
 
 [![CI](https://github.com/Jrabara101/Stellar-Paradigm/actions/workflows/ci.yml/badge.svg)](https://github.com/Jrabara101/Stellar-Paradigm/actions/workflows/ci.yml)
+[![CD](https://github.com/Jrabara101/Stellar-Paradigm/actions/workflows/cd.yml/badge.svg)](https://github.com/Jrabara101/Stellar-Paradigm/actions/workflows/cd.yml)
 
 **23 workflow runs — all passing ✅ since Run #2 | 1 fixed early failure (wasm32 target, resolved in Run #2)**
 
@@ -298,10 +304,11 @@ Real player feedback in [`FEEDBACK_SUMMARY.md`](FEEDBACK_SUMMARY.md) surfaced fo
 ├── wallet-guide.js                     # First-time wallet walkthrough (5-slide carousel)
 ├── word-scramble-contract/
 │   ├── contracts/
-│   │   ├── hello-world/src/lib.rs      # WordScramble contract (leaderboard + events)
+│   │   ├── leaderboard-contract/src/lib.rs # WordScramble contract (leaderboard + events)
 │   │   └── reward-contract/src/lib.rs  # RewardContract (badge minting)
 │   └── Cargo.toml
-├── .github/workflows/ci.yml            # CI/CD pipeline
+├── .github/workflows/ci.yml            # CI: contract tests + frontend build/validate
+├── .github/workflows/cd.yml            # CD: deploy frontend (surge.sh) + package contract wasm
 └── screenshots/                        # Submission screenshots
 ```
 

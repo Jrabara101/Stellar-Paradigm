@@ -11,7 +11,7 @@ let m;
 while ((m = callRe.exec(stellarSrc))) calls.add(m[1]);
 
 const contractSrc = [
-    'word-scramble-contract/contracts/hello-world/src/lib.rs',
+    'word-scramble-contract/contracts/leaderboard-contract/src/lib.rs',
     'word-scramble-contract/contracts/reward-contract/src/lib.rs',
 ].map((f) => fs.readFileSync(f, 'utf8')).join('\n');
 
