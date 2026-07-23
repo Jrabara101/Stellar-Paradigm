@@ -70,12 +70,5 @@ jobs:
             node --check "$f"
           done
 
-      - name: Cross-check stellar.js calls exist on the deployed contract
-        run: |
-          echo "Verifying stellar.js only calls functions the contract actually exposes..."
-          for fn in submit_score get_leaderboard get_score reset_score reset_leaderboard; do
-            grep -q "'$fn'" stellar.js && echo "✅ $fn referenced in stellar.js" || (echo "❌ $fn missing from stellar.js" && exit 1)
-          done
-          for fn in submit_score get_leaderboard get_score reset_score reset_leaderboard; do
-            grep -q "pub fn $fn" word-scramble-contract/contracts/hello-world/src/lib.rs && echo "✅ $fn defined in contract" || (echo "❌ $fn missing from contract" && exit 1)
-          done
+      - name: Cross-check stellar.js calls exist on the contracts
+        run: node .github/scripts/check-contract-calls.js
