@@ -1,0 +1,67 @@
+name: CD — Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI — Build & Test"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  deploy-frontend:
+    name: Deploy Frontend (surge.sh)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Deploy to surge.sh
+        env:
+          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
+          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+        run: npx surge --project . --domain word-scramble-v1.surge.sh
+
+  package-contract:
+    name: Build & Package Smart Contract
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32v1-none
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            word-scramble-contract/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('word-scramble-contract/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Build contract (release wasm)
+        working-directory: word-scramble-contract
+        run: cargo build --target wasm32v1-none --release
+
+      - name: Upload wasm build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: soroban-contracts-${{ github.event.workflow_run.head_sha || github.sha }}
+          path: word-scramble-contract/target/wasm32v1-none/release/*.wasm
+          retention-days: 90
