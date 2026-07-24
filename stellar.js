@@ -5,7 +5,7 @@ const STELLAR_CONFIG = {
     rpcUrl: 'https://soroban-testnet.stellar.org',
     horizonUrl: 'https://horizon-testnet.stellar.org',
     friendbotUrl: 'https://friendbot.stellar.org',
-    contractId: 'CD2XXLJBFBVYAGJYUHQR4XH6ZYWQUMR6A22TUFY4R2S3VU2NCY7KPJEG',
+    contractId: 'CDTTHP4T5IUDCG2MWJJZXOF5LUHXWMHN54E4PKKRQ56FSEQHSTIILWH3',
     adminAddress: 'GCTCR3MURG5WAIAEEYWOCE4HQB7DNBOTSJSG4MXFZJXXG4OTVNYGGWS3',
     rewardContractId: 'CDXIWPK4YYUTZPSXEBLELBBQIJ6X3UKJSDO4CJIH2KZXFWCBH6KXLIOQ',
 };

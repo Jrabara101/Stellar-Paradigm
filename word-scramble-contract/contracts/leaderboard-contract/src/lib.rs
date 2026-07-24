@@ -17,7 +17,7 @@ pub enum DataKey {
     Admin,
 }
 
-const MAX_ENTRIES: u32 = 10;
+const MAX_ENTRIES: u32 = 100;
 
 #[contract]
 pub struct WordScrambleContract;
@@ -41,50 +41,7 @@ impl WordScrambleContract {
     pub fn submit_score(env: Env, player: Address, score: u32, level: u32) {
         player.require_auth();
 
-        let mut board: Vec<PlayerScore> = env
-            .storage()
-            .persistent()
-            .get(&DataKey::Leaderboard)
-            .unwrap_or(Vec::new(&env));
-
-        let mut found = false;
-        for i in 0..board.len() {
-            let entry = board.get(i).unwrap();
-            if entry.player == player {
-                if score > entry.score {
-                    board.set(i, PlayerScore { player: player.clone(), score, level });
-                }
-                found = true;
-                break;
-            }
-        }
-
-        if !found {
-            board.push_back(PlayerScore { player: player.clone(), score, level });
-        }
-
-        // Sort descending by score (bubble sort)
-        let len = board.len();
-        for i in 0..len {
-            for j in 0..len - 1 - i {
-                let a = board.get(j).unwrap();
-                let b = board.get(j + 1).unwrap();
-                if a.score < b.score {
-                    board.set(j, b);
-                    board.set(j + 1, a);
-                }
-            }
-        }
-
-        if board.len() > MAX_ENTRIES {
-            let mut trimmed = Vec::new(&env);
-            for i in 0..MAX_ENTRIES {
-                trimmed.push_back(board.get(i).unwrap());
-            }
-            board = trimmed;
-        }
-
-        env.storage().persistent().set(&DataKey::Leaderboard, &board);
+        Self::upsert_score(&env, &player, score, level);
 
         // Emit an event so frontends can stream real-time score updates
         env.events().publish(
@@ -103,6 +60,23 @@ impl WordScrambleContract {
                 reward.mint_badge(&player, &badge);
             }
         }
+    }
+
+    /// Admin-only: write a player's score directly, bypassing player auth.
+    /// Exists solely to carry forward scores that were already proven via a
+    /// real `submit_score` transaction on a prior contract deployment when
+    /// migrating to a new instance — not for fabricating unproven scores.
+    pub fn admin_seed_score(env: Env, admin: Address, player: Address, score: u32, level: u32) {
+        admin.require_auth();
+        let stored_admin: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::Admin)
+            .expect("admin not initialised — call init_admin first");
+        if admin != stored_admin {
+            panic!("unauthorised");
+        }
+        Self::upsert_score(&env, &player, score, level);
     }
 
     pub fn get_leaderboard(env: Env) -> Vec<PlayerScore> {
@@ -160,6 +134,53 @@ impl WordScrambleContract {
                 break;
             }
         }
+        env.storage().persistent().set(&DataKey::Leaderboard, &board);
+    }
+
+    fn upsert_score(env: &Env, player: &Address, score: u32, level: u32) {
+        let mut board: Vec<PlayerScore> = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Leaderboard)
+            .unwrap_or(Vec::new(env));
+
+        let mut found = false;
+        for i in 0..board.len() {
+            let entry = board.get(i).unwrap();
+            if &entry.player == player {
+                if score > entry.score {
+                    board.set(i, PlayerScore { player: player.clone(), score, level });
+                }
+                found = true;
+                break;
+            }
+        }
+
+        if !found {
+            board.push_back(PlayerScore { player: player.clone(), score, level });
+        }
+
+        // Sort descending by score (bubble sort)
+        let len = board.len();
+        for i in 0..len {
+            for j in 0..len - 1 - i {
+                let a = board.get(j).unwrap();
+                let b = board.get(j + 1).unwrap();
+                if a.score < b.score {
+                    board.set(j, b);
+                    board.set(j + 1, a);
+                }
+            }
+        }
+
+        if board.len() > MAX_ENTRIES {
+            let mut trimmed = Vec::new(env);
+            for i in 0..MAX_ENTRIES {
+                trimmed.push_back(board.get(i).unwrap());
+            }
+            board = trimmed;
+        }
+
         env.storage().persistent().set(&DataKey::Leaderboard, &board);
     }
 
@@ -253,6 +274,38 @@ mod tests {
 
         let board = client.get_leaderboard();
         assert_eq!(board.len(), 0);
+    }
+
+    #[test]
+    fn test_admin_seed_score_writes_to_board() {
+        let env = Env::default();
+        env.mock_all_auths();
+        let contract_id = env.register(WordScrambleContract, ());
+        let client = WordScrambleContractClient::new(&env, &contract_id);
+
+        let admin = Address::generate(&env);
+        client.init_admin(&admin);
+
+        let player = Address::generate(&env);
+        client.admin_seed_score(&admin, &player, &750, &6);
+
+        assert_eq!(client.get_score(&player), 750);
+    }
+
+    #[test]
+    #[should_panic(expected = "unauthorised")]
+    fn test_admin_seed_score_rejects_non_admin() {
+        let env = Env::default();
+        env.mock_all_auths();
+        let contract_id = env.register(WordScrambleContract, ());
+        let client = WordScrambleContractClient::new(&env, &contract_id);
+
+        let admin = Address::generate(&env);
+        client.init_admin(&admin);
+
+        let not_admin = Address::generate(&env);
+        let player = Address::generate(&env);
+        client.admin_seed_score(&not_admin, &player, &750, &6);
     }
 
     #[test]
