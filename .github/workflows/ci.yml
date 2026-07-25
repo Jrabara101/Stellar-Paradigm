@@ -55,17 +55,19 @@ jobs:
       - name: Verify required frontend files exist
         run: |
           echo "Checking required frontend files..."
-          test -f index.html   && echo "✅ index.html" || (echo "❌ index.html missing" && exit 1)
-          test -f style.css    && echo "✅ style.css"  || (echo "❌ style.css missing"  && exit 1)
-          test -f script.js    && echo "✅ script.js"  || (echo "❌ script.js missing"  && exit 1)
-          test -f stellar.js   && echo "✅ stellar.js" || (echo "❌ stellar.js missing" && exit 1)
-          test -f feedback.js  && echo "✅ feedback.js" || (echo "❌ feedback.js missing" && exit 1)
-          test -f wallet-guide.js && echo "✅ wallet-guide.js" || (echo "❌ wallet-guide.js missing" && exit 1)
+          for f in \
+            index.html style.css script.js stellar.js feedback.js wallet-guide.js \
+            daily-words.js wordbank.js themes.css sw.js manifest.json \
+            scramble-board.js scramble-board.css scramble-words.js; do
+            test -f "$f" && echo "✅ $f" || (echo "❌ $f missing" && exit 1)
+          done
           echo "All required files present."
 
       - name: Build-check frontend JS (syntax validation)
         run: |
-          for f in daily-words.js script.js stellar.js feedback.js wallet-guide.js; do
+          for f in \
+            daily-words.js script.js stellar.js feedback.js wallet-guide.js \
+            wordbank.js sw.js scramble-board.js scramble-words.js; do
             echo "Checking $f..."
             node --check "$f"
           done
