@@ -147,8 +147,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const pollMs = 300;
     const phase1MaxMs = 4000;
     const phase2MaxMs = 15000;
+    // Chained entrance modals (e.g. onboarding handing off to the category
+    // picker) close one and open the next a beat later, not instantly — so a
+    // single poll landing in that gap must not read as "sequence finished."
+    // Require the backdrop to stay gone for a full stable window first.
+    const stableClosedMs = 900;
     let waited = 0;
     let modalSeen = false;
+    let closedStreakMs = 0;
 
     const poll = setInterval(() => {
         waited += pollMs;
@@ -165,7 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (!modalActive || waited >= phase2MaxMs) {
+        closedStreakMs = modalActive ? 0 : closedStreakMs + pollMs;
+
+        if ((!modalActive && closedStreakMs >= stableClosedMs) || waited >= phase2MaxMs) {
             clearInterval(poll);
             setTimeout(() => window.showWalletGuide(false), 900);
         }
