@@ -35,7 +35,7 @@ CI also enforces that `stellar.js` exists on every push — see [`.github/workfl
 Word Scramble is a fully client-side browser game (no backend) that integrates Web3 wallet connectivity and smart-contract calls directly from the frontend:
 
 - **Gameplay:** Drag-and-drop letter tiles to solve scrambled words across multiple categories (Science, History, Anime, Technology, and more), with progressive hints, win streaks, custom board themes, and synthesized retro audio.
-- **Blockchain:** When you solve a word, your score is submitted to a Soroban smart contract on **Stellar Testnet**. The contract maintains a top-10 leaderboard, only updating an entry when you beat your previous best.
+- **Blockchain:** When you solve a word, your score is submitted to a Soroban smart contract on **Stellar Testnet**. The contract maintains a top-100 leaderboard, only updating an entry when you beat your previous best.
 - **Inter-contract calls:** `submit_score` automatically calls the **RewardContract** to mint a badge (BRONZE / SILVER / GOLD / LEGEND) when a score milestone is hit — no extra transaction needed.
 - **Event streaming:** The frontend polls `rpc.getEvents()` every 5 seconds. When any player submits a score, all connected tabs flash a **● LIVE** indicator in real time.
 - **Multi-wallet:** Connect with any Stellar wallet (Freighter, Albedo, xBull, LOBSTR, Hana, and more) through Stellar Wallets Kit. The leaderboard shows which wallet each player used.
@@ -46,14 +46,17 @@ Word Scramble is a fully client-side browser game (no backend) that integrates W
 ## 🏗️ Smart Contracts
 
 ### WordScramble Contract
-**Contract ID (Testnet):** `CD2XXLJBFBVYAGJYUHQR4XH6ZYWQUMR6A22TUFY4R2S3VU2NCY7KPJEG`
+**Contract ID (Testnet):** `CDTTHP4T5IUDCG2MWJJZXOF5LUHXWMHN54E4PKKRQ56FSEQHSTIILWH3`
+
+> Redeployed 2026-07-23 to raise the leaderboard cap from 10 → 100 entries ahead of scaling past 50 testnet users. The 12 real scores live on the prior contract (`CD2XXLJBFBVYAGJYUHQR4XH6ZYWQUMR6A22TUFY4R2S3VU2NCY7KPJEG`) at redeploy time were carried forward via a one-time admin-authenticated migration — see `admin_seed_score` below.
 
 | Function | Description |
 |---|---|
 | `submit_score(player, score, level)` | Saves a score; only overwrites if higher. Emits a `score/saved` event and calls RewardContract to mint a badge. |
-| `get_leaderboard()` | Returns the top-10 leaderboard (read-only) |
+| `get_leaderboard()` | Returns the top-100 leaderboard (read-only) |
 | `get_score(player)` | Returns a single player's best score |
 | `set_reward_contract(reward_contract_id)` | Wires the RewardContract address for inter-contract calls |
+| `admin_seed_score(admin, player, score, level)` | Admin-only: writes a score without player auth. Used once during the 2026-07-23 migration to carry forward scores already proven on the prior contract; not used in normal gameplay. |
 
 ### RewardContract
 **Contract ID (Testnet):** `CDXIWPK4YYUTZPSXEBLELBBQIJ6X3UKJSDO4CJIH2KZXFWCBH6KXLIOQ`

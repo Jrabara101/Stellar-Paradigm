@@ -480,3 +480,148 @@ body[data-theme="midnight-walnut"] .grid-container {
     --teak-light: #241a13;
     --teak-base: #1a120d;
 }
+
+/* ==========================================================================
+   PHASE 2B — Stellar Cosmos + Art Deco Lounge (free, ungated — like Midnight
+   Walnut; built on Stage 2A's --theme-* custom-property system).
+   ========================================================================== */
+
+/* Stellar Cosmos — deep-space navy, nebula wash, star-dot field, glowing tiles */
+body[data-theme="stellar-cosmos"] {
+    --theme-body-bg-color: #0B1026;
+    --theme-body-bg-image:
+        radial-gradient(rgba(120, 180, 255, 0.9) 0.7px, transparent 1px),
+        radial-gradient(rgba(255, 255, 255, 0.7) 0.6px, transparent 0.9px),
+        radial-gradient(1200px 600px at 18% 8%, rgba(96, 62, 168, 0.35), transparent 60%),
+        radial-gradient(1000px 520px at 82% 82%, rgba(22, 120, 140, 0.30), transparent 60%);
+    --theme-body-bg-size: 55px 55px, 90px 90px, 100% 100%, 100% 100%;
+    --theme-body-bg-position: 0 0, 25px 40px, 0 0, 0 0;
+    --theme-body-color: #DCE6FF;
+
+    --theme-ambient-glow: radial-gradient(circle, rgba(64, 224, 208, 0.18) 0%, rgba(120, 80, 200, 0.10) 50%, rgba(0,0,0,0) 70%);
+
+    --theme-h1-color: #EAF0FF;
+    --theme-h1-shadow: 2px 2px 0px #060917, 4px 4px 0px #40E0D0;
+
+    --theme-board-plate-bg: linear-gradient(135deg, #141B3D 0%, #0A0E22 100%);
+    --theme-board-plate-border: 4px solid #2A3566;
+    --theme-board-plate-outline: 6px solid #070A18;
+    --theme-board-plate-shadow: 0 30px 60px rgba(0,0,0,0.7), inset 0 2px 12px rgba(120,150,255,0.14);
+
+    --theme-grid-bg: #070A18;
+    --theme-grid-border: 4px solid #070A18;
+    --theme-grid-shadow: inset 0 6px 15px rgba(0,0,0,0.85);
+    --theme-cell-shadow: inset 1px 1px 1px rgba(120,150,255,0.08), inset -1px -1px 1px rgba(0,0,0,0.5);
+
+    --theme-slot-border: #40E0D0;
+    --theme-slot-bg: rgba(64, 224, 208, 0.12);
+
+    --theme-tile-bg: linear-gradient(145deg, #3A4780 0%, #232C55 100%);
+    --theme-tile-color: #EAF0FF;
+    --theme-tile-border: 2px solid #566099;
+    --theme-tile-shadow: 0 6px 0 #10152E, 0 10px 15px rgba(0,0,0,0.7), 0 0 10px rgba(64,224,208,0.25);
+    --theme-tile-hover-shadow: 0 8px 0 #10152E, 0 12px 18px rgba(0,0,0,0.75), 0 0 16px rgba(64,224,208,0.4);
+    --theme-tile-locked-bg: #40E0D0;
+    --theme-tile-locked-color: #0A0E22;
+    --theme-tile-locked-border: #00CED1;
+    --theme-tile-locked-shadow: 0 2px 0 #00CED1, 0 4px 6px rgba(0,0,0,0.5);
+
+    --theme-rack-bg: linear-gradient(to bottom, #1A2145 0%, #0C1128 100%);
+    --theme-rack-border: 2.5px solid #0C1128;
+
+    --theme-clue-bg: rgba(8, 12, 30, 0.6);
+    --theme-clue-border: 2.5px solid #2A3566;
+    --theme-clue-color: #40E0D0;
+    --theme-clue-text-shadow: 0 0 6px rgba(64,224,208,0.45);
+
+    --theme-button-bg: linear-gradient(to bottom, #26305C, #171E3C);
+    --theme-button-color: #EAF0FF;
+    --theme-button-border: 2px solid #0C1128;
+    --theme-button-shadow: 0 5px 0 #0C1128;
+    --theme-button-hover-bg: linear-gradient(to bottom, #303B6E, #1F2749);
+
+    --theme-submit-bg: #40E0D0;
+    --theme-submit-color: #0A0E22;
+    --theme-submit-shadow: 0 5px 0 #00CED1;
+    --theme-submit-hover-bg: #5CE6D6;
+
+    --theme-panel-bg: rgba(12, 17, 40, 0.95);
+    --theme-panel-border: 3.5px solid #2A3566;
+    --theme-panel-color: #EAF0FF;
+    --theme-panel-h3-border: 2px solid #40E0D0;
+    --theme-panel-h3-color: #EAF0FF;
+    --theme-panel-h3-shadow: 0.5px 0.5px 0px #000;
+}
+body[data-theme="stellar-cosmos"] .grid-container {
+    --teak-light: #10152E;
+    --teak-base: #0A0E22;
+}
+
+/* Art Deco Lounge — emerald felt, brass fan motif, cream tiles with gold inlay */
+body[data-theme="art-deco"] {
+    --theme-body-bg-color: #0D3B2E;
+    --theme-body-bg-image:
+        repeating-conic-gradient(from 0deg at 50% 0%, rgba(198,162,39,0.06) 0deg 6deg, transparent 6deg 12deg),
+        radial-gradient(rgba(198,162,39,0.10) 1px, transparent 1px);
+    --theme-body-bg-size: 100% 100%, 30px 30px;
+    --theme-body-bg-position: 0 0, 0 0;
+    --theme-body-color: #F3E9C9;
+
+    --theme-ambient-glow: radial-gradient(circle, rgba(198,162,39,0.18) 0%, rgba(13,59,46,0.15) 50%, rgba(0,0,0,0) 70%);
+
+    --theme-h1-color: #E9D58A;
+    --theme-h1-shadow: 2px 2px 0px #062018, 4px 4px 0px #C6A227;
+
+    --theme-board-plate-bg: linear-gradient(135deg, #12523E 0%, #0A2C22 100%);
+    --theme-board-plate-border: 4px solid #C6A227;
+    --theme-board-plate-outline: 6px solid #062018;
+    --theme-board-plate-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 2px 10px rgba(198,162,39,0.18);
+
+    --theme-grid-bg: #0A2C22;
+    --theme-grid-border: 4px solid #0A2C22;
+    --theme-grid-shadow: inset 0 6px 15px rgba(0,0,0,0.6);
+    --theme-cell-shadow: inset 1px 1px 1px rgba(198,162,39,0.10), inset -1px -1px 1px rgba(0,0,0,0.35);
+
+    --theme-slot-border: #C6A227;
+    --theme-slot-bg: rgba(198,162,39,0.12);
+
+    --theme-tile-bg: linear-gradient(145deg, #F7EFD2 0%, #E8D9A8 100%);
+    --theme-tile-color: #0D3B2E;
+    --theme-tile-border: 2px solid #C6A227;
+    --theme-tile-shadow: 0 6px 0 #093225, 0 10px 15px rgba(0,0,0,0.5);
+    --theme-tile-hover-shadow: 0 8px 0 #093225, 0 12px 18px rgba(0,0,0,0.55);
+    --theme-tile-locked-bg: #C6A227;
+    --theme-tile-locked-color: #0D3B2E;
+    --theme-tile-locked-border: #E9D58A;
+    --theme-tile-locked-shadow: 0 2px 0 #A6841A, 0 4px 6px rgba(0,0,0,0.4);
+
+    --theme-rack-bg: linear-gradient(to bottom, #12523E 0%, #0A2C22 100%);
+    --theme-rack-border: 2.5px solid #093225;
+
+    --theme-clue-bg: rgba(6, 32, 24, 0.55);
+    --theme-clue-border: 2.5px solid #C6A227;
+    --theme-clue-color: #E9D58A;
+    --theme-clue-text-shadow: 0 0 6px rgba(198,162,39,0.4);
+
+    --theme-button-bg: linear-gradient(to bottom, #15604A, #0C3A2C);
+    --theme-button-color: #F3E9C9;
+    --theme-button-border: 2px solid #093225;
+    --theme-button-shadow: 0 5px 0 #093225;
+    --theme-button-hover-bg: linear-gradient(to bottom, #1A7357, #0F4636);
+
+    --theme-submit-bg: #C6A227;
+    --theme-submit-color: #0D3B2E;
+    --theme-submit-shadow: 0 5px 0 #A6841A;
+    --theme-submit-hover-bg: #D9B63A;
+
+    --theme-panel-bg: rgba(10, 44, 34, 0.95);
+    --theme-panel-border: 3.5px solid #C6A227;
+    --theme-panel-color: #F3E9C9;
+    --theme-panel-h3-border: 2px solid #C6A227;
+    --theme-panel-h3-color: #E9D58A;
+    --theme-panel-h3-shadow: 0.5px 0.5px 0px #000;
+}
+body[data-theme="art-deco"] .grid-container {
+    --teak-light: #0E4130;
+    --teak-base: #0A2C22;
+}

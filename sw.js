@@ -1,7 +1,7 @@
 // Word Scramble service worker — network-first with cache fallback.
 // Gives instant repeat loads and lets the game shell open offline,
 // while always preferring fresh files when the network is available.
-const CACHE_NAME = 'word-scramble-v3';
+const CACHE_NAME = 'word-scramble-v4';
 
 const PRECACHE = [
     './',
@@ -15,6 +15,12 @@ const PRECACHE = [
     'icons/icon-192.png',
     'icons/icon-512.png',
 ];
+
+// NOTE: the Scramble Board assets (scramble-board.js, scramble-board.css, and
+// especially the ~1.8MB scramble-words.js dictionary) are intentionally NOT
+// precached — they stay lazy-loaded on first mode entry and are then picked up
+// automatically by the network-first runtime cache below, so players who never
+// open Scramble Board never download the dictionary.
 
 self.addEventListener('install', (event) => {
     event.waitUntil(

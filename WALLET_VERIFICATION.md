@@ -2,17 +2,19 @@
 
 Proof that 10+ real, distinct users connected a Stellar wallet and submitted at least one score on-chain, satisfying the Level 4 "10+ real users / proof of wallet interactions" requirement.
 
+> **2026-07-23 contract migration:** the leaderboard contract was redeployed to raise the on-chain cap from 10 to 100 entries (`CD2XXLJBFBVYAGJYUHQR4XH6ZYWQUMR6A22TUFY4R2S3VU2NCY7KPJEG` → `CDTTHP4T5IUDCG2MWJJZXOF5LUHXWMHN54E4PKKRQ56FSEQHSTIILWH3`). Every transaction hash below was verified against the prior contract ID, which is what these users actually called at the time — that proof is unaffected by the migration. The current live contract is the new ID; all 12 real scores that existed on the old contract at migration time were carried forward via a one-time admin-authenticated seed (see README).
+
 ## Methodology
 
 Each wallet address below was collected via an in-app feedback form, then independently cross-checked against the actual blockchain — not just taken at face value. For every address, we queried Stellar Horizon for `invoke_host_function` operations, decoded the XDR parameters, and confirmed each one:
 
-1. Called the deployed **WordScramble contract** (`CD2XXLJBFBVYAGJYUHQR4XH6ZYWQUMR6A22TUFY4R2S3VU2NCY7KPJEG`)
+1. Called the deployed **WordScramble contract** (`CD2XXLJBFBVYAGJYUHQR4XH6ZYWQUMR6A22TUFY4R2S3VU2NCY7KPJEG` at the time of submission)
 2. Invoked the **`submit_score`** function specifically
 3. Was a **successful** transaction (not a failed/reverted attempt)
 
 This means every row below is backed by a real, independently-verifiable transaction hash — not self-reported data.
 
-**Contract on Stellar Expert:** https://stellar.expert/explorer/testnet/account/CD2XXLJBFBVYAGJYUHQR4XH6ZYWQUMR6A22TUFY4R2S3VU2NCY7KPJEG
+**Live contract on Stellar Expert:** https://stellar.expert/explorer/testnet/account/CDTTHP4T5IUDCG2MWJJZXOF5LUHXWMHN54E4PKKRQ56FSEQHSTIILWH3
 
 ## Verified Users (10 / 10)
 

@@ -1,0 +1,20 @@
+{
+  "capturedAt": "2026-07-25",
+  "contractId": "CDTTHP4T5IUDCG2MWJJZXOF5LUHXWMHN54E4PKKRQ56FSEQHSTIILWH3",
+  "network": "testnet",
+  "note": "Safety snapshot taken via `stellar contract invoke -- get_leaderboard` before any reset_leaderboard call. Used to restore entries via admin_seed_score after a reset.",
+  "entries": [
+    { "player": "GC6SFJXAEDPWUQHQT6MXBZ2P2MVWWPTCBLYHDMCONOSGJXISE6I3HI3F", "score": 3250, "level": 13 },
+    { "player": "GAJNW53ROFPDIJOGKUP53HXOSWYN42IL2UDB4PB64MVZECCZ3JBGMZZL", "score": 2700, "level": 12 },
+    { "player": "GC4WWONMOYVPEEQTYO3BISIO3F7ALUWHJ37M5GUSYYA2Q7MJKTUBXRE5", "score": 2160, "level": 11 },
+    { "player": "GBXUBPKOA63QJ4OZB3QM7ZJAEJKFJFSCADRSM5TAS6SBKEQUZ6EYXRYZ", "score": 1520, "level": 9 },
+    { "player": "GBTO2FOP3AKLQTUWCWWYRDHVS3KBV4OQI654R66O45OVRXBYUED7AVYN", "score": 1080, "level": 7 },
+    { "player": "GAUXEY4HPHJGSZKQWTBNO6JKSFZWSOW2EQ5UY2DNHCRAJ3673C5QHK6A", "score": 940, "level": 4 },
+    { "player": "GDG3DXU4DO37ZCNFTNBBEWMH4HQ3HXZAOC4SHSAO7B7I2UOHVPSP52XY", "score": 940, "level": 4 },
+    { "player": "GD4Q2HBQWR4EIENXQAQ4UIPPR3SAGMAUSD5KOSUDRVN5GMEPBYTGVCE7", "score": 940, "level": 4 },
+    { "player": "GBOPRN5R5TWP6SSZKVSRN3B3KG25GAW53RGZ3ACMUPPW2HAOKWCZOVUF", "score": 630, "level": 3 },
+    { "player": "GCN5BXQEOROX2HALUBZKJPOODPD2RHO5WZ6VVYQ2EJ7IO5XNUO6XMNN7", "score": 630, "level": 3 },
+    { "player": "GBAKAGBJU3AGHSXYTR4XKT7FTCLZN23LJEUGDWMBPOBHZG67WY2XCMDZ", "score": 540, "level": 4 },
+    { "player": "GADVI3JBCXSG4KDR37TGEZH3PCKDIC35RL7ONNX6NKOMC5DU2B2DN4U6", "score": 430, "level": 3 }
+  ]
+}
