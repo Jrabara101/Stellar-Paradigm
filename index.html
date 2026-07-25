@@ -42,6 +42,7 @@
 
     <script type="module" src="stellar.js"></script>
     <script src="daily-words.js" defer></script>
+    <script src="wordbank.js" defer></script>
     <script src="script.js" defer></script>
     <script src="feedback.js" defer></script>
     <script src="wallet-guide.js" defer></script>
@@ -257,6 +258,7 @@
     <div class="modal-backdrop" id="category-modal-backdrop" onclick="game.closeCategoryModal(event)">
         <div class="category-modal" onclick="event.stopPropagation()">
             <h3>Select Category</h3>
+            <p class="category-modal-subtitle" id="category-modal-subtitle" style="display: none;">Pick what kind of words you'd like to unscramble. You can always change this later from the ☰ Menu.</p>
             <div class="category-grid">
                 <button class="category-btn current" id="cat-btn-general" onclick="game.switchCategory('general')">General</button>
                 <button class="category-btn" id="cat-btn-science" onclick="game.switchCategory('science')">Science</button>

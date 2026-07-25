@@ -93,6 +93,7 @@
                 <div class="scr-banner">
                     <span class="scr-banner-title">🎲 Scramble Board</span>
                     <span class="scr-banner-info" id="scr-banner-info"></span>
+                    <button class="scr-exit-btn" id="scr-rules-btn" title="How to play">❔ Rules</button>
                     <button class="scr-exit-btn" id="scr-exit-btn">Exit</button>
                 </div>
                 <div class="scr-opponents" id="scr-opponents"></div>
@@ -159,6 +160,7 @@
                         <button class="scr-opt" data-v="250">250<small>Long</small></button>
                     </div>
                     <button class="scr-btn primary" id="scr-setup-go">Roll for Turn Order →</button>
+                    <button class="scr-btn ghost" id="scr-setup-rules">📖 How to Play</button>
                     <button class="scr-btn" id="scr-setup-cancel">Cancel</button>
                 </div>`;
             document.body.appendChild(setup);
@@ -194,6 +196,85 @@
                 </div>`;
             document.body.appendChild(dict);
 
+            // Rules / How-to-Play modal
+            const rules = document.createElement('div');
+            rules.className = 'scr-scoreboard-backdrop';
+            rules.id = 'scr-rules-backdrop';
+            rules.innerHTML = `
+                <div class="scr-rules-box">
+                    <h3>📖 How to Play</h3>
+                    <div class="scr-rules-content">
+                        <div class="scr-rule-sec">
+                            <h4>🎯 Goal</h4>
+                            <p>Build words on the 15×15 board to score points. The <b>first player to reach the Win Target</b> (100, 150, or 250 — you pick at setup) wins the match instantly. If the tile bag runs out first, the highest score wins.</p>
+                        </div>
+                        <div class="scr-rule-sec">
+                            <h4>🎲 Taking Turns</h4>
+                            <p>Everyone rolls a die at the start — <b>highest roll goes first</b>, then play passes around. On your turn, drag letters from your rack onto the board to form a word, then <b>Submit</b>.</p>
+                        </div>
+                        <div class="scr-rule-sec">
+                            <h4>🔤 Placing Words</h4>
+                            <ul>
+                                <li>Your <b>first word must cross the ★ center</b> star.</li>
+                                <li>All the tiles you place in one turn must sit in a <b>single row or column</b>, with no gaps.</li>
+                                <li>After the first turn, every new word must <b>connect to letters already on the board</b>.</li>
+                                <li>Every word you form — across <i>and</i> down — must be a real word (checked against a 168,000-word dictionary).</li>
+                            </ul>
+                        </div>
+                        <div class="scr-rule-sec">
+                            <h4>💯 Tile Points</h4>
+                            <div class="scr-points-grid">
+                                <span><b>1</b> — A E I O U L N R S T</span>
+                                <span><b>2</b> — D G</span>
+                                <span><b>3</b> — B C M P</span>
+                                <span><b>4</b> — F H V W Y</span>
+                                <span><b>5</b> — K</span>
+                                <span><b>8</b> — J X</span>
+                                <span><b>10</b> — Q Z</span>
+                                <span><b>0</b> — Blank (plays as any letter you choose)</span>
+                            </div>
+                        </div>
+                        <div class="scr-rule-sec">
+                            <h4>🎨 Premium Squares</h4>
+                            <div class="scr-prem-legend">
+                                <span><i class="sw dl"></i><b>DL</b> — Double Letter score</span>
+                                <span><i class="sw tl"></i><b>TL</b> — Triple Letter score</span>
+                                <span><i class="sw dw"></i><b>DW</b> — Double Word score</span>
+                                <span><i class="sw tw"></i><b>TW</b> — Triple Word score</span>
+                                <span><i class="sw ctr"></i><b>★</b> — Center (counts as Double Word)</span>
+                            </div>
+                            <p class="scr-rule-note">A premium only counts on the turn a tile is first placed on it.</p>
+                        </div>
+                        <div class="scr-rule-sec">
+                            <h4>✨ Scoring a Word</h4>
+                            <p>Add up each tile's points (applying any DL/TL to tiles you just placed), then multiply the whole word by any DW/TW squares it covers. Multiple word-multipliers stack. Play all <b>7 tiles in one turn for a +50 BINGO bonus</b>!</p>
+                        </div>
+                        <div class="scr-rule-sec">
+                            <h4>🛠️ Your Buttons</h4>
+                            <ul>
+                                <li><b>Submit</b> — play the word you've laid down.</li>
+                                <li><b>Recall</b> — take this turn's tiles back to your rack.</li>
+                                <li><b>Shuffle</b> — reshuffle your rack.</li>
+                                <li><b>Exchange</b> — swap your tiles for new ones (uses up your turn; needs tiles left in the bag).</li>
+                                <li><b>Pass</b> — skip your turn.</li>
+                            </ul>
+                        </div>
+                        <div class="scr-rule-sec">
+                            <h4>🔍 Helpers</h4>
+                            <ul>
+                                <li><b>💡 Find Word</b> — highlights the best play from your rack and the board (3 uses per match).</li>
+                                <li><b>📖 Dictionary</b> — check if any word is playable and read its meaning.</li>
+                            </ul>
+                        </div>
+                        <div class="scr-rule-sec">
+                            <h4>🤖 Opponents</h4>
+                            <p>Your rivals are AI players drawn from real wallets on the on-chain leaderboard (with practice bots as backup). Their tile racks stay <b>hidden</b> — you'll never see an opponent's letters.</p>
+                        </div>
+                    </div>
+                    <button class="scr-btn primary" id="scr-rules-close">Got it — Let's Play!</button>
+                </div>`;
+            document.body.appendChild(rules);
+
             // Build 225 cells once
             const grid = document.getElementById('scr-board-grid');
             const labels = { TW: 'TW', DW: 'DW', TL: 'TL', DL: 'DL', CENTER: '★' };
@@ -220,6 +301,9 @@
             document.getElementById('scr-exchange').onclick = () => this.exchange();
             document.getElementById('scr-pass').onclick = () => this.pass();
             document.getElementById('scr-exit-btn').onclick = () => this.quit();
+            document.getElementById('scr-rules-btn').onclick = () => this.openRules();
+            document.getElementById('scr-setup-rules').onclick = () => this.openRules();
+            document.getElementById('scr-rules-close').onclick = () => this._hideBackdrop('scr-rules-backdrop');
             document.getElementById('scr-again').onclick = () => { this.hideScoreboard(); this.openSetup(); };
             document.getElementById('scr-quit').onclick = () => { this.hideScoreboard(); this.quit(); };
 
@@ -787,6 +871,12 @@
         clearHints() {
             document.querySelectorAll('.scr-cell.legal-hint').forEach(c => c.classList.remove('legal-hint'));
             document.querySelectorAll('.scr-tile.hint-tile').forEach(t => t.classList.remove('hint-tile'));
+        }
+
+        openRules() {
+            const content = document.querySelector('#scr-rules-backdrop .scr-rules-content');
+            if (content) content.scrollTop = 0; // always open at the top
+            this._showBackdrop('scr-rules-backdrop');
         }
 
         openDictionary() {

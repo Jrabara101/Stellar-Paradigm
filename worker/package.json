@@ -1,0 +1,11 @@
+{
+  "name": "word-scramble-words-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker that proxies, curates, and caches Datamuse into clean {word, def} JSON for Word Scramble.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  }
+}

@@ -916,8 +916,27 @@ class TeakScrambleGame {
         }
     }
 
+    // The 6 categories backed by the bundled, definition-verified word bank
+    // (wordbank.js). Anime and Filipino Movies are proper nouns with no
+    // dictionary entry and stay on the live-Wikipedia path instead.
+    static BANK_CATEGORIES = ['general', 'science', 'math', 'history', 'technology', 'novel'];
+
+    // Pick a random {word, clue} from the bundled bank for a category + level.
+    // Difficulty ramps by length (level 1 = 4 letters ... level 5+ = 8). Returns
+    // null for non-bank categories or if the bank failed to load, so callers
+    // transparently fall back to the offline dictionary / live sources.
+    pickFromBank(category, level) {
+        const bank = (typeof window !== 'undefined') ? window.WORD_BANK : null;
+        if (!bank || !bank[category]) return null;
+        const levelKey = Math.min(Math.max(level, 1), 5);
+        const pool = bank[category][levelKey];
+        if (!pool || !pool.length) return null;
+        const entry = pool[Math.floor(Math.random() * pool.length)];
+        return { word: entry.w, clue: entry.d };
+    }
+
     async initLevel() {
-        const hasCustomApi = (this.apiSettings.wordsEnabled && this.apiSettings.wordsKey) || 
+        const hasCustomApi = (this.apiSettings.wordsEnabled && this.apiSettings.wordsKey) ||
                              (this.apiSettings.wordnikEnabled && this.apiSettings.wordnikKey);
         const maxLen = hasCustomApi ? 10 : 8;
         const wordLength = Math.min(3 + this.level, maxLen);
@@ -934,77 +953,30 @@ class TeakScrambleGame {
             this.prefetchedData = null;
         } else {
             const isOffline = (typeof navigator !== 'undefined' && !navigator.onLine);
-            // To make initial load (LCP) extremely fast, we use the offline fallback on the first entrance load or when offline
-            if (this.isEntranceLoad || isOffline) {
-                console.log("First load or offline: using offline fallback for instant start");
+            const allowNetwork = !this.isEntranceLoad && !isOffline;
+
+            // Custom APIs (user opt-in) take priority when configured and online.
+            let customFetched = null;
+            if (allowNetwork && this.apiSettings.wordsEnabled && this.apiSettings.wordsKey) {
+                customFetched = await this.fetchFromWordsAPI(wordLength);
+            }
+            if (!customFetched && allowNetwork && this.apiSettings.wordnikEnabled && this.apiSettings.wordnikKey) {
+                customFetched = await this.fetchFromWordnikAPI(wordLength);
+            }
+
+            if (customFetched) {
+                word = customFetched.word;
+                clue = customFetched.clue;
             } else {
-                // Try Custom APIs first if configured
-                let customFetched = null;
-                if (this.apiSettings.wordsEnabled && this.apiSettings.wordsKey) {
-                    customFetched = await this.fetchFromWordsAPI(wordLength);
-                }
-                if (!customFetched && this.apiSettings.wordnikEnabled && this.apiSettings.wordnikKey) {
-                    customFetched = await this.fetchFromWordnikAPI(wordLength);
-                }
-                
-                if (customFetched) {
-                    word = customFetched.word;
-                    clue = customFetched.clue;
-                } else if (cat === 'general') {
-                    try {
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 1000);
-                        const response = await fetch(`https://random-word-api.herokuapp.com/word?length=${wordLength}`, {
-                            signal: controller.signal
-                        });
-                        clearTimeout(timeoutId);
-                        if (response.ok) {
-                            const data = await response.json();
-                            if (data && data[0]) {
-                                word = data[0].toUpperCase();
-                            }
-                        }
-                    } catch (err) {
-                        console.log("General API word fetch failed (using offline fallback)");
-                    }
-                }
-                else if (cat === 'science' || cat === 'math' || cat === 'history' || cat === 'technology' || cat === 'novel') {
-                    const mlQueries = {
-                        science: 'science',
-                        math: 'mathematics',
-                        history: 'history',
-                        technology: 'technology',
-                        novel: 'novel'
-                    };
-                    const query = mlQueries[cat];
-                    try {
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 1000);
-                        const response = await fetch(`https://api.datamuse.com/words?ml=${query}&md=d&max=150`, {
-                            signal: controller.signal
-                        });
-                        clearTimeout(timeoutId);
-                        if (response.ok) {
-                            const data = await response.json();
-                            const candidates = data.filter(item => {
-                                const w = item.word.toUpperCase();
-                                return w.length === wordLength && /^[A-Z]+$/.test(w);
-                            });
-                            if (candidates.length > 0) {
-                                const chosen = candidates[Math.floor(Math.random() * candidates.length)];
-                                word = chosen.word.toUpperCase();
-                                if (chosen.defs && chosen.defs.length > 0) {
-                                    const rawDef = chosen.defs[0];
-                                    const tabIdx = rawDef.indexOf('\t');
-                                    clue = tabIdx !== -1 ? rawDef.substring(tabIdx + 1) : rawDef;
-                                }
-                            }
-                        }
-                    } catch (err) {
-                        console.log(`Datamuse API fetch failed for ${cat} (using offline fallback)`);
-                    }
-                }
-                else if (cat === 'anime' || cat === 'filipino-movies') {
+                // Bundled word bank: instant, offline, and every word already has
+                // a verified definition — no random-word API, no live dictionary
+                // lookup, so no more undefinable words or 404s for these
+                // categories (works on the fast entrance load too).
+                const bankPick = this.pickFromBank(cat, this.level);
+                if (bankPick) {
+                    word = bankPick.word;
+                    clue = bankPick.clue;
+                } else if (allowNetwork && (cat === 'anime' || cat === 'filipino-movies')) {
                     const categories = {
                         anime: 'Category:Anime_series',
                         'filipino-movies': 'Category:Philippine_films'
@@ -1068,19 +1040,34 @@ class TeakScrambleGame {
         
         this.targetWord = word;
         
-        // Fetch definition asynchronously in background if not available and online
+        // Resolve a definition when the source didn't already provide one.
+        // Bank categories always arrive with a clue, so this only runs for the
+        // Wikipedia categories or the rare offline-dictionary fallback.
         if (!clue) {
             const isOffline = (typeof navigator !== 'undefined' && !navigator.onLine);
-            if (!isOffline) {
-                this.fetchDictionaryDefinition(word).then(resolvedClue => {
-                    if (resolvedClue) {
-                        this.wordClue = this.censorWordInClue(resolvedClue, this.targetWord);
-                        this.updateClueUI();
-                    }
-                });
-            }
             const categoryLabel = cat.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-            clue = `No dictionary definition found for this ${categoryLabel} word — it's ${wordLength} letters, starting with '${this.targetWord[0]}' and ending with '${this.targetWord[this.targetWord.length-1]}'.`;
+            const isProperNounCat = (cat === 'anime' || cat === 'filipino-movies');
+            if (isProperNounCat) {
+                // Proper nouns have no dictionary entry — don't hit the dictionary
+                // API with guaranteed 404s. When online, the live Wikipedia
+                // summary fetched above fills this in shortly.
+                clue = isOffline
+                    ? `No description available for this ${categoryLabel} title.`
+                    : "Fetching description...";
+            } else if (!isOffline) {
+                this.fetchDictionaryDefinition(word).then(resolvedClue => {
+                    if (this.targetWord !== word) return; // player already moved to another word
+                    this.wordClue = this.censorWordInClue(
+                        resolvedClue || `No dictionary definition available for this ${categoryLabel} word.`,
+                        this.targetWord
+                    );
+                    this.updateClueUI();
+                });
+                // Never leak the starting/ending letters here — those are paid Clue 2/3 hints below.
+                clue = "Fetching definition...";
+            } else {
+                clue = `No dictionary definition available for this ${categoryLabel} word.`;
+            }
         }
         this.wordClue = this.censorWordInClue(clue, this.targetWord);
         
@@ -1151,58 +1138,14 @@ class TeakScrambleGame {
             customFetched = await this.fetchFromWordnikAPI(wordLength);
         }
         
+        const bankPick = this.pickFromBank(cat, nextLevel);
         if (customFetched) {
             word = customFetched.word;
             clue = customFetched.clue;
-        } else if (cat === 'general') {
-            try {
-                const response = await fetch(`https://random-word-api.herokuapp.com/word?length=${wordLength}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && data[0]) {
-                        word = data[0].toUpperCase();
-                    }
-                }
-            } catch (err) {
-                console.log("Pre-fetch word failed (using offline fallback)");
-            }
-            if (word) {
-                clue = await this.fetchDictionaryDefinition(word);
-            }
-        }
-        else if (cat === 'science' || cat === 'math' || cat === 'history' || cat === 'technology' || cat === 'novel') {
-            const mlQueries = {
-                science: 'science',
-                math: 'mathematics',
-                history: 'history',
-                technology: 'technology',
-                novel: 'novel'
-            };
-            const query = mlQueries[cat];
-            try {
-                const response = await fetch(`https://api.datamuse.com/words?ml=${query}&md=d&max=150`);
-                if (response.ok) {
-                    const data = await response.json();
-                    const candidates = data.filter(item => {
-                        const w = item.word.toUpperCase();
-                        return w.length === wordLength && /^[A-Z]+$/.test(w);
-                    });
-                    if (candidates.length > 0) {
-                        const chosen = candidates[Math.floor(Math.random() * candidates.length)];
-                        word = chosen.word.toUpperCase();
-                        if (chosen.defs && chosen.defs.length > 0) {
-                            const rawDef = chosen.defs[0];
-                            const tabIdx = rawDef.indexOf('\t');
-                            clue = tabIdx !== -1 ? rawDef.substring(tabIdx + 1) : rawDef;
-                        }
-                    }
-                }
-            } catch (err) {
-                console.log("Pre-fetch word failed (using offline fallback)");
-            }
-            if (word && !clue) {
-                clue = await this.fetchDictionaryDefinition(word);
-            }
+        } else if (bankPick) {
+            // Bundled bank word + verified definition — no network, no 404s.
+            word = bankPick.word;
+            clue = bankPick.clue;
         }
         else if (cat === 'anime' || cat === 'filipino-movies') {
             const categories = {
@@ -2344,8 +2287,10 @@ class TeakScrambleGame {
         this.sound.toggleMute();
     }
 
-    openCategoryModal() {
+    openCategoryModal(fromOnboarding = false) {
         this.sound.play('select');
+        const subtitle = document.getElementById('category-modal-subtitle');
+        if (subtitle) subtitle.style.display = fromOnboarding ? '' : 'none';
         document.getElementById('category-modal-backdrop').classList.add('active');
     }
 
@@ -2377,8 +2322,12 @@ class TeakScrambleGame {
         this.sound.play('select');
         document.getElementById('onboarding-modal-backdrop').classList.remove('active');
         localStorage.setItem('ws_onboarding_seen', 'true');
-        // Still show the changelog afterward, same as every other visit.
-        setTimeout(() => this.openChangelogModal(), 300);
+        // Let a brand-new player pick a category right away instead of silently
+        // defaulting to General — the category tag is easy to miss inside the
+        // ☰ Menu, and mismatched-category words are what make definitions look
+        // "broken" to a first-timer. Skip the changelog on this run only, so we
+        // don't stack a third popup on someone who just opened the game.
+        setTimeout(() => this.openCategoryModal(true), 300);
     }
 
     openThemeModal() {
@@ -3269,12 +3218,13 @@ class TeakScrambleGame {
         const word = pool[(dayIndex * 2654435761) % pool.length].toUpperCase();
         this.targetWord = word;
 
-        this.wordClue = `Today's Daily Challenge — a ${word.length}-letter word starting with '${word[0]}' and ending with '${word[word.length - 1]}'.`;
+        this.wordClue = "Fetching definition...";
         this.fetchDictionaryDefinition(word).then(resolvedClue => {
-            if (resolvedClue && this.isDailyChallenge && this.targetWord === word) {
-                this.wordClue = this.censorWordInClue(resolvedClue, this.targetWord);
-                this.updateClueUI();
-            }
+            if (!this.isDailyChallenge || this.targetWord !== word) return; // player already moved on
+            this.wordClue = resolvedClue
+                ? this.censorWordInClue(resolvedClue, this.targetWord)
+                : `No dictionary definition available for today's ${word.length}-letter word.`;
+            this.updateClueUI();
         });
 
         let scrambled = word;
@@ -3566,10 +3516,11 @@ class TeakScrambleGame {
     }
 
     async fetchDictionaryDefinition(word) {
+        const cleanWord = word.toLowerCase();
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 3000);
-            const defRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`, {
+            const defRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${cleanWord}`, {
                 signal: controller.signal
             });
             clearTimeout(timeoutId);
@@ -3582,8 +3533,31 @@ class TeakScrambleGame {
                 }
             }
         } catch (err) {
-            console.log("Free Dictionary definition fetch failed (using fallback clue)");
+            console.log("Free Dictionary definition fetch failed (trying fallback source)");
         }
+
+        // Datamuse has definitions for a number of words the Free Dictionary
+        // API has no entry for (rarer/technical terms), so try it before giving up.
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            const dmRes = await fetch(`https://api.datamuse.com/words?sp=${cleanWord}&md=d&max=1`, {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            if (dmRes.ok) {
+                const dmData = await dmRes.json();
+                const match = dmData.find(item => item.word && item.word.toLowerCase() === cleanWord && item.defs && item.defs.length > 0);
+                if (match) {
+                    const rawDef = match.defs[0];
+                    const tabIdx = rawDef.indexOf('\t');
+                    return tabIdx !== -1 ? rawDef.substring(tabIdx + 1) : rawDef;
+                }
+            }
+        } catch (err) {
+            console.log("Datamuse definition fetch failed (using fallback clue)");
+        }
+
         return "";
     }
 

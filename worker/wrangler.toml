@@ -1,0 +1,10 @@
+name = "word-scramble-words"
+main = "src/index.mjs"
+compatibility_date = "2025-06-01"
+
+# Curated Datamuse pools are cached in Cloudflare's edge cache (caches.default),
+# so no KV/D1 bindings are required. To swap to KV for longer-lived pools, add a
+# [[kv_namespaces]] binding and store pools there instead of the Cache API.
+
+[observability]
+enabled = true

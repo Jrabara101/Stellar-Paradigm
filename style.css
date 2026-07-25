@@ -1527,6 +1527,13 @@ button:active {
     letter-spacing: 2px;
     text-shadow: 1px 1px 0px var(--turquoise), 2px 2px 0px var(--teak-dark);
 }
+.category-modal-subtitle {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--off-white);
+    opacity: 0.85;
+    margin: -10px 0 16px;
+}
 .category-grid {
     display: grid;
     grid-template-columns: 1fr;
