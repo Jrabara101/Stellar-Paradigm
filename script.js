@@ -1,5 +1,10 @@
 // --- WEB AUDIO SYNTHESIZER ---
 class SoundController {
+    // 2C: the music gain node's tuned default loudness (unchanged from the
+    // original hardcoded value) — volume sliders scale relative to this, so
+    // the 100% slider position reproduces exactly what the game always sounded like.
+    static DEFAULT_MUSIC_GAIN = 0.05;
+
     constructor() {
         this.audioCtx = null;
         this.isMuted = false;
@@ -10,11 +15,62 @@ class SoundController {
         this.currentStep = 0; // eighth notes (0 to 63)
         this.isPlayingMusic = false;
         this.musicGainNode = null;
+        this.sfxGainNode = null; // 2C: shared gain all one-shot SFX route through
+
+        // 2C: independent Music/SFX enable flags + relative volume (0-100%),
+        // layered on top of (not replacing) the existing master isMuted toggle.
+        this.musicEnabled = localStorage.getItem('ws_audio_music_enabled') !== 'false';
+        this.sfxEnabled = localStorage.getItem('ws_audio_sfx_enabled') !== 'false';
+        this.musicVolumePct = this._loadPct('ws_audio_music_volume');
+        this.sfxVolumePct = this._loadPct('ws_audio_sfx_volume');
+    }
+
+    _loadPct(key) {
+        const v = parseInt(localStorage.getItem(key), 10);
+        return (isNaN(v) || v < 0 || v > 100) ? 100 : v;
     }
 
     init() {
         if (this.audioCtx) return;
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this.sfxGainNode = this.audioCtx.createGain();
+        this.sfxGainNode.gain.value = this.sfxVolumePct / 100;
+        this.sfxGainNode.connect(this.audioCtx.destination);
+    }
+
+    setMusicVolume(pct) {
+        this.musicVolumePct = pct;
+        localStorage.setItem('ws_audio_music_volume', pct);
+        // Direct assignment (not setValueAtTime) — a live slider needs the
+        // change to land instantly; setValueAtTime's scheduled-event semantics
+        // mean a synchronous .value read-back right after can still show the
+        // old value until the audio render thread reaches that timestamp.
+        if (this.musicGainNode) {
+            this.musicGainNode.gain.value = (pct / 100) * SoundController.DEFAULT_MUSIC_GAIN;
+        }
+    }
+
+    setSfxVolume(pct) {
+        this.sfxVolumePct = pct;
+        localStorage.setItem('ws_audio_sfx_volume', pct);
+        if (this.sfxGainNode) {
+            this.sfxGainNode.gain.value = pct / 100;
+        }
+    }
+
+    setMusicEnabled(enabled) {
+        this.musicEnabled = enabled;
+        localStorage.setItem('ws_audio_music_enabled', enabled);
+        if (enabled) {
+            if (!this.isMuted) this.startBackgroundMusic();
+        } else {
+            this.stopBackgroundMusic();
+        }
+    }
+
+    setSfxEnabled(enabled) {
+        this.sfxEnabled = enabled;
+        localStorage.setItem('ws_audio_sfx_enabled', enabled);
     }
 
     toggleMute() {
@@ -33,7 +89,7 @@ class SoundController {
 
     startBackgroundMusic() {
         this.init();
-        if (!this.audioCtx || this.isMuted || this.isPlayingMusic) return;
+        if (!this.audioCtx || this.isMuted || this.isPlayingMusic || !this.musicEnabled) return;
 
         if (this.audioCtx.state === 'suspended') {
             this.audioCtx.resume().catch(() => {});
@@ -41,7 +97,8 @@ class SoundController {
 
         if (!this.musicGainNode) {
             this.musicGainNode = this.audioCtx.createGain();
-            this.musicGainNode.gain.setValueAtTime(0.05, this.audioCtx.currentTime); // Louder background music
+            this.musicGainNode.gain.setValueAtTime(
+                (this.musicVolumePct / 100) * SoundController.DEFAULT_MUSIC_GAIN, this.audioCtx.currentTime);
             this.musicGainNode.connect(this.audioCtx.destination);
         }
 
@@ -158,7 +215,7 @@ class SoundController {
 
     play(type, opt) {
         this.init();
-        if (!this.audioCtx || this.isMuted) return;
+        if (!this.audioCtx || this.isMuted || !this.sfxEnabled) return;
 
         if (this.audioCtx.state === 'suspended') {
             this.audioCtx.resume().catch(() => {});
@@ -177,7 +234,7 @@ class SoundController {
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
             
             osc.connect(gain);
-            gain.connect(this.audioCtx.destination);
+            gain.connect(this.sfxGainNode);
             osc.start(now);
             osc.stop(now + 0.08);
         } 
@@ -192,7 +249,7 @@ class SoundController {
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
             
             osc.connect(gain);
-            gain.connect(this.audioCtx.destination);
+            gain.connect(this.sfxGainNode);
             osc.start(now);
             osc.stop(now + 0.12);
         }
@@ -207,7 +264,7 @@ class SoundController {
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
             
             osc.connect(gain);
-            gain.connect(this.audioCtx.destination);
+            gain.connect(this.sfxGainNode);
             osc.start(now);
             osc.stop(now + 0.25);
         }
@@ -226,7 +283,7 @@ class SoundController {
             
             osc1.connect(gain);
             osc2.connect(gain);
-            gain.connect(this.audioCtx.destination);
+            gain.connect(this.sfxGainNode);
             
             osc1.start(now);
             osc2.start(now);
@@ -247,7 +304,7 @@ class SoundController {
                 gain.gain.exponentialRampToValueAtTime(0.001, time + 0.4);
 
                 osc.connect(gain);
-                gain.connect(this.audioCtx.destination);
+                gain.connect(this.sfxGainNode);
 
                 osc.start(time);
                 osc.stop(time + 0.4);
@@ -270,7 +327,7 @@ class SoundController {
 
             osc1.connect(gain);
             osc2.connect(gain);
-            gain.connect(this.audioCtx.destination);
+            gain.connect(this.sfxGainNode);
             osc1.start(now);
             osc2.start(now);
             osc1.stop(now + 0.22);
@@ -291,7 +348,7 @@ class SoundController {
                 gain.gain.exponentialRampToValueAtTime(0.001, time + 0.09);
 
                 osc.connect(gain);
-                gain.connect(this.audioCtx.destination);
+                gain.connect(this.sfxGainNode);
                 osc.start(time);
                 osc.stop(time + 0.09);
             }
@@ -310,7 +367,7 @@ class SoundController {
                 gain.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
 
                 osc.connect(gain);
-                gain.connect(this.audioCtx.destination);
+                gain.connect(this.sfxGainNode);
                 osc.start(time);
                 osc.stop(time + 0.18);
             });
@@ -326,7 +383,7 @@ class SoundController {
                 gain.gain.exponentialRampToValueAtTime(0.001, time + 0.7);
 
                 osc.connect(gain);
-                gain.connect(this.audioCtx.destination);
+                gain.connect(this.sfxGainNode);
                 osc.start(time);
                 osc.stop(time + 0.7);
             });
@@ -349,7 +406,7 @@ class SoundController {
 
                 osc.connect(gain);
                 partial.connect(gain);
-                gain.connect(this.audioCtx.destination);
+                gain.connect(this.sfxGainNode);
                 osc.start(time);
                 partial.start(time);
                 osc.stop(time + 1.1);
@@ -755,6 +812,10 @@ class TeakScrambleGame {
             wave: localStorage.getItem('ws_fx_wave') !== 'false',
             streakFire: localStorage.getItem('ws_fx_streakFire') !== 'false',
             victoryGlow: localStorage.getItem('ws_fx_victoryGlow') !== 'false',
+            streakEscalation: localStorage.getItem('ws_fx_streakEscalation') !== 'false',
+            idleShimmer: localStorage.getItem('ws_fx_idleShimmer') !== 'false',
+            dropPreview: localStorage.getItem('ws_fx_dropPreview') !== 'false',
+            haptics: localStorage.getItem('ws_fx_haptics') !== 'false',
             // Unlike the effects above, Performance Mode defaults OFF —
             // it's an opt-in trade of visual polish for speed.
             performanceMode: localStorage.getItem('ws_fx_performanceMode') === 'true'
@@ -1469,6 +1530,7 @@ class TeakScrambleGame {
         if (this._dashedSlots) {
             this._dashedSlots.forEach(el => el.classList.remove('drag-hover'));
         }
+        this._clearDropPreview();
         this._dragSnapTargets = [];
         this._dashedSlots = null;
 
@@ -1497,10 +1559,12 @@ class TeakScrambleGame {
                 this.moveTileTo(tileObj, destType, destIdx);
                 this.moveTileTo(occupant, srcLocation, srcIdx);
                 this.sound.play('drop');
+                this._vibrate(10);
             } else {
                 // Clear slot and move in
                 this.moveTileTo(tileObj, destType, destIdx);
                 this.sound.play('drop');
+                this._vibrate(10);
             }
         } else {
             // return to start
@@ -1536,6 +1600,7 @@ class TeakScrambleGame {
 
         // Highlight slot outline if dragged over target cell paths
         this._dashedSlots.forEach(el => el.classList.remove('drag-hover'));
+        this._clearDropPreview();
 
         if (bestCell) {
             this.hoveredCell = bestCell;
@@ -1543,11 +1608,34 @@ class TeakScrambleGame {
                 const innerSlot = bestCell.element.querySelector('.dashed-slot');
                 if (innerSlot) {
                     innerSlot.classList.add('drag-hover');
+                    // 2C: snap/drop letter preview — only on an empty target,
+                    // so it never overlaps an existing wood-tile (swap targets
+                    // are intentionally left unpreviewed to avoid visual clash).
+                    if (!this.boardOccupants[bestCell.index]) {
+                        this._showDropPreview(innerSlot);
+                    }
                 }
+            } else if (bestCell.type === 'rack' && !this.rackSlots[bestCell.index]) {
+                this._showDropPreview(bestCell.element);
             }
         } else {
             this.hoveredCell = null;
         }
+    }
+
+    // 2C: drop-preview letter — a faint ghost of the dragged tile's letter in
+    // the currently-hovered empty landing zone. Named to avoid colliding with
+    // the unrelated neon-effect "ghost" trail (spawnNeonGhost/particle type 'ghost').
+    _showDropPreview(hostEl) {
+        if (!this.activeDragTile || !this.effectsSettings.dropPreview) return;
+        const span = document.createElement('span');
+        span.className = 'drop-preview';
+        span.textContent = this.activeDragTile.char;
+        hostEl.appendChild(span);
+    }
+
+    _clearDropPreview() {
+        document.querySelectorAll('.drop-preview').forEach(el => el.remove());
     }
 
     registerGlobalEvents() {
@@ -1558,6 +1646,12 @@ class TeakScrambleGame {
 
         window.addEventListener('mouseup', (e) => this.dragEnd(e));
         window.addEventListener('touchend', (e) => this.dragEnd(e));
+
+        // 2C: idle-shimmer activity tracking — reset the idle countdown on any input.
+        const resetIdle = () => this._resetIdleTimer();
+        ['pointerdown', 'pointermove', 'keydown', 'touchstart', 'wheel'].forEach(ev =>
+            window.addEventListener(ev, resetIdle, { passive: true }));
+        this._resetIdleTimer();
 
         window.addEventListener('resize', () => {
             this.syncViewPositions(false);
@@ -1585,6 +1679,7 @@ class TeakScrambleGame {
 
         if (playerWord === this.targetWord) {
             this.sound.play('win');
+            this._vibrate([20, 40, 20]);
             if (this.effectsSettings.shockwave) {
                 this.triggerShockwave();
             }
@@ -2052,12 +2147,28 @@ class TeakScrambleGame {
             localStorage.setItem(key, JSON.stringify(earned));
             // Delay the fanfare so it lands after the win arpeggio finishes
             setTimeout(() => this.sound.play('fanfare'), 700);
-            newlyEarned.forEach(a => {
-                window.stellarWallet?._showStatus(`Achievement unlocked: ${a.label}`, 'success');
+            // Badge-stamp toast (2C) — staggered so simultaneous unlocks queue
+            // instead of overlapping (each stamp runs ~2.6s).
+            newlyEarned.forEach((a, i) => {
+                setTimeout(() => this.showAchievementStamp(a.label), 700 + i * 2800);
             });
         }
 
         return newlyEarned;
+    }
+
+    // 2C: badge-stamp settle animation for a newly-earned achievement — the
+    // choreographed victory sequence's new visual (see .achievement-toast).
+    showAchievementStamp(label) {
+        const toast = document.getElementById('achievement-toast');
+        const labelEl = document.getElementById('achievement-toast-label');
+        if (!toast || !labelEl) return;
+        labelEl.textContent = label;
+        toast.classList.remove('active');
+        void toast.offsetWidth; // restart the animation if one is already mid-flight
+        toast.classList.add('active');
+        if (this._achievementToastTimer) clearTimeout(this._achievementToastTimer);
+        this._achievementToastTimer = setTimeout(() => toast.classList.remove('active'), 2600);
     }
 
     // Tween the score display up to its new value with a bubble pulse.
@@ -2107,6 +2218,31 @@ class TeakScrambleGame {
         bubble.classList.toggle('streak-tier-1', this.winStreak >= 3 && this.winStreak < 7);
         bubble.classList.toggle('streak-tier-2', this.winStreak >= 7 && this.winStreak < 10);
         bubble.classList.toggle('streak-glow-active', this.winStreak >= 10);
+        // 2C: top-tier escalation — a screen-edge ember vignette at 10+ streak
+        // (extends the winStreak tiers per the resolved decision; combo caps at ×3).
+        document.body.classList.toggle('streak-max',
+            this.winStreak >= 10 && !!(this.effectsSettings && this.effectsSettings.streakEscalation) && !(this.effectsSettings && this.effectsSettings.performanceMode));
+    }
+
+    // 2C: haptic feedback on tile placement / win — feature-detected and
+    // gated by its own Effects toggle. Silently no-ops on unsupported devices
+    // (desktop browsers, iOS Safari) and if the toggle is off.
+    _vibrate(pattern) {
+        if (!this.effectsSettings.haptics) return;
+        if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') return;
+        try { navigator.vibrate(pattern); } catch (e) { /* ignore */ }
+    }
+
+    // 2C: idle tile shimmer — after ~20s with no interaction, sweep light over
+    // the rack tiles as a gentle "your move" affordance. Any input clears it.
+    _resetIdleTimer() {
+        document.body.classList.remove('idle-shimmer');
+        if (this._idleTimer) clearTimeout(this._idleTimer);
+        this._idleTimer = setTimeout(() => {
+            if (this.effectsSettings && this.effectsSettings.idleShimmer && !this.effectsSettings.performanceMode) {
+                document.body.classList.add('idle-shimmer');
+            }
+        }, 20000);
     }
 
     async nextLevel() {
@@ -2410,11 +2546,19 @@ class TeakScrambleGame {
     static TILE_FONT_LAZY = ['dyslexic', 'bungee', 'pressstart'];
     static TILE_FONT_PREMIUM = ['bungee', 'pressstart'];
     static TILE_EFFECT_PREMIUM = ['volcanic', 'holographic', 'ice-crystal', 'stained-glass'];
+    // LEGEND-exclusive effects — a higher tier than the GOLD/LEGEND-shared premium set.
+    static TILE_EFFECT_LEGEND = ['aurora'];
 
     // Shared badge gate for cosmetic unlocks (tile fonts, tile effects, ...).
     isCosmeticUnlocked() {
         const badges = (window.stellarWallet && window.stellarWallet.cachedBadges) || [];
         return badges.includes('GOLD') || badges.includes('LEGEND');
+    }
+
+    // LEGEND-only gate (no GOLD fallback) for the top tier of cosmetics (Aurora).
+    isLegendCosmeticUnlocked() {
+        const badges = (window.stellarWallet && window.stellarWallet.cachedBadges) || [];
+        return badges.includes('LEGEND');
     }
 
     isTileFontUnlocked() {
@@ -2525,9 +2669,26 @@ class TeakScrambleGame {
             const card = document.getElementById(`tile-effect-card-${effectId}`);
             if (card) card.classList.toggle('locked', !unlocked);
         });
+        const legendUnlocked = this.isLegendCosmeticUnlocked();
+        TeakScrambleGame.TILE_EFFECT_LEGEND.forEach(effectId => {
+            const card = document.getElementById(`tile-effect-card-${effectId}`);
+            if (card) card.classList.toggle('locked', !legendUnlocked);
+        });
     }
 
     switchTileEffect(effectId) {
+        const isLegend = TeakScrambleGame.TILE_EFFECT_LEGEND.includes(effectId);
+        if (isLegend && !this.isLegendCosmeticUnlocked()) {
+            this.sound.play('select');
+            if (window.stellarWallet) {
+                const msg = window.stellarWallet.connected
+                    ? 'Aurora is LEGEND-exclusive — reach 1000+ points to earn the LEGEND badge and unlock it.'
+                    : 'Connect your wallet and earn the LEGEND badge (1000+ points) to unlock the Aurora effect.';
+                window.stellarWallet._showStatus(msg, 'error');
+            }
+            this.updateTileEffectsModalHighlight(); // keep lock state in sync, modal stays open
+            return;
+        }
         const isPremium = TeakScrambleGame.TILE_EFFECT_PREMIUM.includes(effectId);
         if (isPremium && !this.isCosmeticUnlocked()) {
             this.sound.play('select');
@@ -2567,6 +2728,7 @@ class TeakScrambleGame {
             if (effectId === 'holographic') label = 'Holographic';
             if (effectId === 'ice-crystal') label = 'Ice Crystal';
             if (effectId === 'stained-glass') label = 'Stained Glass';
+            if (effectId === 'aurora') label = 'Aurora';
             btn.innerText = `Tile Effect: ${label}`;
         }
 
@@ -3175,6 +3337,66 @@ class TeakScrambleGame {
         }
     }
 
+    // ---------------------------------------------------------------------
+    // SCRAMBLE BOARD (v2.0.0) — multiplayer 15x15 tile game.
+    // The whole engine lives in scramble-board.js (a self-contained module)
+    // and is lazy-loaded on first entry, mirroring _ensureLazyThemeCSS().
+    // These three thin methods are the only Scramble hooks in this class.
+    // ---------------------------------------------------------------------
+    _ensureScrambleAssets() {
+        if (this._scramblePromise) return this._scramblePromise;
+        const loadScript = (src) => new Promise((res, rej) => {
+            const s = document.createElement('script');
+            s.src = src;
+            s.onload = res;
+            s.onerror = () => rej(new Error('Failed to load ' + src));
+            document.head.appendChild(s);
+        });
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = 'scramble-board.css';
+        document.head.appendChild(css);
+        // Word list must be present before the engine builds its dictionary,
+        // so load it first, then the engine module.
+        this._scramblePromise = loadScript('scramble-words.js')
+            .then(() => loadScript('scramble-board.js'));
+        return this._scramblePromise;
+    }
+
+    async startScrambleBoard() {
+        const dropdown = document.getElementById('menu-dropdown');
+        dropdown?.classList.remove('open');
+        dropdown?.closest('.header-container')?.classList.remove('menu-open');
+
+        const menuBtn = document.getElementById('scramble-board-btn');
+        if (menuBtn) { menuBtn.disabled = true; menuBtn.textContent = '🎲 Loading…'; }
+        try {
+            await this._ensureScrambleAssets();
+        } catch (e) {
+            console.error(e);
+            this._scramblePromise = null; // allow retry
+            alert('Could not load Scramble Board. Check your connection and try again.');
+            return;
+        } finally {
+            if (menuBtn) { menuBtn.disabled = false; menuBtn.textContent = '🎲 Scramble Board'; }
+        }
+        if (!window.ScrambleBoardGame) return;
+        if (!this._scrambleGame) {
+            this._scrambleGame = new window.ScrambleBoardGame(this);
+            window.scrambleGame = this._scrambleGame;
+        }
+        this.sound.play('select');
+        // Opens the setup modal (players / difficulty / target) → dice roll for
+        // turn order → match. Opponents are drawn from the on-chain leaderboard.
+        this._scrambleGame.openSetup();
+    }
+
+    exitScrambleBoard() {
+        // The overlay hides itself (ScrambleBoardGame.quit). Classic play sits
+        // underneath untouched, so there is nothing to restore in C1.
+        this.sound.play('select');
+    }
+
     // hintsUsed: 0, 1, or 2 (derived from clueLevel at the moment of winning)
     buildDailyEmojiGrid(hintsUsed) {
         const total = 3;
@@ -3420,7 +3642,11 @@ class TeakScrambleGame {
             scorePop: document.getElementById('fx-switch-scorePop'),
             wave: document.getElementById('fx-switch-wave'),
             streakFire: document.getElementById('fx-switch-streakFire'),
-            victoryGlow: document.getElementById('fx-switch-victoryGlow')
+            victoryGlow: document.getElementById('fx-switch-victoryGlow'),
+            streakEscalation: document.getElementById('fx-switch-streakEscalation'),
+            idleShimmer: document.getElementById('fx-switch-idleShimmer'),
+            dropPreview: document.getElementById('fx-switch-dropPreview'),
+            haptics: document.getElementById('fx-switch-haptics')
         };
         for (const [key, element] of Object.entries(switches)) {
             if (element) {
@@ -3466,6 +3692,51 @@ class TeakScrambleGame {
         } else {
             document.body.removeAttribute('data-performance-mode');
         }
+    }
+
+    // --- Audio Settings Popover (2C) ---
+    openAudioModal() {
+        this.sound.play('select');
+        document.getElementById('audio-switch-music').checked = this.sound.musicEnabled;
+        document.getElementById('audio-switch-sfx').checked = this.sound.sfxEnabled;
+        document.getElementById('audio-slider-music').value = this.sound.musicVolumePct;
+        document.getElementById('audio-slider-music-val').textContent = `${this.sound.musicVolumePct}%`;
+        document.getElementById('audio-slider-sfx').value = this.sound.sfxVolumePct;
+        document.getElementById('audio-slider-sfx-val').textContent = `${this.sound.sfxVolumePct}%`;
+        document.getElementById('audio-modal-backdrop').classList.add('active');
+    }
+
+    closeAudioModal(event) {
+        if (!event || event.target === document.getElementById('audio-modal-backdrop')) {
+            this.sound.play('select');
+            document.getElementById('audio-modal-backdrop').classList.remove('active');
+        }
+    }
+
+    toggleMusicEnabled() {
+        const enabled = document.getElementById('audio-switch-music').checked;
+        this.sound.setMusicEnabled(enabled);
+        this.sound.play('select');
+    }
+
+    toggleSfxEnabled() {
+        // Flip first, then let the (now-updated) sfxEnabled gate this click's
+        // own confirmation blip — so enabling plays a sound, disabling doesn't.
+        const enabled = document.getElementById('audio-switch-sfx').checked;
+        this.sound.setSfxEnabled(enabled);
+        if (enabled) this.sound.play('select');
+    }
+
+    setMusicVolume(val) {
+        const pct = parseInt(val, 10);
+        this.sound.setMusicVolume(pct);
+        document.getElementById('audio-slider-music-val').textContent = `${pct}%`;
+    }
+
+    setSfxVolume(val) {
+        const pct = parseInt(val, 10);
+        this.sound.setSfxVolume(pct);
+        document.getElementById('audio-slider-sfx-val').textContent = `${pct}%`;
     }
 
     previewVictoryEffect(type) {

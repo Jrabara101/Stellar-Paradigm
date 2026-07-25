@@ -162,6 +162,58 @@
 .stellar-status--error   { background: #c62828; color: #fff; }
 .stellar-status--info    { background: var(--teak-dark, #5C3A21); color: var(--mustard, #E1AD01); border: 1px solid var(--mustard, #E1AD01); }
 
+/* ==========================================================================
+   PHASE 2C — Achievement badge-stamp toast (choreographed victory sequence's
+   new visual, per the resolved decision to build a stamp keyframe rather than
+   drop the idea). Distinct from .stellar-status so it never competes with
+   wallet tx messages.
+   ========================================================================== */
+.achievement-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 2500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 26px;
+    border-radius: 12px;
+    background: linear-gradient(160deg, var(--mustard, #E1AD01), var(--mustard-dark, #DAA520));
+    color: var(--teak-dark, #5C3A21);
+    border: 3px solid var(--teak-dark, #5C3A21);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    font-weight: 900;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -50%) scale(1.8) rotate(-8deg);
+}
+.achievement-toast-icon { font-size: 1.4rem; }
+.achievement-toast.active {
+    visibility: visible;
+    animation: badge-stamp-settle 2.6s cubic-bezier(0.2, 1, 0.4, 1) forwards;
+}
+@keyframes badge-stamp-settle {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(1.8) rotate(-8deg); }
+    12%  { opacity: 1; transform: translate(-50%, -50%) scale(0.94) rotate(2deg); }
+    20%  { transform: translate(-50%, -50%) scale(1.04) rotate(-1deg); }
+    28%, 82% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+}
+body[data-performance-mode="true"] .achievement-toast.active {
+    animation-name: achievement-fade-only;
+}
+@keyframes achievement-fade-only {
+    0%, 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .achievement-toast.active { animation-name: achievement-fade-only; }
+}
+
 :root {
     /* Mid-Century Modern Palette */
     --teak-base: #8B5A2B;
@@ -178,6 +230,13 @@
     
     /* Organic Friction Easing Curve */
     --slide-snap: cubic-bezier(0.25, 1, 0.5, 1);
+
+    /* 2C: fluid board-cell size — replaces the old fixed-40px + 520px-breakpoint-
+       patch approach. Consumed by .grid-container/.grid-cell/.rack-slot; actual
+       wood-tile pixel size still comes from syncViewPositions()'s live
+       getBoundingClientRect() measurement, so tiles always match whatever this
+       resolves to at the current viewport. */
+    --cell-size: clamp(26px, min(4.2vh, 8.5vw), 44px);
 }
 
 * {
@@ -566,8 +625,8 @@ h1 {
 /* Go/Chess 10x10 Grid Background */
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(10, 40px);
-    grid-template-rows: repeat(10, 40px);
+    grid-template-columns: repeat(10, var(--cell-size));
+    grid-template-rows: repeat(10, var(--cell-size));
     gap: 2px;
     background-color: var(--theme-grid-bg, var(--teak-dark));
     border: var(--theme-grid-border, 4px solid var(--teak-dark));
@@ -579,8 +638,8 @@ h1 {
 
 /* Grid cells styling */
 .grid-cell {
-    width: 40px;
-    height: 40px;
+    width: var(--cell-size);
+    height: var(--cell-size);
     border-radius: 2px;
     position: relative;
     box-shadow: var(--theme-cell-shadow,
@@ -608,11 +667,39 @@ h1 {
     background-color: rgba(225, 173, 1, 0.15);
 }
 
+/* 2C: drop-preview letter — faint ghost of the dragged tile's letter shown in
+   the hovered empty landing zone (board dashed-slot or rack-slot). */
+.drop-preview {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.3rem;
+    font-family: inherit;
+    color: var(--mustard);
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: 3;
+    animation: drop-preview-in 0.12s ease-out;
+}
+@keyframes drop-preview-in {
+    from { opacity: 0; transform: scale(0.65); }
+    to { opacity: 0.55; transform: scale(1); }
+}
+body[data-performance-mode="true"] .drop-preview { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+    .drop-preview { animation: none !important; }
+}
+
 /* Inlaid Status/Clue Vacuum Tube Monitor */
 .clue-panel {
-    /* Match the 10x10 grid width (10x40px + 9x2px gaps + padding + border = 430px)
-       so long definitions wrap instead of stretching the whole board plate wider. */
-    width: 430px;
+    /* Match the 10x10 grid's actual rendered width (10 cells + 9x2px gaps +
+       2px padding each side + 4px border each side) so long definitions wrap
+       instead of stretching the whole board plate wider. Tracks --cell-size
+       fluidly instead of the old fixed 430px (= 10*40 + 18 + 4 + 8). */
+    width: calc(10 * var(--cell-size) + 30px);
     max-width: 100%;
     background: var(--theme-clue-bg, rgba(40, 20, 10, 0.45));
     border: var(--theme-clue-border, 2.5px solid var(--teak-dark));
@@ -944,8 +1031,9 @@ button:active {
     margin-bottom: 2px;
 }
 .rack-slot {
-    width: 52px;
-    height: 52px;
+    position: relative;
+    width: var(--cell-size);
+    height: var(--cell-size);
     background: transparent;
 }
 .rack-shelf {
@@ -1735,16 +1823,9 @@ button:active {
         width: 95vw;
         max-width: 460px;
     }
-    .grid-container {
-        grid-template-columns: repeat(10, min(36px, 8.5vw));
-        grid-template-rows: repeat(10, min(36px, 8.5vw));
-        gap: 1.5px;
-        padding: 1.5px;
-    }
-    .grid-cell, .dashed-slot {
-        width: 100%;
-        height: 100%;
-    }
+    /* .grid-container / .grid-cell / .rack-slot sizing is fluid via
+       --cell-size at every width now (2C) — no breakpoint patch needed here
+       anymore; the old fixed-px overrides were deleted. */
     .wood-tile {
         box-shadow: 
             0 4px 0 var(--teak-dark),
@@ -1768,10 +1849,6 @@ button:active {
         gap: 4px;
         justify-content: center;
         width: 100%;
-    }
-    .rack-slot {
-        width: min(42px, 9.5vw);
-        height: min(42px, 9.5vw);
     }
     /* Removed level-panel responsive overrides */
         body {
@@ -2496,6 +2573,45 @@ input:checked + .retro-slider:before {
     transform: translateX(24px);
     background-color: var(--mustard);
 }
+
+/* 2C: Audio popover volume sliders — matches the retro-switch tactility. */
+.audio-volume-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    border-radius: 6px;
+    background: rgba(0,0,0,0.25);
+    border: 2px solid var(--teak-dark);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+    cursor: pointer;
+}
+.audio-volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: var(--mustard);
+    border: 1.5px solid var(--teak-dark);
+    box-shadow: 0 1.5px 3px rgba(0,0,0,0.3);
+    cursor: pointer;
+    margin-top: -1px;
+}
+.audio-volume-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: var(--mustard);
+    border: 1.5px solid var(--teak-dark);
+    box-shadow: 0 1.5px 3px rgba(0,0,0,0.3);
+    cursor: pointer;
+}
+.audio-volume-slider:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
 .preview-btn {
     border: 2px solid var(--teak-dark);
     border-radius: 6px;
@@ -3774,6 +3890,97 @@ body[data-chip-material="pearl"] .wood-tile {
 }
 
 /* ==========================================================================
+   PHASE 2B — Terrazzo + Cork chips (free) and the Aurora LEGEND-only effect
+   ========================================================================== */
+
+/* 12. Terrazzo Chip — off-white with multi-color speck scatter */
+body[data-chip-material="terrazzo"] .wood-tile {
+    background:
+        radial-gradient(circle at 20% 30%, #e07a5f 0 2px, transparent 2.6px),
+        radial-gradient(circle at 72% 24%, #3d9970 0 2.4px, transparent 3px),
+        radial-gradient(circle at 40% 72%, #f2cc8f 0 2px, transparent 2.6px),
+        radial-gradient(circle at 82% 66%, #6a8cc7 0 1.8px, transparent 2.3px),
+        radial-gradient(circle at 55% 45%, #c44536 0 1.5px, transparent 2px),
+        #f4f1e8;
+    color: #4a3728;
+    border: 2px solid #cfc7b3;
+}
+
+/* 13. Cork Chip — warm speckled tan */
+body[data-chip-material="cork"] .wood-tile {
+    background:
+        radial-gradient(circle at 30% 40%, rgba(120,72,30,0.38) 0 1.5px, transparent 2px),
+        radial-gradient(circle at 66% 60%, rgba(90,54,20,0.32) 0 1.8px, transparent 2.3px),
+        radial-gradient(circle at 50% 24%, rgba(140,90,40,0.28) 0 1.2px, transparent 1.7px),
+        radial-gradient(circle at 78% 30%, rgba(120,72,30,0.30) 0 1.3px, transparent 1.8px),
+        linear-gradient(160deg, #d8a86a 0%, #c28e4e 100%);
+    color: #4a2f16;
+    border: 2px solid #9a6b34;
+    text-shadow: 0px 1px 0px rgba(255,255,255,0.2);
+}
+
+/* Aurora — LEGEND-exclusive premium tile effect (northern-lights ribbon sweep).
+   hue-rotate + a translating gradient ::after, intensifying while dragging.
+   Follows volcanic's ::after layering + holographic's idle→drag keyframe swap. */
+body[data-tile-effect="aurora"] .wood-tile {
+    background: linear-gradient(145deg, #0d1b2a 0%, #10243a 100%) !important;
+    color: #eafcff !important;
+    border: 2px solid #1c3a52 !important;
+    text-shadow: 0 0 6px rgba(120,255,230,0.6) !important;
+    box-shadow: 0 5px 0 #081420, 0 8px 16px rgba(0,0,0,0.6) !important;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+body[data-tile-effect="aurora"] .wood-tile::after {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    background: linear-gradient(115deg,
+        transparent 0%,
+        rgba(64,224,208,0.5) 20%,
+        rgba(120,90,220,0.5) 40%,
+        rgba(80,220,140,0.5) 60%,
+        rgba(64,224,208,0.5) 80%,
+        transparent 100%);
+    background-size: 300% 300%;
+    filter: hue-rotate(0deg) blur(2px);
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: -1;
+    animation: aurora-sweep 6s linear infinite;
+}
+@keyframes aurora-sweep {
+    0%   { background-position: 0% 50%; filter: hue-rotate(0deg) blur(2px); }
+    50%  { background-position: 100% 50%; filter: hue-rotate(180deg) blur(2px); }
+    100% { background-position: 0% 50%; filter: hue-rotate(360deg) blur(2px); }
+}
+body[data-tile-effect="aurora"] .wood-tile:hover {
+    --tile-extra-transform: scale(1.06) translateY(-2px);
+    box-shadow: 0 8px 0 #081420, 0 12px 22px rgba(64,224,208,0.4) !important;
+}
+body[data-tile-effect="aurora"] .wood-tile.dragging {
+    --tile-extra-transform: scale(1.18);
+    box-shadow: 0 12px 0 #081420, 0 18px 30px rgba(120,90,220,0.6) !important;
+}
+body[data-tile-effect="aurora"] .wood-tile.dragging::after {
+    opacity: 0.9;
+    animation: aurora-sweep 1.8s linear infinite;
+}
+body[data-tile-effect="aurora"] .wood-tile.inlaid::after { opacity: 0.28; }
+body[data-tile-effect="aurora"] .wood-tile.locked {
+    border-color: #40E0D0 !important;
+    box-shadow: 0 2px 0 #00CED1, 0 0 14px rgba(64,224,208,0.6) !important;
+}
+
+/* Aurora respects the app's performance-mode / reduced-motion convention */
+body[data-performance-mode="true"][data-tile-effect="aurora"] .wood-tile::after,
+body[data-tile-effect="aurora"] .wood-tile.inlaid::after { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+    body[data-tile-effect="aurora"] .wood-tile::after { animation: none; }
+}
+
+/* ==========================================================================
    WIN CASCADE GOLD RIPPLE (rides the bounce cascade stagger)
    ========================================================================== */
 .grid-cell.cascade-gold::after {
@@ -3854,6 +4061,61 @@ body[data-chip-material="pearl"] .wood-tile {
 }
 
 /* ==========================================================================
+   PHASE 2C — Streak-max ember vignette (10+ streak) + idle tile shimmer.
+   Both gated in JS by their ws_fx toggle + performance mode; reduced-motion
+   is handled by the CSS guard below (JS can't read that media query).
+   ========================================================================== */
+body.streak-max::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 900;
+    box-shadow:
+        inset 0 0 90px 10px rgba(255, 96, 0, 0.28),
+        inset 0 0 200px 40px rgba(255, 64, 0, 0.14);
+    animation: streak-vignette-pulse 2.2s ease-in-out infinite;
+}
+@keyframes streak-vignette-pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+/* Idle shimmer — only when no tile effect is active (tile effects own ::after) */
+body[data-tile-effect="none"].idle-shimmer .wood-tile:not(.locked):not(.inlaid) {
+    overflow: hidden;
+}
+body[data-tile-effect="none"].idle-shimmer .wood-tile:not(.locked):not(.inlaid)::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 55%;
+    height: 100%;
+    background: linear-gradient(105deg, transparent, rgba(255,255,255,0.55), transparent);
+    transform: skewX(-18deg);
+    pointer-events: none;
+    z-index: 2;
+    animation: idle-shimmer-sweep 2.6s ease-in-out infinite;
+}
+@keyframes idle-shimmer-sweep {
+    0% { left: -120%; }
+    55%, 100% { left: 170%; }
+}
+body[data-performance-mode="true"].streak-max::after,
+body[data-performance-mode="true"].idle-shimmer .wood-tile:not(.locked):not(.inlaid)::after {
+    animation: none !important;
+    display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+    body.streak-max::after,
+    body.idle-shimmer .wood-tile:not(.locked):not(.inlaid)::after {
+        animation: none !important;
+        display: none;
+    }
+}
+
+/* ==========================================================================
    MODAL SPRING ENTRANCE (lift + overshoot; close still fades/settles out)
    ========================================================================== */
 .category-modal, .theme-modal, .leaderboard-modal, .changelog-modal, .api-settings-modal {
@@ -3866,6 +4128,57 @@ body[data-chip-material="pearl"] .wood-tile {
 .modal-backdrop.active .changelog-modal,
 .modal-backdrop.active .api-settings-modal {
     transform: scale(1) translateY(0);
+}
+
+/* ==========================================================================
+   PHASE 2C — Mobile bottom-sheets. On narrow screens, modals dock to the
+   bottom edge and slide up (thumb-reachable) instead of springing in
+   centered. The descendant-combinator selectors below (specificity 0,2,0)
+   intentionally outrank the single-class rules above (0,1,0) regardless of
+   source order, so this safely overrides the desktop scale/translateY entrance.
+   Scoped to the modals sharing .modal-backdrop; Scramble Board's own
+   scr-*-backdrop modals are a separate, already-shipped system (out of scope).
+   ========================================================================== */
+@media (max-width: 520px) {
+    .modal-backdrop {
+        align-items: flex-end;
+    }
+    .modal-backdrop .category-modal,
+    .modal-backdrop .theme-modal,
+    .modal-backdrop .leaderboard-modal,
+    .modal-backdrop .changelog-modal,
+    .modal-backdrop .api-settings-modal,
+    .modal-backdrop .wallet-guide-box,
+    .modal-backdrop .feedback-box {
+        width: 100%;
+        max-width: 100%;
+        max-height: 85vh;
+        overflow-y: auto;
+        margin: 0;
+        border-radius: 20px 20px 0 0;
+        transform: translateY(100%);
+        transition: transform 0.32s cubic-bezier(0.3, 1, 0.5, 1);
+    }
+    .modal-backdrop.active .category-modal,
+    .modal-backdrop.active .theme-modal,
+    .modal-backdrop.active .leaderboard-modal,
+    .modal-backdrop.active .changelog-modal,
+    .modal-backdrop.active .api-settings-modal,
+    .modal-backdrop.active .wallet-guide-box,
+    .modal-backdrop.active .feedback-box {
+        transform: translateY(0);
+    }
+}
+@media (max-width: 520px) and (prefers-reduced-motion: reduce) {
+    .modal-backdrop .category-modal,
+    .modal-backdrop .theme-modal,
+    .modal-backdrop .leaderboard-modal,
+    .modal-backdrop .changelog-modal,
+    .modal-backdrop .api-settings-modal,
+    .modal-backdrop .wallet-guide-box,
+    .modal-backdrop .feedback-box {
+        transition: none;
+    }
 }
 
 /* ==========================================================================

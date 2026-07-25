@@ -1,0 +1,485 @@
+/* ============================================================================
+   SCRAMBLE BOARD — Multiplayer 15x15 tile game (v2.0.0)
+   Lazy-loaded only when the mode opens (mirrors themes.css). Reuses the
+   app's teak/mustard palette + --theme-* custom properties where sensible.
+   Interaction model: TAP-TO-PLACE (select a rack tile, tap a board cell) —
+   chosen over pixel-drag for reliability on a 225-cell grid, esp. on touch.
+   ============================================================================ */
+
+/* Full-screen overlay that sits above the classic board while the mode runs. */
+#scramble-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1500;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 12px 18px;
+    overflow-y: auto;
+    background-color: var(--theme-body-bg-color, #E8E5DF);
+    background-image: var(--theme-body-bg-image,
+        radial-gradient(var(--turquoise) 1px, transparent 1px),
+        radial-gradient(var(--mustard) 1px, transparent 1px));
+    background-size: var(--theme-body-bg-size, 40px 40px);
+    background-position: var(--theme-body-bg-position, 0 0, 20px 20px);
+    color: var(--theme-body-color, var(--teak-dark));
+    font-family: inherit;
+}
+#scramble-overlay.active { display: flex; }
+
+/* --- Top banner: title / turn / target / exit --- */
+.scr-banner {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--teak-dark, #5C3A21);
+    border: 2px solid var(--mustard, #E1AD01);
+    border-radius: 10px;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.3);
+}
+.scr-banner-title {
+    font-size: 0.95rem;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    color: var(--mustard, #E1AD01);
+    text-transform: uppercase;
+}
+.scr-banner-info {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--off-white, #F5F5F0);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.scr-banner-info b { color: var(--mustard, #E1AD01); }
+.scr-exit-btn {
+    font-family: inherit;
+    font-size: 0.68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1.5px solid var(--mustard, #E1AD01);
+    background: transparent;
+    color: var(--mustard, #E1AD01);
+    transition: background 0.15s, color 0.15s;
+}
+.scr-exit-btn:hover { background: var(--mustard, #E1AD01); color: var(--teak-dark, #5C3A21); }
+
+/* --- Opponents strip (confidential: name + score + face-down tile count) --- */
+.scr-opponents {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+.scr-opp-panel {
+    flex: 1 1 150px;
+    max-width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 10px;
+    background: linear-gradient(135deg, var(--teak-base, #8B5A2B), var(--teak-dark, #5C3A21));
+    border: 2px solid var(--teak-light, #A67345);
+    border-radius: 8px;
+    color: var(--off-white, #F5F5F0);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.scr-opp-panel.active-turn {
+    border-color: var(--mustard, #E1AD01);
+    box-shadow: 0 0 0 2px var(--mustard, #E1AD01), 0 0 14px rgba(225,173,1,0.5);
+}
+.scr-opp-name {
+    font-size: 0.72rem;
+    font-weight: 900;
+    font-family: 'Courier Prime', monospace;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.scr-opp-meta { font-size: 0.6rem; opacity: 0.8; }
+.scr-opp-score { font-size: 1.1rem; font-weight: 900; color: var(--mustard, #E1AD01); }
+/* Face-down tiles: never reveal opponent letters (confidential). */
+.scr-opp-tiles { display: flex; gap: 2px; }
+.scr-tileback {
+    width: 12px;
+    height: 15px;
+    border-radius: 2px;
+    background: repeating-linear-gradient(45deg, #7a4e28, #7a4e28 2px, #6a4020 2px, #6a4020 4px);
+    border: 1px solid rgba(0,0,0,0.35);
+}
+
+/* --- The 15x15 board --- */
+.scr-board-wrap {
+    width: min(94vw, 560px);
+    padding: 10px;
+    border-radius: 10px;
+    background: var(--theme-board-plate-bg, linear-gradient(135deg, var(--teak-base, #8B5A2B), var(--teak-dark, #5C3A21)));
+    border: 4px solid var(--teak-light, #A67345);
+    box-shadow: 0 8px 24px var(--shadow-deep, rgba(40,20,10,0.45));
+}
+.scr-board-grid {
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    gap: 2px;
+    aspect-ratio: 1 / 1;
+    background: var(--teak-dark, #5C3A21);
+    border: 2px solid var(--teak-dark, #5C3A21);
+    border-radius: 4px;
+}
+.scr-cell {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+    background: var(--scr-cell-normal, #E7D8BC);
+    font-size: 0.42rem;
+    font-weight: 900;
+    line-height: 1;
+    text-align: center;
+    color: rgba(255,255,255,0.9);
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: box-shadow 0.12s, filter 0.12s;
+}
+.scr-cell[data-prem="TW"] { background: var(--scr-cell-tw, #C0453B); }
+.scr-cell[data-prem="DW"] { background: var(--scr-cell-dw, #D98C8C); color: rgba(80,20,20,0.85); }
+.scr-cell[data-prem="TL"] { background: var(--scr-cell-tl, #3E78B0); }
+.scr-cell[data-prem="DL"] { background: var(--scr-cell-dl, #9FC1DE); color: rgba(20,50,80,0.85); }
+.scr-cell[data-prem="CENTER"] {
+    background: var(--scr-cell-center, #C77B9E);
+    font-size: 0.7rem;
+    color: #fff;
+}
+/* Legal drop target while a rack tile is selected */
+.scr-board-grid.placing .scr-cell:not(.filled):hover {
+    box-shadow: inset 0 0 0 2px var(--mustard, #E1AD01);
+    filter: brightness(1.08);
+}
+.scr-cell.legal-hint {
+    box-shadow: inset 0 0 0 2px var(--turquoise, #40E0D0);
+    animation: scr-hint-pulse 1.1s ease-in-out infinite;
+}
+@keyframes scr-hint-pulse {
+    0%, 100% { box-shadow: inset 0 0 0 2px var(--turquoise, #40E0D0); }
+    50% { box-shadow: inset 0 0 0 3px var(--turquoise-dark, #00CED1); }
+}
+
+/* --- Letter tiles (bone chip with letter + point value) --- */
+.scr-tile {
+    position: absolute;
+    inset: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    background: linear-gradient(160deg, #F7EFDD, #E4D3AE);
+    color: #4A2F1A;
+    font-size: 0.72em;
+    font-weight: 900;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.6);
+    z-index: 2;
+}
+.scr-cell .scr-tile { font-size: min(2.6vw, 15px); }
+.scr-tile.pending { outline: 2px solid var(--mustard, #E1AD01); cursor: pointer; }
+.scr-tile.just-placed { animation: scr-drop 0.28s var(--slide-snap, ease); }
+@keyframes scr-drop {
+    0% { transform: translateY(-8px) scale(1.15); }
+    60% { transform: translateY(1px) scale(0.97); }
+    100% { transform: translateY(0) scale(1); }
+}
+.scr-tile-pts {
+    position: absolute;
+    right: 1px;
+    bottom: 0px;
+    font-size: 0.5em;
+    font-weight: 700;
+    opacity: 0.85;
+}
+.scr-tile.blank { color: #9a7b4f; font-style: italic; }
+
+/* --- Player rack + actions --- */
+.scr-rack-wrap {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+.scr-you-score {
+    font-size: 0.8rem;
+    font-weight: 900;
+    color: var(--teak-dark, #5C3A21);
+    background: var(--mustard, #E1AD01);
+    padding: 4px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--teak-dark, #5C3A21);
+}
+.scr-rack {
+    display: flex;
+    gap: 6px;
+    padding: 8px 10px;
+    background: linear-gradient(180deg, var(--teak-light, #A67345), var(--teak-base, #8B5A2B));
+    border: 2px solid var(--teak-dark, #5C3A21);
+    border-radius: 10px;
+    box-shadow: inset 0 3px 8px rgba(0,0,0,0.4);
+    min-height: 54px;
+}
+.scr-rack-slot {
+    position: relative;
+    width: 42px;
+    height: 46px;
+    border-radius: 4px;
+    background: rgba(0,0,0,0.18);
+}
+.scr-rack-slot .scr-tile {
+    inset: 2px;
+    font-size: 1.15rem;
+    cursor: pointer;
+}
+.scr-rack-slot .scr-tile.selected {
+    outline: 3px solid var(--turquoise, #40E0D0);
+    transform: translateY(-4px);
+    box-shadow: 0 6px 10px rgba(0,0,0,0.4);
+}
+.scr-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.scr-btn {
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1.5px solid var(--teak-dark, #5C3A21);
+    background: var(--off-white, #F5F5F0);
+    color: var(--teak-dark, #5C3A21);
+    box-shadow: 0 3px 0 var(--teak-dark, #5C3A21);
+    transition: transform 0.1s, box-shadow 0.1s, opacity 0.15s;
+}
+.scr-btn:active { transform: translateY(3px); box-shadow: 0 0 0 var(--teak-dark, #5C3A21); }
+.scr-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.scr-btn.primary { background: var(--mustard, #E1AD01); box-shadow: 0 3px 0 var(--mustard-dark, #DAA520); }
+.scr-btn.primary:active { box-shadow: 0 0 0 var(--mustard-dark, #DAA520); }
+
+/* --- Message line (validation feedback) --- */
+.scr-message {
+    width: 100%;
+    max-width: 720px;
+    min-height: 22px;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--teak-dark, #5C3A21);
+}
+.scr-message.err { color: #C0453B; }
+.scr-message.ok { color: #2E7D32; }
+
+/* --- Scoreboard / victory modal --- */
+.scr-scoreboard-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1600;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(20,10,0,0.72);
+    padding: 20px;
+}
+.scr-scoreboard-backdrop.active { display: flex; }
+.scr-scoreboard {
+    width: min(92vw, 380px);
+    background: var(--off-white, #F5F5F0);
+    border: 3px solid var(--mustard, #E1AD01);
+    border-radius: 14px;
+    padding: 22px;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+}
+.scr-scoreboard h3 {
+    font-size: 1.2rem;
+    color: var(--teak-dark, #5C3A21);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+.scr-winner { font-size: 0.9rem; font-weight: 900; color: var(--mustard-dark, #DAA520); margin-bottom: 14px; }
+.scr-final-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    margin: 4px 0;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.05);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--teak-dark, #5C3A21);
+}
+.scr-final-row.win { background: var(--mustard, #E1AD01); }
+.scr-final-row .nm { font-family: 'Courier Prime', monospace; }
+.scr-scoreboard .scr-actions { margin-top: 16px; }
+
+/* --- Setup + dice modals (Checkpoint 2) --- */
+.scr-setup, .scr-dice {
+    width: min(94vw, 420px);
+    background: var(--off-white, #F5F5F0);
+    border: 3px solid var(--mustard, #E1AD01);
+    border-radius: 14px;
+    padding: 22px;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+}
+.scr-setup h3, .scr-dice h3 {
+    font-size: 1.15rem;
+    color: var(--teak-dark, #5C3A21);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+.scr-setup .sub, .scr-dice .sub { font-size: 0.72rem; color: var(--teak-base, #8B5A2B); margin-bottom: 14px; }
+.scr-opt-label {
+    font-size: 0.66rem;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--teak-base, #8B5A2B);
+    text-align: left;
+    margin: 12px 0 6px;
+}
+.scr-opt-group { display: flex; gap: 8px; }
+.scr-opt {
+    flex: 1;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 900;
+    cursor: pointer;
+    padding: 10px 6px;
+    border-radius: 8px;
+    border: 2px solid var(--teak-light, #A67345);
+    background: #fff;
+    color: var(--teak-dark, #5C3A21);
+    transition: transform 0.1s, border-color 0.15s, background 0.15s;
+}
+.scr-opt small { display: block; font-size: 0.58rem; font-weight: 700; opacity: 0.7; text-transform: uppercase; }
+.scr-opt.sel { background: var(--mustard, #E1AD01); border-color: var(--teak-dark, #5C3A21); }
+.scr-opt:active { transform: translateY(2px); }
+.scr-setup .scr-btn, .scr-dice .scr-btn { margin-top: 18px; }
+
+/* Dice screen */
+.scr-dice-list { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 4px; }
+.scr-dice-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.05);
+}
+.scr-dice-row.is-you { background: rgba(225,173,1,0.18); }
+.scr-die {
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--teak-dark, #5C3A21);
+    min-width: 34px;
+}
+.scr-die.rolling { animation: scr-die-spin 0.12s steps(1) infinite; }
+@keyframes scr-die-spin { 0% { transform: rotate(-8deg) scale(1.05); } 100% { transform: rotate(8deg) scale(0.95); } }
+.scr-dice-name { flex: 1; text-align: left; font-weight: 900; font-size: 0.82rem; font-family: 'Courier Prime', monospace; color: var(--teak-dark, #5C3A21); }
+.scr-dice-name .meta { display: block; font-size: 0.58rem; font-weight: 700; opacity: 0.7; font-family: inherit; }
+.scr-order-badge {
+    font-size: 0.62rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: var(--teak-dark, #5C3A21);
+    color: var(--mustard, #E1AD01);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.scr-order-badge.show { opacity: 1; }
+
+/* --- Helpers: Word Finder + Dictionary (Checkpoint 3) --- */
+.scr-helpers { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.scr-btn.ghost {
+    font-size: 0.66rem;
+    padding: 7px 12px;
+    background: rgba(255,255,255,0.14);
+    border: 1.5px solid var(--mustard, #E1AD01);
+    box-shadow: none;
+    color: var(--theme-body-color, var(--teak-dark, #5C3A21));
+}
+.scr-btn.ghost:active { transform: translateY(2px); box-shadow: none; }
+.scr-tile.hint-tile {
+    outline: 3px solid var(--turquoise, #40E0D0);
+    box-shadow: 0 0 10px var(--turquoise, #40E0D0);
+    z-index: 3;
+}
+
+/* Dictionary modal */
+.scr-dict-box {
+    width: min(94vw, 420px);
+    background: var(--off-white, #F5F5F0);
+    border: 3px solid var(--mustard, #E1AD01);
+    border-radius: 14px;
+    padding: 22px;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+}
+.scr-dict-box h3 { font-size: 1.15rem; color: var(--teak-dark, #5C3A21); text-transform: uppercase; }
+.scr-dict-box .sub { font-size: 0.7rem; color: var(--teak-base, #8B5A2B); margin-bottom: 12px; }
+.scr-dict-search { display: flex; gap: 8px; }
+#scr-dict-input {
+    flex: 1;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 2px solid var(--teak-light, #A67345);
+    color: var(--teak-dark, #5C3A21);
+    background: #fff;
+    min-width: 0;
+}
+#scr-dict-input:focus { outline: none; border-color: var(--mustard, #E1AD01); }
+.scr-dict-search .scr-btn { margin-top: 0; }
+.scr-dict-result { text-align: left; margin: 14px 0 6px; min-height: 40px; }
+.scr-dict-word { font-size: 1rem; font-weight: 900; color: var(--teak-dark, #5C3A21); letter-spacing: 1px; margin-bottom: 8px; }
+.scr-dict-def { font-size: 0.82rem; line-height: 1.45; color: var(--teak-base, #8B5A2B); max-height: 200px; overflow-y: auto; }
+.scr-dict-def b { color: var(--teak-dark, #5C3A21); }
+.scr-badge { font-size: 0.6rem; font-weight: 900; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; letter-spacing: 0.5px; white-space: nowrap; }
+.scr-badge.ok { background: #2E7D32; color: #fff; }
+.scr-badge.no { background: #C0453B; color: #fff; }
+
+/* Scoreboard entrance pop */
+.scr-scoreboard-backdrop.active .scr-scoreboard { animation: scr-pop 0.42s var(--slide-snap, ease); }
+@keyframes scr-pop {
+    0% { transform: scale(0.8); opacity: 0; }
+    60% { transform: scale(1.04); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 480px) {
+    .scr-banner-title { font-size: 0.8rem; }
+    .scr-rack-slot { width: 34px; height: 40px; }
+    .scr-rack-slot .scr-tile { font-size: 0.95rem; }
+    .scr-btn { padding: 8px 12px; font-size: 0.66rem; }
+}

@@ -75,6 +75,13 @@
     </div>
     <div id="stellar-status" class="stellar-status" style="display:none;"></div>
 
+    <!-- Achievement badge-stamp toast (2C) — separate from the wallet status
+         bar above so achievement unlocks don't compete with tx status text. -->
+    <div id="achievement-toast" class="achievement-toast">
+        <span class="achievement-toast-icon">🏆</span>
+        <span class="achievement-toast-label" id="achievement-toast-label"></span>
+    </div>
+
     <!-- Mute/Sound Toggle Switch -->
     <div class="sound-toggle" id="sound-toggle" onclick="game.toggleSound()" title="Toggle Sound">
         <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
@@ -95,11 +102,13 @@
                 <button class="menu-toggle-btn" id="menu-toggle-btn" onclick="toggleHeaderMenu(event)" aria-haspopup="true" aria-expanded="false">☰ Menu <span class="menu-caret">▾</span></button>
                 <div class="menu-panel" id="menu-panel" role="menu">
                     <button class="menu-item" id="daily-challenge-btn" role="menuitem" onclick="game.startDailyChallenge()">📅 Daily Challenge</button>
+                    <button class="menu-item" id="scramble-board-btn" role="menuitem" onclick="game.startScrambleBoard()">🎲 Scramble Board</button>
                     <button class="menu-item" id="category-tag-btn" role="menuitem" onclick="game.openCategoryModal()">Category: General</button>
                     <button class="menu-item" id="customize-tag-btn" role="menuitem" onclick="game.openThemeModal()">Customize Board</button>
                     <button class="menu-item" id="customize-chips-btn" role="menuitem" onclick="game.openChipModal()">Customize Chips</button>
                     <button class="menu-item" id="leaderboard-btn" role="menuitem" onclick="game.openLeaderboardModal()">Leaderboard</button>
                     <button class="menu-item" id="effects-btn" role="menuitem" onclick="game.openEffectsModal()">Effects</button>
+                    <button class="menu-item" id="audio-settings-btn" role="menuitem" onclick="game.openAudioModal()">🔊 Audio</button>
                     <button class="menu-item" id="api-settings-btn" role="menuitem" onclick="game.openApiSettingsModal()">⚙️ API Settings</button>
                 </div>
             </div>
@@ -313,6 +322,24 @@
                     </div>
                     <div class="theme-name">Midnight Walnut</div>
                 </div>
+                <!-- Stellar Cosmos -->
+                <div class="theme-card" id="theme-card-stellar-cosmos" onclick="game.switchTheme('stellar-cosmos')">
+                    <div class="theme-preview" style="background: radial-gradient(rgba(120,180,255,0.9) 1px, transparent 1px), radial-gradient(1000px 500px at 20% 15%, rgba(96,62,168,0.55), transparent 60%), #0B1026; background-size: 10px 10px, 100% 100%, 100% 100%; border: 2px solid rgba(0,0,0,0.3); border-radius: 6px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; position: relative;">
+                        <div style="background: linear-gradient(135deg, #141B3D, #0A0E22); width: 60%; height: 60%; border-radius: 4px; border: 1.5px solid #2A3566; display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 16px; height: 16px; background: linear-gradient(145deg, #3A4780, #232C55); border: 1.2px solid #566099; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 900; color: #EAF0FF; box-shadow: 0 0 6px rgba(64,224,208,0.5);">S</div>
+                        </div>
+                    </div>
+                    <div class="theme-name">Stellar Cosmos</div>
+                </div>
+                <!-- Art Deco Lounge -->
+                <div class="theme-card" id="theme-card-art-deco" onclick="game.switchTheme('art-deco')">
+                    <div class="theme-preview" style="background: repeating-conic-gradient(from 0deg at 50% 0%, rgba(198,162,39,0.14) 0deg 6deg, transparent 6deg 12deg), #0D3B2E; border: 2px solid rgba(0,0,0,0.3); border-radius: 6px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; position: relative;">
+                        <div style="background: linear-gradient(135deg, #12523E, #0A2C22); width: 60%; height: 60%; border-radius: 4px; border: 1.5px solid #C6A227; display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 16px; height: 16px; background: linear-gradient(145deg, #F7EFD2, #E8D9A8); border: 1.2px solid #C6A227; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 900; color: #0D3B2E;">A</div>
+                        </div>
+                    </div>
+                    <div class="theme-name">Art Deco Lounge</div>
+                </div>
             </div>
             <button class="theme-close-btn" onclick="game.closeThemeModal(null)">Close Theme Menu</button>
         </div>
@@ -399,6 +426,20 @@
                         <div style="font-weight: 800; font-size: 2.5rem; color: #8A7580; text-shadow: 0px 1px 0px rgba(255,255,255,0.8); font-family: inherit;">K</div>
                     </div>
                     <div class="theme-name">Mother-of-Pearl</div>
+                </div>
+                <!-- Chip: Terrazzo -->
+                <div class="theme-card" id="chip-card-terrazzo" onclick="game.switchChipMaterial('terrazzo')">
+                    <div class="theme-preview" style="background: radial-gradient(circle at 22% 32%, #e07a5f 0 4px, transparent 5px), radial-gradient(circle at 70% 26%, #3d9970 0 5px, transparent 6px), radial-gradient(circle at 42% 72%, #f2cc8f 0 4px, transparent 5px), radial-gradient(circle at 80% 66%, #6a8cc7 0 3px, transparent 4px), #f4f1e8; border: 2px solid var(--teak-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: inset 0 -3px 4px rgba(0,0,0,0.2); margin-bottom: 4px;">
+                        <div style="font-weight: 800; font-size: 2.5rem; color: #4a3728; font-family: inherit;">T</div>
+                    </div>
+                    <div class="theme-name">Terrazzo</div>
+                </div>
+                <!-- Chip: Cork -->
+                <div class="theme-card" id="chip-card-cork" onclick="game.switchChipMaterial('cork')">
+                    <div class="theme-preview" style="background: radial-gradient(circle at 30% 40%, rgba(120,72,30,0.5) 0 3px, transparent 4px), radial-gradient(circle at 66% 60%, rgba(90,54,20,0.45) 0 4px, transparent 5px), radial-gradient(circle at 50% 24%, rgba(140,90,40,0.4) 0 2.5px, transparent 3.5px), linear-gradient(160deg, #d8a86a, #c28e4e); border: 2px solid var(--teak-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: inset 0 -3px 4px rgba(0,0,0,0.2); margin-bottom: 4px;">
+                        <div style="font-weight: 800; font-size: 2.5rem; color: #4a2f16; text-shadow: 0px 1px 0px rgba(255,255,255,0.2); font-family: inherit;">O</div>
+                    </div>
+                    <div class="theme-name">Cork</div>
                 </div>
             </div>
 
@@ -514,6 +555,15 @@
                     </div>
                     <div class="theme-name">Stained Glass 🔒</div>
                 </div>
+                <!-- Tile Effect: Aurora (premium, LEGEND-only) -->
+                <div class="theme-card locked" id="tile-effect-card-aurora" onclick="game.switchTileEffect('aurora')">
+                    <div class="theme-preview" style="background: linear-gradient(115deg, #0d1b2a 0%, #10243a 40%, #143a4a 60%, #0d1b2a 100%); border: 2px solid #1c3a52; border-radius: 12px; display: flex; align-items: center; justify-content: center; height: 90px; box-sizing: border-box; box-shadow: 0 3px 0 #40E0D0, 0 6px 12px rgba(64,224,208,0.35); margin-bottom: 4px; position: relative; overflow: hidden;">
+                        <div style="position: absolute; inset: -40%; background: linear-gradient(115deg, transparent, rgba(64,224,208,0.5) 30%, rgba(120,90,220,0.5) 50%, rgba(80,220,140,0.5) 70%, transparent); background-size: 200% 200%; animation: holo-flow 3s linear infinite; filter: blur(3px);"></div>
+                        <div style="font-weight: 800; font-size: 2.5rem; color: #eafcff; text-shadow: 0 0 8px rgba(120,255,230,0.7); font-family: inherit; z-index: 1;">A</div>
+                        <span class="font-lock material-symbols-outlined">lock</span>
+                    </div>
+                    <div class="theme-name">Aurora 🔒</div>
+                </div>
             </div>
             <button class="theme-close-btn" style="margin-top: 20px;" onclick="game.closeTileEffectsModal(null)">Close Menu</button>
         </div>
@@ -564,6 +614,33 @@
             <h3>Game Updates</h3>
             <div class="changelog-content">
                 <div class="changelog-version">
+                    <h4>v2.0.0 - Scramble Board, New Themes & Big Polish Update 🎲✨</h4>
+                    <ul>
+                        <li><strong>New Game Mode:</strong> Open ☰ Menu → <em>Scramble Board</em> for a full 15×15 tile-laying board game — a fresh way to play, separate from the classic word scramble.</li>
+                        <li><strong>Colored Premium Board:</strong> A proper 15×15 board with Triple/Double Word and Triple/Double Letter squares and a ★ center start — build words across the grid for big scores.</li>
+                        <li><strong>2–4 Players:</strong> Play against 1, 2, or 3 opponents, and choose Easy, Medium, or Hard before each match.</li>
+                        <li><strong>Roll the Dice:</strong> Every match opens with a dice roll to decide turn order — highest roll plays first.</li>
+                        <li><strong>Opponents From the Leaderboard:</strong> Your AI rivals are drawn from real wallets on the on-chain leaderboard (practice bots fill in as a fallback). Their racks stay hidden — you never see an opponent's letters.</li>
+                        <li><strong>Real Word Validation:</strong> Every word you play is checked against a 168,000-word dictionary built right into the game, so it works fully offline once loaded.</li>
+                        <li><strong>Race to Win:</strong> First player to reach the target score wins. Land all 7 tiles in one turn for a +50 <em>bingo</em> bonus.</li>
+                        <li><strong>In-Game Dictionary:</strong> Look up any word from inside a match — instantly see whether it's playable and read its definition.</li>
+                        <li><strong>Word Finder Helper:</strong> Stuck? Tap <em>Find Word</em> to highlight the best play your rack and the board can make — three hints per match.</li>
+                        <li><strong>Dark Mode:</strong> A new Midnight Walnut theme, a header sun/moon quick-toggle, and a smart first-visit default that follows your device's dark mode setting.</li>
+                        <li><strong>Stellar Cosmos Theme:</strong> A deep-space navy board with a nebula wash, a star-dot field, and glowing turquoise-accented tiles.</li>
+                        <li><strong>Art Deco Lounge Theme:</strong> Emerald felt with a brass fan-ray motif and cream tiles trimmed in gold.</li>
+                        <li><strong>Terrazzo & Cork Chips:</strong> Two new chip materials join the Customize Chips menu.</li>
+                        <li><strong>Aurora Tile Effect:</strong> A shimmering northern-lights ribbon sweep — the game's first LEGEND-exclusive premium effect, unlocked at 1000+ points on the leaderboard.</li>
+                        <li><strong>Streak Escalation:</strong> Hit a 10+ win streak and a warm ember glow spreads across the screen edges.</li>
+                        <li><strong>Idle Tile Shimmer:</strong> A gentle light sweep across your rack after a short pause nudges you toward your next move.</li>
+                        <li><strong>Drop Preview:</strong> See a faint letter preview in the slot you're dragging a tile toward before you let go.</li>
+                        <li><strong>Achievement Badge Stamps:</strong> Unlocking an achievement now stamps a proper badge onto the screen instead of a plain status message.</li>
+                        <li><strong>Smoother Board Scaling:</strong> The board and tiles now resize fluidly to fit your screen, from desktop down to the smallest phones.</li>
+                        <li><strong>Audio Settings:</strong> A new Audio menu with independent Music and Sound Effects toggles and volume sliders.</li>
+                        <li><strong>Redesigned Mobile Menus:</strong> On phones, menus now slide up from the bottom edge for easier one-handed reach.</li>
+                        <li><strong>Haptic Feedback:</strong> A short vibration on tile placement and on winning, on supported devices (toggle in the Effects menu).</li>
+                    </ul>
+                </div>
+                <div class="changelog-version" style="margin-top: 15px;">
                     <h4>v1.11.0 - Autumn Theme, New Chips & Smarter Feedback</h4>
                     <ul>
                         <li><strong>Autumn Harvest Theme:</strong> A warm burnt-orange board with amber tiles joins the theme collection.</li>
@@ -889,6 +966,54 @@
                     </label>
                 </div>
 
+                <!-- Streak Escalation Toggle (2C) -->
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <span style="font-weight: 900; font-size: 0.95rem;">Streak Escalation</span>
+                        <span class="toggle-description" style="font-size: 0.75rem; opacity: 0.85;">Screen-edge ember vignette once your win streak hits 10+</span>
+                    </div>
+                    <label class="retro-switch">
+                        <input type="checkbox" id="fx-switch-streakEscalation" onclick="game.toggleEffect('streakEscalation')">
+                        <span class="retro-slider"></span>
+                    </label>
+                </div>
+
+                <!-- Idle Tile Shimmer Toggle (2C) -->
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <span style="font-weight: 900; font-size: 0.95rem;">Idle Tile Shimmer</span>
+                        <span class="toggle-description" style="font-size: 0.75rem; opacity: 0.85;">A light sweep across your rack tiles after ~20s of inactivity</span>
+                    </div>
+                    <label class="retro-switch">
+                        <input type="checkbox" id="fx-switch-idleShimmer" onclick="game.toggleEffect('idleShimmer')">
+                        <span class="retro-slider"></span>
+                    </label>
+                </div>
+
+                <!-- Drop Preview Toggle (2C) -->
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <span style="font-weight: 900; font-size: 0.95rem;">Drop Preview</span>
+                        <span class="toggle-description" style="font-size: 0.75rem; opacity: 0.85;">Faint letter preview in the slot you're dragging a tile toward</span>
+                    </div>
+                    <label class="retro-switch">
+                        <input type="checkbox" id="fx-switch-dropPreview" onclick="game.toggleEffect('dropPreview')">
+                        <span class="retro-slider"></span>
+                    </label>
+                </div>
+
+                <!-- Haptics Toggle (2C) -->
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <span style="font-weight: 900; font-size: 0.95rem;">📳 Haptic Feedback</span>
+                        <span class="toggle-description" style="font-size: 0.75rem; opacity: 0.85;">A short vibration on tile placement and winning (supported devices only)</span>
+                    </div>
+                    <label class="retro-switch">
+                        <input type="checkbox" id="fx-switch-haptics" onclick="game.toggleEffect('haptics')">
+                        <span class="retro-slider"></span>
+                    </label>
+                </div>
+
             </div>
 
             <h4 style="margin: 20px 0 10px 0; text-transform: uppercase; font-family: inherit; font-size: 0.85rem; color: var(--teak-dark); border-bottom: 2px solid var(--mustard); padding-bottom: 4px; font-weight: 900; text-align: left;">Victory Preview Buttons</h4>
@@ -904,6 +1029,56 @@
             </div>
 
             <button class="theme-close-btn" style="margin-top: 20px;" onclick="game.closeEffectsModal(null)">Close Menu</button>
+        </div>
+    </div>
+
+    <!-- Audio Settings Modal (2C) — separate Music/SFX enable toggles + volume
+         sliders, layered on top of (not replacing) the header mute icon. -->
+    <div class="modal-backdrop" id="audio-modal-backdrop" onclick="game.closeAudioModal(event)">
+        <div class="theme-modal" onclick="event.stopPropagation()">
+            <h3>🔊 Audio Settings</h3>
+            <div class="effects-settings-container" style="display: flex; flex-direction: column; gap: 16px; margin-top: 15px;">
+
+                <!-- Music -->
+                <div style="border-bottom: 2px solid var(--teak-dark); padding-bottom: 14px;">
+                    <div class="toggle-container" style="margin-bottom: 10px;">
+                        <div class="toggle-label">
+                            <span style="font-weight: 900; font-size: 0.95rem;">🎵 Music</span>
+                            <span class="toggle-description" style="font-size: 0.75rem; opacity: 0.85;">The background bossa nova loop</span>
+                        </div>
+                        <label class="retro-switch">
+                            <input type="checkbox" id="audio-switch-music" onclick="game.toggleMusicEnabled()">
+                            <span class="retro-slider"></span>
+                        </label>
+                    </div>
+                    <label style="display: flex; align-items: center; gap: 10px; font-size: 0.8rem; font-weight: 700; color: var(--teak-dark);">
+                        Volume
+                        <input type="range" id="audio-slider-music" class="audio-volume-slider" min="0" max="100" step="5" oninput="game.setMusicVolume(this.value)">
+                        <span id="audio-slider-music-val" style="min-width: 32px; text-align: right;">100%</span>
+                    </label>
+                </div>
+
+                <!-- SFX -->
+                <div>
+                    <div class="toggle-container" style="margin-bottom: 10px;">
+                        <div class="toggle-label">
+                            <span style="font-weight: 900; font-size: 0.95rem;">🔔 Sound Effects</span>
+                            <span class="toggle-description" style="font-size: 0.75rem; opacity: 0.85;">Tile drops, wins, achievements, and UI clicks</span>
+                        </div>
+                        <label class="retro-switch">
+                            <input type="checkbox" id="audio-switch-sfx" onclick="game.toggleSfxEnabled()">
+                            <span class="retro-slider"></span>
+                        </label>
+                    </div>
+                    <label style="display: flex; align-items: center; gap: 10px; font-size: 0.8rem; font-weight: 700; color: var(--teak-dark);">
+                        Volume
+                        <input type="range" id="audio-slider-sfx" class="audio-volume-slider" min="0" max="100" step="5" oninput="game.setSfxVolume(this.value)">
+                        <span id="audio-slider-sfx-val" style="min-width: 32px; text-align: right;">100%</span>
+                    </label>
+                </div>
+
+            </div>
+            <button class="theme-close-btn" style="margin-top: 20px;" onclick="game.closeAudioModal(null)">Close Menu</button>
         </div>
     </div>
 
