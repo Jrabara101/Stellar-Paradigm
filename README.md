@@ -174,7 +174,7 @@ Covers everything added for Level 4 — features not shown in the Level 3 video 
 > 4. A full solve → hint → Submit → Freighter approval → "Spectacular!" victory cycle, saved on-chain
 > 5. The in-app feedback survey — name, wallet address, rating, and open feedback — submitted live
 > 6. The GoatCounter analytics dashboard — live wallet connect, feedback, and score-submission events
-> 7. [`WALLET_VERIFICATION.md`](WALLET_VERIFICATION.md) on GitHub — all 10 testers' wallets cross-checked against real on-chain transactions
+> 7. [`WALLET_VERIFICATION.md`](WALLET_VERIFICATION.md) on GitHub — every tester's wallet cross-checked against real on-chain transactions (the doc now lists **51 verified users**)
 > 8. Closing — live URL, public repo, and CI passing
 
 ---
