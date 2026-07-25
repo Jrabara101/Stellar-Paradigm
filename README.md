@@ -133,6 +133,17 @@ npx serve .
 
 ---
 
+## 🎤 Product Presentation (Pitch Deck)
+
+A 9-slide pitch deck covering all six required sections — **Problem, Solution, Market Opportunity, Architecture, Growth Strategy, and Future Roadmap** — plus a Demo & Traction slide backed by the verified on-chain numbers.
+
+- **📊 Deck (PowerPoint):** [`Pitch Deck/Word_Scramble_Pitch_Deck.pptx`](Pitch%20Deck/Word_Scramble_Pitch_Deck.pptx) — the presentation file. Word-for-word narration is embedded in each slide's **speaker notes**, so you can present straight from it.
+- **📝 Speaker script:** [`PITCH_DECK_SCRIPT.md`](PITCH_DECK_SCRIPT.md) — the same per-slide narration with timing cues (~5 min run).
+
+> The deck's numbers match the on-chain reality documented in [`WALLET_VERIFICATION.md`](WALLET_VERIFICATION.md): 51 distinct verified users, 182 verified transactions, 100% verified, 4.8/5 average rating.
+
+---
+
 ## 🎬 Demo Video
 
 ### Level 3 — Core Gameplay & Blockchain Integration

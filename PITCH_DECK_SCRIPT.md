@@ -103,13 +103,13 @@ A slide-by-slide script for presenting the **Word Scramble** pitch deck.
 
 **ON SLIDE:**
 - Acquisition-and-verification loop: recruit → connect wallet → on-chain submit → cross-check on Horizon
-- Scaled from 10 → 50+ verified testnet users (independently verified, not self-reported)
+- Scaled from 10 → 51 verified testnet users · 182 on-chain txns · 100% verified (not self-reported)
 - Built-in feedback funnel: auto-prompt after first score + persistent button → continuous improvement
 - Feedback already shipped real fixes (see next slide)
 - Retention modes next: Speedrun (cheapest lift), Weekly Arena, Category Rush
 
 **SAY:**
-> "Growth is already running as a repeatable loop: we recruit a player, they connect a wallet, they submit a score on-chain, and then we independently verify that transaction against Stellar's own ledger — so our user numbers aren't self-reported, they're cryptographically backed. We've scaled that from ten verified users to over fifty. Retention is built in too: right after your first score, the game invites you to leave feedback, and that feedback loop has already produced real product fixes that shipped. Our next retention modes — a timed Speedrun, a Weekly Arena, Category Rush — reuse the systems we've already built, so each one is a cheap, fast addition rather than a rewrite."
+> "Growth is already running as a repeatable loop: we recruit a player, they connect a wallet, they submit a score on-chain, and then we independently verify that transaction against Stellar's own ledger — so our user numbers aren't self-reported, they're cryptographically backed. We've scaled that from ten verified users to fifty-one, across a hundred and eighty-two real transactions with a hundred percent verification rate. Retention is built in too: right after your first score, the game invites you to leave feedback, and that feedback loop has already produced real product fixes that shipped. Our next retention modes — a timed Speedrun, a Weekly Arena, Category Rush — reuse the systems we've already built, so each one is a cheap, fast addition rather than a rewrite."
 
 **Delivery tip:** "Cryptographically backed, not self-reported" is a credibility flex — most hackathon projects can't say this. Emphasize it.
 
@@ -140,14 +140,14 @@ A slide-by-slide script for presenting the **Word Scramble** pitch deck.
 
 **ON SLIDE:**
 - Live: word-scramble-v1.surge.sh — playable now
-- 50+ testnet users, every wallet cross-checked on Stellar Horizon for a real submit_score
-- 4.9/5 average rating · 90% would play again
+- 51 verified users · 182 on-chain txns · 100% cross-checked on Stellar Horizon for a real submit_score
+- 4.8/5 average rating · 51/52 (~98%) would play again
 - Full walkthrough demo video: connect → play → on-chain submit → analytics → feedback
-- Public GitHub repo · 40+ commits · CI passing
+- Public GitHub repo · 50+ commits · CI passing
 - "Come solve a word — and make your first blockchain transaction without realizing it."
 
 **SAY:**
-> "To wrap up: this isn't a concept, it's live. Over fifty testnet users have played, and every one of their wallets is independently verified on-chain. Players rate it four-point-nine out of five, and ninety percent say they'd play again. Everything's open source, with a passing CI pipeline and a full walkthrough video that shows the entire flow end to end. So my ask is simple: go to the link, solve one word, and you'll have made your first blockchain transaction without even realizing it. That's how we onboard the next million users to Stellar. Thank you."
+> "To wrap up: this isn't a concept, it's live. Fifty-one distinct testnet users have played, and every one of their wallets is independently verified on-chain — a hundred percent verification rate across a hundred and eighty-two transactions. Players rate it four-point-eight out of five, and fifty-one of fifty-two say they'd play again. Everything's open source, with a passing CI pipeline and a full walkthrough video that shows the entire flow end to end. So my ask is simple: go to the link, solve one word, and you'll have made your first blockchain transaction without even realizing it. That's how we onboard the next million users to Stellar. Thank you."
 
 **Delivery tip:** End on the callback to your opening hook ("without realizing it"). Then stop talking — let "Thank you" be the last word.
 
@@ -162,7 +162,7 @@ A slide-by-slide script for presenting the **Word Scramble** pitch deck.
 | 3 | Solution | 0:50 | Solving a word = a real Stellar transaction |
 | 4 | Market | 0:40 | Word games × Web3 newcomers, on Stellar's mission |
 | 5 | Architecture | 0:45 | Lean, two-contract, auditable, CI-backed |
-| 6 | Growth | 0:45 | Verified loop, 10→50+, feedback funnel |
+| 6 | Growth | 0:45 | Verified loop, 10→51, feedback funnel |
 | 7 | Feedback→Roadmap | 0:35 | We shipped what users asked for |
 | 8 | Traction / Close | 0:35 | Live, verified, rated — callback to hook |
 
