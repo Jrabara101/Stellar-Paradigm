@@ -274,11 +274,11 @@ Added for Level 4 — Product Quality and User Onboarding requirements.
 
 **First-time wallet guide:** [`wallet-guide.js`](wallet-guide.js) adds a 5-slide carousel (using real screenshots from `screenshots/`) explaining what a wallet is, how to install Freighter, how to connect, and what happens when a score is submitted on-chain — aimed at players with no prior crypto experience. Reachable anytime via the "❓ Guide" button in the wallet bar, and auto-shown once to first-time visitors. It deliberately waits for the game's own first-visit "how to play" tutorial (`#onboarding-modal-backdrop` in `script.js`) to close first, so the two guides never stack on top of each other.
 
-**Proof of 10+ real users:** [`WALLET_VERIFICATION.md`](WALLET_VERIFICATION.md) lists 10 distinct testers, each with their wallet address cross-checked directly against Stellar Horizon to confirm a real, successful `submit_score` transaction — not just self-reported form data.
+**Proof of 50+ real users:** [`WALLET_VERIFICATION.md`](WALLET_VERIFICATION.md) lists **51 distinct verified users** (from 52 form responses), each with their wallet address cross-checked directly against Stellar Horizon to confirm a real, successful `submit_score` transaction — not just self-reported form data. 100% of distinct wallets have genuine on-chain activity, across both contract deployments, totalling **182 verified transactions**.
 
-**User feedback summary:** [`FEEDBACK_SUMMARY.md`](FEEDBACK_SUMMARY.md) — 4.9/5 average rating, 9/10 would play again, synthesized from the same 10 testers' responses.
+**User feedback summary:** [`FEEDBACK_SUMMARY.md`](FEEDBACK_SUMMARY.md) synthesizes the qualitative themes. Across all 52 responses: **4.8/5 average rating**, and **51/52 would play again**.
 
-**Full response export (Excel):** ⚠️ *Not yet attached.* Export the linked Google Form's response sheet via Google Sheets → File → Download → Microsoft Excel (.xlsx), commit the file as `feedback-responses.xlsx` in the repo root, then replace this line with a link to it: `[feedback-responses.xlsx](feedback-responses.xlsx)`. This is the raw wallet/email/name/rating data backing the summary above.
+**Full response export (Excel):** [`Updated 50 test net users.xlsx`](Updated%2050%20test%20net%20users.xlsx) — the raw Google Form export (name, Stellar wallet address, rating, feedback, would-play-again, and transaction-proof screenshot links) backing the verification above.
 
 ---
 
