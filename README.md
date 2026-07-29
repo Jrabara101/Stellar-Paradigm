@@ -139,13 +139,21 @@ A 9-slide pitch deck covering all six required sections — **Problem, Solution,
 
 - **📊 Deck (PowerPoint):** [`Pitch Deck/Word_Scramble_Pitch_Deck.pptx`](Pitch%20Deck/Word_Scramble_Pitch_Deck.pptx) — the presentation file. Word-for-word narration is embedded in each slide's **speaker notes**, so you can present straight from it.
 - **📄 Deck (PDF):** [`Pitch Deck/Word_Scramble_Pitch_Deck.pdf`](Pitch%20Deck/Word_Scramble_Pitch_Deck.pdf) — view without PowerPoint. The traction slide's growth chart is built from the real on-chain data, not placeholder figures.
-- **📝 Speaker script:** [`PITCH_DECK_SCRIPT.md`](PITCH_DECK_SCRIPT.md) — the same per-slide narration with timing cues (~5 min run).
+- **📝 Speaker script:** [`Pitch Deck/PITCH_DECK_SCRIPT.md`](Pitch%20Deck/PITCH_DECK_SCRIPT.md) — the same per-slide narration with timing cues (~5 min run).
 
 > The deck's numbers match the on-chain reality documented in [`WALLET_VERIFICATION.md`](WALLET_VERIFICATION.md): 51 distinct verified users, 182 verified transactions, 100% verified, 4.8/5 average rating.
 
 ---
 
 ## 🎬 Demo Video
+
+### Level 5 — Full Product Walkthrough
+
+📁 **File:** [Video/Word Scramble Full Walkthrough.mp4](Video/Word%20Scramble%20Full%20Walkthrough.mp4) (~9 min)
+
+An end-to-end walkthrough: game/UI tour → first-time onboarding & wallet guide → connecting a wallet (auto-funded) & winning a round on-chain → Daily Challenge with a real wallet-signed transaction → the new **Scramble Board v2.0.0** mode → on-chain proof on Stellar Expert → live GoatCounter analytics → the user feedback loop (Google Form → Excel) → the 51-user `WALLET_VERIFICATION.md` proof.
+
+📝 **Per-clip narration script:** [`DEMO_CLIP_SCRIPTS.md`](DEMO_CLIP_SCRIPTS.md) — what's on screen and the voiceover for each of the 9 source clips this walkthrough was cut from.
 
 ### Level 3 — Core Gameplay & Blockchain Integration
 
@@ -326,6 +334,52 @@ Real player feedback in [`FEEDBACK_SUMMARY.md`](FEEDBACK_SUMMARY.md) surfaced fo
 ├── .github/workflows/cd.yml            # CD: deploy frontend (surge.sh) + package contract wasm
 └── screenshots/                        # Submission screenshots
 ```
+
+---
+
+## ✅ Level 5 Submission Checklist
+
+Mapped directly to the official Level 5 requirements — every item below links to its actual proof in this repo, not just a claim.
+
+### User Growth
+- [x] **50+ testnet users onboarded** — [`WALLET_VERIFICATION.md`](WALLET_VERIFICATION.md) documents **51 distinct verified users** (from 52 form responses)
+- [x] **Real transaction activity** — all 51 wallets independently cross-checked against Stellar Horizon; **182 verified `submit_score` transactions**, 100% verification rate
+- [x] **Active usage proof** — many wallets show 2–12 repeat submissions each (not one-and-done); live in [GoatCounter analytics](https://word-scramble-stellar.goatcounter.com)
+
+### Product Improvements
+- [x] **New features from user feedback** — see [Feedback → Action](#-feedback--action-next-phase-improvement-plan) below; headline feature: **Scramble Board v2.0.0** (2–4 player, 15×15 board), built because testers asked for a persistent Scrabble-style board
+- [x] **UX/UI and stability improvements** — hint/definition naming fix, fallback-clue coverage, feedback-modal suppression bug — all commit-linked below
+- [x] **Onboarding optimization** — 5-slide first-time wallet guide + auto-funding via Friendbot, audited this cycle for friction points
+
+### Product Presentation
+- [x] **Professional pitch deck** — [Pitch Deck section above](#-product-presentation-pitch-deck) (PPTX + PDF), all six required topics covered:
+  - [x] Problem statement · [x] Solution · [x] Market opportunity · [x] Architecture · [x] Growth strategy · [x] Future roadmap
+
+### Demo
+- [x] **Full product walkthrough recorded** — [Video/Word Scramble Full Walkthrough.mp4](Video/Word%20Scramble%20Full%20Walkthrough.mp4) (~9 min)
+- [x] **Showcases real user flow** — onboarding, wallet connect, on-chain submission, Daily Challenge, Scramble Board, on-chain verification, analytics, and the feedback loop — all with real data, no staged/mock content
+
+### Technical Standards
+- [x] **20+ meaningful commits** — 56+ on `main` (growing)
+- [x] **Updated documentation** — README, `WALLET_VERIFICATION.md`, `FEEDBACK_SUMMARY.md`, and CI workflow all current as of this submission
+
+### User Onboarding Requirements
+- [x] **Google Form collecting user details** — name, Stellar wallet address, rating, and open feedback ⚠️ *no dedicated email field was included in the form — see note below*
+- [x] **Excel export attached** — [`Updated 50 test net users.xlsx`](Updated%2050%20test%20net%20users.xlsx), linked in [Analytics & Feedback](#-analytics-monitoring--user-feedback) above
+- [x] **Improvement plan with commit links** — [Feedback → Action: Next-Phase Improvement Plan](#-feedback--action-next-phase-improvement-plan) below maps every theme to its actual commit
+
+> ⚠️ **Known gap:** the Level 5 spec asks the form to collect an email address; ours collects name + wallet + feedback but not email. Everything else in the User Onboarding requirements is satisfied.
+
+### Submission Checklist
+- [x] Public GitHub repository — [github.com/Jrabara101/Stellar-Paradigm](https://github.com/Jrabara101/Stellar-Paradigm)
+- [x] Minimum 20+ meaningful commits — 56+
+- [x] Live deployed application — [word-scramble-v1.surge.sh](https://word-scramble-v1.surge.sh)
+- [x] PPT/Pitch deck link — [`Pitch Deck/Word_Scramble_Pitch_Deck.pptx`](Pitch%20Deck/Word_Scramble_Pitch_Deck.pptx) / [`.pdf`](Pitch%20Deck/Word_Scramble_Pitch_Deck.pdf)
+- [x] Demo video link — [`Video/Word Scramble Full Walkthrough.mp4`](Video/Word%20Scramble%20Full%20Walkthrough.mp4)
+- [x] Proof of 50+ users — [`WALLET_VERIFICATION.md`](WALLET_VERIFICATION.md) (51/51 verified)
+- [x] Screenshots of analytics/transaction activity — [Screenshots](#-screenshots) section above
+- [x] Updated README and documentation — this file
+- [x] User feedback iteration summary — [`FEEDBACK_SUMMARY.md`](FEEDBACK_SUMMARY.md) + [Feedback → Action](#-feedback--action-next-phase-improvement-plan)
 
 ---
 
