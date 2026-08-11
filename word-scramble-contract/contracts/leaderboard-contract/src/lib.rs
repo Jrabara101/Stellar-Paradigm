@@ -331,4 +331,43 @@ mod tests {
         // Verify the badge was minted on the RewardContract
         assert!(reward_client.has_badge(&player, &Symbol::new(&env, "GOLD")));
     }
+
+    #[test]
+    fn test_submit_score_mints_badge_via_genuine_cross_contract_auth() {
+        // Deliberately no env.mock_all_auths(): that would blanket-approve every
+        // require_auth() call, including RewardContract's new
+        // `authorized_caller.require_auth()`, which would prove nothing. Instead
+        // only the player's submit_score auth is mocked (mock_auths, not
+        // mock_all_auths), so mint_badge's auth check is satisfied for real —
+        // by Soroban's implicit "current invoker" authorization for contract
+        // addresses — confirming the access-control fix actually works end to end.
+        use soroban_sdk::testutils::{MockAuth, MockAuthInvoke};
+        use soroban_sdk::IntoVal;
+
+        let env = Env::default();
+
+        let word_id = env.register(WordScrambleContract, ());
+        let reward_id = env.register(reward_contract::RewardContract, ());
+
+        let word_client = WordScrambleContractClient::new(&env, &word_id);
+        let reward_client = reward_contract::RewardContractClient::new(&env, &reward_id);
+
+        reward_client.init(&word_id);
+        word_client.set_reward_contract(&reward_id);
+
+        let player = Address::generate(&env);
+        env.mock_auths(&[MockAuth {
+            address: &player,
+            invoke: &MockAuthInvoke {
+                contract: &word_id,
+                fn_name: "submit_score",
+                args: (player.clone(), 600u32, 5u32).into_val(&env),
+                sub_invokes: &[],
+            },
+        }]);
+
+        word_client.submit_score(&player, &600, &5);
+
+        assert!(reward_client.has_badge(&player, &Symbol::new(&env, "GOLD")));
+    }
 }

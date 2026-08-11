@@ -1,14 +1,44 @@
 // --- STELLAR / SOROBAN INTEGRATION ---
 
-const STELLAR_CONFIG = {
-    networkPassphrase: 'Test SDF Network ; September 2015',
-    rpcUrl: 'https://soroban-testnet.stellar.org',
-    horizonUrl: 'https://horizon-testnet.stellar.org',
-    friendbotUrl: 'https://friendbot.stellar.org',
-    contractId: 'CDTTHP4T5IUDCG2MWJJZXOF5LUHXWMHN54E4PKKRQ56FSEQHSTIILWH3',
-    adminAddress: 'GCTCR3MURG5WAIAEEYWOCE4HQB7DNBOTSJSG4MXFZJXXG4OTVNYGGWS3',
-    rewardContractId: 'CDXIWPK4YYUTZPSXEBLELBBQIJ6X3UKJSDO4CJIH2KZXFWCBH6KXLIOQ',
+const STELLAR_NETWORKS = {
+    testnet: {
+        networkPassphrase: 'Test SDF Network ; September 2015',
+        rpcUrl: 'https://soroban-testnet.stellar.org',
+        horizonUrl: 'https://horizon-testnet.stellar.org',
+        friendbotUrl: 'https://friendbot.stellar.org',
+        contractId: 'CDTTHP4T5IUDCG2MWJJZXOF5LUHXWMHN54E4PKKRQ56FSEQHSTIILWH3',
+        adminAddress: 'GCTCR3MURG5WAIAEEYWOCE4HQB7DNBOTSJSG4MXFZJXXG4OTVNYGGWS3',
+        rewardContractId: 'CDXIWPK4YYUTZPSXEBLELBBQIJ6X3UKJSDO4CJIH2KZXFWCBH6KXLIOQ',
+    },
+    mainnet: {
+        networkPassphrase: 'Public Global Stellar Network ; September 2015',
+        // SDF does not run a free public Soroban RPC for mainnet — pick a provider
+        // from https://developers.stellar.org/docs/data/apis/rpc/providers and fill
+        // this in before deploying (see Workstream A in the Level 6 plan).
+        rpcUrl: null,
+        horizonUrl: 'https://horizon.stellar.org',
+        friendbotUrl: null, // no Friendbot on mainnet — see fee-sponsorship worker instead
+        contractId: null,       // filled in after mainnet contract deploy
+        adminAddress: null,     // filled in once the mainnet admin account is created
+        rewardContractId: null, // filled in after mainnet contract deploy
+    },
 };
+
+// Network selection: ?network=mainnet in the URL, or window.STELLAR_NETWORK set by
+// the host page, falling back to testnet. Resolved once at load time.
+function _resolveActiveNetwork() {
+    try {
+        const fromQuery = new URLSearchParams(window.location.search).get('network');
+        if (fromQuery && STELLAR_NETWORKS[fromQuery]) return fromQuery;
+    } catch (e) { /* no window/URLSearchParams (non-browser context) */ }
+    if (window.STELLAR_NETWORK && STELLAR_NETWORKS[window.STELLAR_NETWORK]) {
+        return window.STELLAR_NETWORK;
+    }
+    return 'testnet';
+}
+
+const ACTIVE_NETWORK = _resolveActiveNetwork();
+const STELLAR_CONFIG = STELLAR_NETWORKS[ACTIVE_NETWORK];
 
 // --- Analytics & error monitoring (GoatCounter custom events) ---
 // Fires a custom event to the GoatCounter dashboard configured in index.html.
@@ -68,7 +98,7 @@ class StellarWallet {
         }
 
         this._kit = new StellarWalletsKit({
-            network: WalletNetwork.TESTNET,
+            network: ACTIVE_NETWORK === 'mainnet' ? WalletNetwork.PUBLIC : WalletNetwork.TESTNET,
             selectedWalletId: FREIGHTER_ID,
             modules,
         });
@@ -82,8 +112,11 @@ class StellarWallet {
         return this._sdk;
     }
 
-    // Auto-fund any address that isn't activated on Testnet yet
+    // Auto-fund any address that isn't activated on Testnet yet.
+    // No-op on mainnet (no Friendbot) until the fee-sponsorship worker's
+    // sponsored-account-creation route takes over this job.
     async _ensureFunded(address) {
+        if (!STELLAR_CONFIG.friendbotUrl) return;
         try {
             const res = await fetch(`${STELLAR_CONFIG.horizonUrl}/accounts/${address}`);
             if (res.status === 404) {

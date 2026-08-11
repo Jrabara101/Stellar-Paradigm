@@ -1,0 +1,8 @@
+{
+  "appId": "com.stellarwordscramble.app",
+  "appName": "Word Scramble",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

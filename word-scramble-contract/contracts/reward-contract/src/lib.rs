@@ -17,9 +17,18 @@ impl RewardContract {
         env.storage().instance().set(&DataKey::Admin, &admin);
     }
 
-    /// Mint a badge for a player. Called by WordScrambleContract via cross-contract call.
-    /// No require_auth here — the player already authorized submit_score which triggers this.
+    /// Mint a badge for a player. Only callable by the registered WordScrambleContract
+    /// (the address passed to `init`) — calling this directly as any other caller panics,
+    /// since a contract Address's `require_auth()` only succeeds when that contract is
+    /// the direct invoker of the current call, with no signature involved.
     pub fn mint_badge(env: Env, player: Address, badge: Symbol) -> bool {
+        let authorized_caller: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::Admin)
+            .expect("reward contract not initialised — call init first");
+        authorized_caller.require_auth();
+
         let key = DataKey::Badges(player.clone());
         let mut badges: Vec<Symbol> = env
             .storage()
@@ -120,4 +129,21 @@ mod tests {
         let badges = client.get_badges(&player);
         assert_eq!(badges.len(), 3);
     }
+
+    #[test]
+    #[should_panic]
+    fn test_mint_badge_rejects_direct_call_from_non_registered_caller() {
+        // No mock_all_auths() here: this proves a plain top-level call (not routed
+        // through the registered leaderboard contract) cannot satisfy
+        // `authorized_caller.require_auth()` and must panic.
+        let env = Env::default();
+        let contract_id = env.register(RewardContract, ());
+        let registered_caller = Address::generate(&env);
+        let client = RewardContractClient::new(&env, &contract_id);
+        client.init(&registered_caller);
+
+        let player = Address::generate(&env);
+        client.mint_badge(&player, &Symbol::new(&env, "GOLD"));
+    }
+
 }
