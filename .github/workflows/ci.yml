@@ -58,7 +58,7 @@ jobs:
           for f in \
             index.html style.css script.js stellar.js feedback.js wallet-guide.js \
             daily-words.js wordbank.js themes.css sw.js manifest.json \
-            scramble-board.js scramble-board.css scramble-words.js; do
+            scramble-board.js scramble-board.css scramble-words.js qrcode.js; do
             test -f "$f" && echo "✅ $f" || (echo "❌ $f missing" && exit 1)
           done
           echo "All required files present."
@@ -67,7 +67,7 @@ jobs:
         run: |
           for f in \
             daily-words.js script.js stellar.js feedback.js wallet-guide.js \
-            wordbank.js sw.js scramble-board.js scramble-words.js; do
+            wordbank.js sw.js scramble-board.js scramble-words.js qrcode.js; do
             echo "Checking $f..."
             node --check "$f"
           done
