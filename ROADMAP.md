@@ -45,8 +45,38 @@ This roadmap tracks Word Scramble's key feature milestones, launch timeline, and
 
 ## 🔭 Planned — Gameplay Expansion
 
+- **Speedrun mode:** timed word-scramble runs with a time-bank formula; reuses the existing word pool + scoring engine, only new surface is a clock. Recommended as the next mode to ship (cheapest lift, highest expected value).
+- **Weekly Arena:** recurring competitive window, config-only on top of the existing leaderboard system.
+- **Category Rush:** config-only on top of the existing category system.
+- **Streak Freeze:** one miss doesn't reset your win streak — targets the most common complaint about Wordle-style streak mechanics (no partial credit).
 - **Scrabble Duel:** 2-player persistent-board mode with a full turn engine, evolving toward a 4-player 15×15 board (requested by users; scoped as a follow-on to the already-shipped Scramble Board)
+- Looser/less-worked-out ideas: Boss Word, Co-op Relay, Themed Weekends
 - Manual difficulty selector (currently auto-scales with level; deferred pending its own UI/state design)
+
+## 🔭 Ideas Under Consideration (concept stage, not yet scoped)
+
+**Social & multiplayer**
+- **Challenge a Friend** — shareable link/code with a pre-seeded puzzle; friend plays the same board, results compared side-by-side
+- **Ghost Replay** — translucent "ghost" of your best-ever (or a friend's) tile placements racing alongside you, Mario Kart-style
+- **Guild/Clan leaderboards** — small wallet groups (3-10) with a combined weekly score, layered on the existing leaderboard contract
+
+**Retention**
+- **Comeback bonus** — small score multiplier for returning after 3+ days away
+- **Daily quest chips** — 2-3 rotating micro-goals granting cosmetic currency, reusing the existing badge/chip system
+- **Puzzle calendar / monthly recap** — Wordle-style shareable grid image, generated client-side
+
+**Accessibility & UX**
+- **Colorblind-safe tile-effect mode** — alt-palette for effects (aurora, holographic, volcanic, neon) that currently rely on color-only cues
+- **One-handed / large-tap mode** — accessibility toggle building on the existing fluid board-sizing system
+- **Practice mode** — play with no score/streak risk, for nervous new players
+
+**Monetization-adjacent (non-pay-to-win)**
+- **Cosmetic marketplace via NFT badges** — trade/gift on-chain badges between wallets, turning a static reward into a tradeable collectible
+- **Sponsor-a-category** — partner-branded category/theme skin, without touching core gameplay fairness
+
+**Content depth**
+- **User-submitted word packs** — moderated community word lists, extending the existing bundled word-bank pipeline
+- **Localization** — full language toggle (UI + word banks), building on the existing cultural word-pack precedent (anime/filipino)
 
 ## 🔭 Long-Term — On-Chain Vocabulary Credentials
 

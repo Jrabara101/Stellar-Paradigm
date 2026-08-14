@@ -773,7 +773,7 @@ body[data-performance-mode="true"] .drop-preview { animation: none !important; }
     background: rgba(0, 0, 0, 0.4);
     border: 2px solid rgba(255, 255, 255, 0.1);
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-    transition: all 0.35s ease;
+    transition: color 0.35s ease, background 0.35s ease;
     cursor: default;
     position: relative;
 }
@@ -793,7 +793,7 @@ body[data-performance-mode="true"] .drop-preview { animation: none !important; }
     white-space: nowrap;
     opacity: 0;
     pointer-events: none;
-    transition: all 0.2s ease;
+    transition: opacity 0.2s ease, transform 0.2s ease;
     border: 1px solid var(--teak-light);
     box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     z-index: 10;
@@ -1024,6 +1024,11 @@ button:active {
     z-index: 10;
     width: fit-content;
 }
+.rack-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 .rack-slots {
     display: flex;
     gap: 7px;
@@ -1035,6 +1040,39 @@ button:active {
     width: var(--cell-size);
     height: var(--cell-size);
     background: transparent;
+}
+.btn-shuffle {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    line-height: 1;
+    background: var(--mustard);
+    color: var(--teak-dark);
+    border: 2px solid var(--teak-dark);
+    border-radius: 50%;
+    box-shadow: 0 4px 0 var(--mustard-dark);
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s, background-color 0.2s;
+    font-family: inherit;
+}
+.btn-shuffle:hover {
+    background: #F0C020;
+}
+.btn-shuffle:active {
+    transform: translateY(4px);
+    box-shadow: 0 0px 0 var(--mustard-dark);
+}
+.btn-shuffle.spin {
+    animation: shuffleSpin 0.4s ease;
+}
+@keyframes shuffleSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(180deg); }
 }
 .rack-shelf {
     width: 100%;
@@ -1063,6 +1101,7 @@ button:active {
     top: 120px;
     z-index: 10;
     backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     box-sizing: border-box;
 }
 
@@ -1133,6 +1172,7 @@ button:active {
     top: 120px;
     z-index: 10;
     backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     box-sizing: border-box;
 }
 
@@ -1270,7 +1310,7 @@ button:active {
     text-transform: uppercase;
     letter-spacing: 1px;
     box-shadow: 0 4px 0 var(--turquoise-dark);
-    transition: all 0.1s;
+    transition: background 0.1s, box-shadow 0.1s, transform 0.1s;
     font-family: inherit;
     width: 100%;
 }
@@ -1359,6 +1399,7 @@ button:active {
     transition: opacity 0.5s ease;
     z-index: 1000;
     backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
 }
 .victory-screen.active {
     opacity: 1;
@@ -1499,6 +1540,7 @@ button:active {
     transition: opacity 0.3s ease;
     z-index: 1500;
     backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
 }
 .modal-backdrop.active {
     opacity: 1; pointer-events: auto;
@@ -1561,7 +1603,7 @@ button:active {
     text-transform: uppercase;
     letter-spacing: 1px;
     box-shadow: 0 4px 0 var(--teak-dark);
-    transition: all 0.1s;
+    transition: background 0.1s, box-shadow 0.1s, transform 0.1s;
     font-family: inherit;
 }
 .category-btn:hover {
@@ -1576,6 +1618,93 @@ button:active {
     background: var(--turquoise);
     border-color: var(--teak-dark);
     box-shadow: 0 4px 0 var(--turquoise-dark);
+}
+
+/* ==========================================================================
+   GET APP MODAL (QR code + direct APK download link)
+   ========================================================================== */
+.get-app-modal {
+    background: radial-gradient(circle, var(--teak-light) 0%, var(--teak-dark) 100%);
+    border: 5px solid var(--teak-dark);
+    border-radius: 20px;
+    padding: 30px;
+    width: 90%;
+    max-width: 380px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.8);
+    text-align: center;
+    transform: scale(0.8);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modal-backdrop.active .get-app-modal {
+    transform: scale(1);
+}
+.get-app-modal h3 {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--off-white);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 1px 1px 0px var(--turquoise), 2px 2px 0px var(--teak-dark);
+}
+.get-app-subtitle {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--off-white);
+    opacity: 0.85;
+    margin-bottom: 18px;
+}
+.get-app-qr-wrapper {
+    background: #ffffff;
+    border: 3px solid var(--teak-dark);
+    border-radius: 12px;
+    padding: 12px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+    min-height: 60px;
+    color: var(--teak-dark);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+.get-app-qr-canvas {
+    display: block;
+    width: 220px;
+    height: 220px;
+    max-width: 100%;
+    image-rendering: pixelated;
+}
+.get-app-note {
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--off-white);
+    opacity: 0.8;
+    margin: 16px 0;
+}
+.get-app-download-btn {
+    display: block;
+    background: var(--mustard);
+    color: var(--teak-dark);
+    border: 2px solid var(--teak-dark);
+    padding: 12px;
+    font-size: 0.95rem;
+    font-weight: 900;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 0 var(--mustard-dark);
+    transition: background 0.1s, box-shadow 0.1s, transform 0.1s;
+    font-family: inherit;
+    text-decoration: none;
+}
+.get-app-download-btn:hover {
+    background: #F5C518;
+}
+.get-app-download-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 0px 0 var(--mustard-dark);
 }
 
 /* Dynamic Mahogany Loading Screen Styles */
@@ -1768,6 +1897,7 @@ button:active {
     max-width: 360px;
     background-color: rgba(255,255,255,0.05);
     backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     padding: 14px;
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.1);
@@ -1978,7 +2108,7 @@ button:active {
     border-radius: 10px;
     padding: 8px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -2039,7 +2169,7 @@ button:active {
     text-transform: uppercase;
     letter-spacing: 1px;
     box-shadow: 0 4px 0 var(--turquoise-dark);
-    transition: all 0.1s;
+    transition: background 0.1s, box-shadow 0.1s, transform 0.1s;
     font-family: inherit;
     width: 100%;
 }
@@ -2735,6 +2865,7 @@ input:checked + .retro-slider:before {
     transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     box-sizing: border-box;
     backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 .preview-hud-panel.active {
     right: 35px; /* Slide in */
@@ -3171,8 +3302,6 @@ body[data-tile-effect="ice-crystal"] .wood-tile {
         0 6px 12px rgba(0, 0, 0, 0.15) !important;
     text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
     transition: transform 0.2s, box-shadow 0.2s, background 0.3s, border-color 0.3s, color 0.3s;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
 }
 
 body[data-tile-effect="ice-crystal"] .wood-tile::before {
@@ -3295,8 +3424,6 @@ body[data-tile-effect="ice-crystal"] .wood-tile.locked::before {
 body[data-tile-effect="stained-glass"] .wood-tile {
     border: 2.5px solid #1e293b !important; /* Dark lead came borders */
     color: #1e293b !important; /* Dark charcoal text for the leading */
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
     transition: transform 0.2s, box-shadow 0.2s, background 0.3s, border-color 0.3s, color 0.3s, filter 0.3s;
 }
 
@@ -4125,7 +4252,7 @@ body[data-performance-mode="true"].idle-shimmer .wood-tile:not(.locked):not(.inl
 /* ==========================================================================
    MODAL SPRING ENTRANCE (lift + overshoot; close still fades/settles out)
    ========================================================================== */
-.category-modal, .theme-modal, .leaderboard-modal, .changelog-modal, .api-settings-modal {
+.category-modal, .theme-modal, .leaderboard-modal, .changelog-modal, .api-settings-modal, .get-app-modal {
     transform: scale(0.85) translateY(26px);
     transition: transform 0.38s cubic-bezier(0.3, 1.4, 0.5, 1);
 }
@@ -4133,7 +4260,8 @@ body[data-performance-mode="true"].idle-shimmer .wood-tile:not(.locked):not(.inl
 .modal-backdrop.active .theme-modal,
 .modal-backdrop.active .leaderboard-modal,
 .modal-backdrop.active .changelog-modal,
-.modal-backdrop.active .api-settings-modal {
+.modal-backdrop.active .api-settings-modal,
+.modal-backdrop.active .get-app-modal {
     transform: scale(1) translateY(0);
 }
 
@@ -4155,6 +4283,7 @@ body[data-performance-mode="true"].idle-shimmer .wood-tile:not(.locked):not(.inl
     .modal-backdrop .leaderboard-modal,
     .modal-backdrop .changelog-modal,
     .modal-backdrop .api-settings-modal,
+    .modal-backdrop .get-app-modal,
     .modal-backdrop .wallet-guide-box,
     .modal-backdrop .feedback-box {
         width: 100%;
@@ -4171,6 +4300,7 @@ body[data-performance-mode="true"].idle-shimmer .wood-tile:not(.locked):not(.inl
     .modal-backdrop.active .leaderboard-modal,
     .modal-backdrop.active .changelog-modal,
     .modal-backdrop.active .api-settings-modal,
+    .modal-backdrop.active .get-app-modal,
     .modal-backdrop.active .wallet-guide-box,
     .modal-backdrop.active .feedback-box {
         transform: translateY(0);
@@ -4182,6 +4312,7 @@ body[data-performance-mode="true"].idle-shimmer .wood-tile:not(.locked):not(.inl
     .modal-backdrop .leaderboard-modal,
     .modal-backdrop .changelog-modal,
     .modal-backdrop .api-settings-modal,
+    .modal-backdrop .get-app-modal,
     .modal-backdrop .wallet-guide-box,
     .modal-backdrop .feedback-box {
         transition: none;
@@ -4204,12 +4335,13 @@ body[data-performance-mode="true"] .grid-cell.cascade-gold::after {
     .grid-cell.cascade-gold::after {
         animation: none !important;
     }
-    .category-modal, .theme-modal, .leaderboard-modal, .changelog-modal, .api-settings-modal,
+    .category-modal, .theme-modal, .leaderboard-modal, .changelog-modal, .api-settings-modal, .get-app-modal,
     .modal-backdrop.active .category-modal,
     .modal-backdrop.active .theme-modal,
     .modal-backdrop.active .leaderboard-modal,
     .modal-backdrop.active .changelog-modal,
-    .modal-backdrop.active .api-settings-modal {
+    .modal-backdrop.active .api-settings-modal,
+    .modal-backdrop.active .get-app-modal {
         transform: none;
         transition: none;
     }

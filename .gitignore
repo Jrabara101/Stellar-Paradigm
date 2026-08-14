@@ -22,3 +22,13 @@ worker/.wrangler/
 
 # Capacitor Android build (generated from root web files; see www/README or capacitor.config.json)
 www/
+
+# Android (Capacitor native project) — build output / local machine config only
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/.idea/
+android/**/*.iml
+*.apk
+*.aab

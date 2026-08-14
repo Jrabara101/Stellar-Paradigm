@@ -111,6 +111,7 @@
                     <button class="menu-item" id="effects-btn" role="menuitem" onclick="game.openEffectsModal()">Effects</button>
                     <button class="menu-item" id="audio-settings-btn" role="menuitem" onclick="game.openAudioModal()">🔊 Audio</button>
                     <button class="menu-item" id="api-settings-btn" role="menuitem" onclick="game.openApiSettingsModal()">⚙️ API Settings</button>
+                    <button class="menu-item" id="get-app-btn" role="menuitem" onclick="game.openGetAppModal()">📱 Get Android App</button>
                 </div>
             </div>
             <div class="daily-banner" id="daily-banner" onclick="game.exitDailyChallenge()" title="Click to exit Daily Challenge and return to regular play">
@@ -175,7 +176,10 @@
 
     <!-- Letter Tray Rack (Bottom-Right) -->
     <div class="rack-container">
-        <div class="rack-slots" id="rack-slots"></div>
+        <div class="rack-row">
+            <div class="rack-slots" id="rack-slots"></div>
+            <button class="btn-shuffle" id="btn-shuffle" onclick="game.shuffleRack()" title="Shuffle your letters">🔀</button>
+        </div>
         <div class="rack-shelf"></div>
     </div>
 
@@ -854,6 +858,25 @@
                 <button class="reset-score-btn" id="reset-score-btn" onclick="game.confirmSelfReset()" style="display: none;">Reset My Score</button>
                 <button class="theme-close-btn" style="margin-top: 0; width: auto;" onclick="game.closeLeaderboardModal(null)">Close</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Get Android App Modal (QR code + direct download link) -->
+    <div class="modal-backdrop" id="get-app-modal-backdrop" onclick="game.closeGetAppModal(event)">
+        <div class="get-app-modal" onclick="event.stopPropagation()">
+            <h3>Get the Android App</h3>
+            <div class="get-app-subtitle">Scan with your phone camera to download the APK</div>
+
+            <div class="get-app-qr-wrapper">
+                <canvas id="get-app-qr-canvas" class="get-app-qr-canvas"></canvas>
+            </div>
+
+            <div class="get-app-note">
+                Debug build — you may need to enable <strong>"Install from unknown sources"</strong> on your Android device.
+            </div>
+
+            <a id="get-app-download-link" class="get-app-download-btn" href="#" target="_blank" rel="noopener noreferrer" download>⬇️ Download APK</a>
+            <button class="theme-close-btn" style="margin-top: 10px;" onclick="game.closeGetAppModal(null)">Close</button>
         </div>
     </div>
 

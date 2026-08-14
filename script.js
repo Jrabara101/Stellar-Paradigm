@@ -1834,9 +1834,46 @@ class TeakScrambleGame {
         }
     }
 
+    // Randomly reorders only the tiles still sitting in the rack — tiles the
+    // player has already placed on the board (locked or not) are left alone,
+    // since shuffling those would silently undo the player's in-progress answer.
+    shuffleRack() {
+        const rackTiles = this.tilesData.filter(t => t.currentLocation === 'rack');
+        if (rackTiles.length < 2) {
+            this.sound.play('error');
+            return;
+        }
+
+        this.sound.play('reset');
+        this._vibrate(10);
+
+        const occupiedSlots = rackTiles.map(t => t.slotIndex);
+        // Fisher-Yates shuffle of the slot indices themselves, so tiles keep
+        // occupying the exact same set of rack slots, just reassigned.
+        for (let i = occupiedSlots.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [occupiedSlots[i], occupiedSlots[j]] = [occupiedSlots[j], occupiedSlots[i]];
+        }
+
+        rackTiles.forEach((tileObj, i) => {
+            const newSlot = occupiedSlots[i];
+            tileObj.slotIndex = newSlot;
+            this.rackSlots[newSlot] = tileObj;
+        });
+
+        this.syncViewPositions(true);
+
+        const btn = document.getElementById('btn-shuffle');
+        if (btn) {
+            btn.classList.remove('spin');
+            void btn.offsetWidth; // restart the animation on repeated clicks
+            btn.classList.add('spin');
+        }
+    }
+
     resetTray(excludeLocked = true) {
         this.sound.play('reset');
-        
+
         if (excludeLocked) {
             // Clear board occupants of non-locked tiles
             for (let i = 0; i < this.boardOccupants.length; i++) {
@@ -2755,6 +2792,73 @@ class TeakScrambleGame {
         if (!event || event.target === document.getElementById('api-settings-modal-backdrop')) {
             this.sound.play('select');
             document.getElementById('api-settings-modal-backdrop').classList.remove('active');
+        }
+    }
+
+    // Debug APK direct-download link (GitHub Release asset — stable URL, no
+    // size-interstitial like Drive/Dropbox hit on files this size).
+    static ANDROID_APK_URL = 'https://github.com/Jrabara101/Stellar-Paradigm/releases/download/android-debug-v1/app-debug.apk';
+
+    // qrcode.js (~55KB, vendored MIT lib) is only needed by this modal, so it's
+    // lazy-loaded on first open rather than shipped on every page load —
+    // mirrors _ensureScrambleAssets()'s loadScript pattern.
+    _ensureQRCodeLib() {
+        if (this._qrcodePromise) return this._qrcodePromise;
+        this._qrcodePromise = new Promise((resolve, reject) => {
+            if (typeof qrcode !== 'undefined') return resolve();
+            const s = document.createElement('script');
+            s.src = 'qrcode.js';
+            s.onload = resolve;
+            s.onerror = () => reject(new Error('Failed to load qrcode.js'));
+            document.head.appendChild(s);
+        });
+        return this._qrcodePromise;
+    }
+
+    openGetAppModal() {
+        this.sound.play('select');
+        document.getElementById('get-app-download-link').href = TeakScrambleGame.ANDROID_APK_URL;
+        document.getElementById('get-app-modal-backdrop').classList.add('active');
+
+        // Render once and cache — the URL never changes at runtime, so redrawing
+        // on every open would just waste CPU for an identical result.
+        const canvas = document.getElementById('get-app-qr-canvas');
+        if (canvas.dataset.rendered === 'true') return;
+
+        this._ensureQRCodeLib().then(() => {
+            const qr = qrcode(0, 'M');
+            qr.addData(TeakScrambleGame.ANDROID_APK_URL);
+            qr.make();
+
+            const count = qr.getModuleCount();
+            const scale = 6;
+            const margin = 2;
+            const size = (count + margin * 2) * scale;
+            canvas.width = size;
+            canvas.height = size;
+
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, size, size);
+            ctx.fillStyle = '#000000';
+            for (let row = 0; row < count; row++) {
+                for (let col = 0; col < count; col++) {
+                    if (qr.isDark(row, col)) {
+                        ctx.fillRect((col + margin) * scale, (row + margin) * scale, scale, scale);
+                    }
+                }
+            }
+            canvas.dataset.rendered = 'true';
+        }).catch(() => {
+            const wrapper = canvas.closest('.get-app-qr-wrapper');
+            if (wrapper) wrapper.textContent = 'QR code unavailable — use the download button below.';
+        });
+    }
+
+    closeGetAppModal(event) {
+        if (!event || event.target === document.getElementById('get-app-modal-backdrop')) {
+            this.sound.play('select');
+            document.getElementById('get-app-modal-backdrop').classList.remove('active');
         }
     }
 

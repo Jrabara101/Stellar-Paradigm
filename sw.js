@@ -20,7 +20,8 @@ const PRECACHE = [
 // especially the ~1.8MB scramble-words.js dictionary) are intentionally NOT
 // precached — they stay lazy-loaded on first mode entry and are then picked up
 // automatically by the network-first runtime cache below, so players who never
-// open Scramble Board never download the dictionary.
+// open Scramble Board never download the dictionary. Same reasoning for
+// qrcode.js (~55KB), lazy-loaded only when the "Get Android App" modal opens.
 
 self.addEventListener('install', (event) => {
     event.waitUntil(

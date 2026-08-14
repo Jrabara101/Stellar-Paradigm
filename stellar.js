@@ -9,6 +9,7 @@ const STELLAR_NETWORKS = {
         contractId: 'CDTTHP4T5IUDCG2MWJJZXOF5LUHXWMHN54E4PKKRQ56FSEQHSTIILWH3',
         adminAddress: 'GCTCR3MURG5WAIAEEYWOCE4HQB7DNBOTSJSG4MXFZJXXG4OTVNYGGWS3',
         rewardContractId: 'CDXIWPK4YYUTZPSXEBLELBBQIJ6X3UKJSDO4CJIH2KZXFWCBH6KXLIOQ',
+        credentialContractId: 'CCJHBN7YGYZGKTYA3ZHWB76TZL6OGPWLOF4GE55G2XR53M6RAE45EXB7',
     },
     mainnet: {
         networkPassphrase: 'Public Global Stellar Network ; September 2015',
@@ -18,9 +19,10 @@ const STELLAR_NETWORKS = {
         rpcUrl: null,
         horizonUrl: 'https://horizon.stellar.org',
         friendbotUrl: null, // no Friendbot on mainnet — see fee-sponsorship worker instead
-        contractId: null,       // filled in after mainnet contract deploy
-        adminAddress: null,     // filled in once the mainnet admin account is created
-        rewardContractId: null, // filled in after mainnet contract deploy
+        contractId: null,           // filled in after mainnet contract deploy
+        adminAddress: null,         // filled in once the mainnet admin account is created
+        rewardContractId: null,     // filled in after mainnet contract deploy
+        credentialContractId: null, // filled in after mainnet contract deploy
     },
 };
 
