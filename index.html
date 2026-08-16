@@ -108,6 +108,7 @@
                     <button class="menu-item" id="customize-tag-btn" role="menuitem" onclick="game.openThemeModal()">Customize Board</button>
                     <button class="menu-item" id="customize-chips-btn" role="menuitem" onclick="game.openChipModal()">Customize Chips</button>
                     <button class="menu-item" id="leaderboard-btn" role="menuitem" onclick="game.openLeaderboardModal()">Leaderboard</button>
+                    <button class="menu-item" id="credentials-btn" role="menuitem" onclick="game.openCredentialsModal()">🎓 My Credentials</button>
                     <button class="menu-item" id="effects-btn" role="menuitem" onclick="game.openEffectsModal()">Effects</button>
                     <button class="menu-item" id="audio-settings-btn" role="menuitem" onclick="game.openAudioModal()">🔊 Audio</button>
                     <button class="menu-item" id="api-settings-btn" role="menuitem" onclick="game.openApiSettingsModal()">⚙️ API Settings</button>
@@ -857,6 +858,48 @@
                 <button class="leaderboard-refresh-btn" onclick="game.refreshLeaderboard()" onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 0px 0 #00bfa5'" onmouseup="this.style.transform=''; this.style.boxShadow='0 3px 0 #00bfa5'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 3px 0 #00bfa5'">Refresh</button>
                 <button class="reset-score-btn" id="reset-score-btn" onclick="game.confirmSelfReset()" style="display: none;">Reset My Score</button>
                 <button class="theme-close-btn" style="margin-top: 0; width: auto;" onclick="game.closeLeaderboardModal(null)">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Credentials Modal (on-chain soulbound vocabulary credentials) -->
+    <div class="modal-backdrop" id="credentials-modal-backdrop" onclick="game.closeCredentialsModal(event)">
+        <div class="leaderboard-modal credentials-modal" onclick="event.stopPropagation()">
+            <h3>My Credentials</h3>
+            <div class="leaderboard-subtitle">On-Chain Vocabulary Credentials</div>
+
+            <div class="leaderboard-container">
+                <div class="leaderboard-loading" id="credentials-loading">
+                    <div class="spinner"></div>
+                    <span>Retrieving your credentials...</span>
+                </div>
+
+                <div class="leaderboard-error" id="credentials-error" style="display: none;">
+                    <span class="material-symbols-outlined error-icon">warning</span>
+                    <span class="error-msg">Failed to connect to network.</span>
+                    <button class="leaderboard-retry-btn" onclick="game.refreshCredentials()">Retry</button>
+                </div>
+
+                <div class="leaderboard-empty" id="credentials-no-wallet" style="display: none;">
+                    <span class="material-symbols-outlined empty-icon">account_balance_wallet</span>
+                    <span class="empty-msg">Connect your wallet to view your credentials.</span>
+                </div>
+
+                <div class="leaderboard-empty" id="credentials-empty" style="display: none;">
+                    <span class="material-symbols-outlined empty-icon">school</span>
+                    <span class="empty-msg">No credentials yet.<br/>Score 90+ in a category to earn one!</span>
+                </div>
+
+                <div class="credentials-list-wrapper" id="credentials-list-wrapper" style="display: none;">
+                    <div class="credentials-list" id="credentials-list">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="leaderboard-actions">
+                <button class="leaderboard-refresh-btn" onclick="game.refreshCredentials()">Refresh</button>
+                <button class="theme-close-btn" style="margin-top: 0; width: auto;" onclick="game.closeCredentialsModal(null)">Close</button>
             </div>
         </div>
     </div>

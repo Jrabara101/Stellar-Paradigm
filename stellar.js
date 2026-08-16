@@ -464,6 +464,41 @@ class StellarWallet {
         }
     }
 
+    async fetchCredentials() {
+        if (!this.address) return [];
+        if (!STELLAR_CONFIG.credentialContractId) return [];
+        try {
+            const sdk = await this._getSDK();
+            const rpc = new sdk.rpc.Server(STELLAR_CONFIG.rpcUrl);
+            const contract = new sdk.Contract(STELLAR_CONFIG.credentialContractId);
+            const tempKeypair = sdk.Keypair.random();
+            const tempAccount = new sdk.Account(tempKeypair.publicKey(), '0');
+            const tx = new sdk.TransactionBuilder(tempAccount, {
+                fee: sdk.BASE_FEE,
+                networkPassphrase: STELLAR_CONFIG.networkPassphrase,
+            })
+                .addOperation(contract.call('get_credentials', sdk.Address.fromString(this.address).toScVal()))
+                .setTimeout(30)
+                .build();
+            const sim = await rpc.simulateTransaction(tx);
+            if (sdk.rpc.Api.isSimulationError(sim)) return [];
+            const raw = sim.result?.retval;
+            if (!raw) return [];
+            return sdk.scValToNative(raw).map(c => ({
+                id: this._bytesToHex(c.id),
+                issuer: c.issuer,
+                player: c.player,
+                subject: c.subject,
+                cefrLevel: c.cefr_level,
+                score: c.score,
+                issuedAtLedger: c.issued_at_ledger,
+                timestamp: Number(c.timestamp),
+            }));
+        } catch (e) {
+            return [];
+        }
+    }
+
     // Reset only the connected player's own score (player-signed)
     async resetScore() {
         if (!this.connected || !this.address) {
@@ -641,6 +676,10 @@ class StellarWallet {
         return `${address.slice(0, 4)}...${address.slice(-4)}`;
     }
 
+    _bytesToHex(bytes) {
+        return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     // Best-effort human-readable text for a thrown/returned error value.
     // RPC failures (response.errorResult, result.resultXdr) are XDR objects,
     // not strings — interpolating them directly into a template literal
@@ -705,3 +744,4 @@ class StellarWallet {
 const stellarWallet = new StellarWallet();
 window.stellarWallet = stellarWallet;
 window.StellarWallet = StellarWallet;
+window.STELLAR_CONFIG = STELLAR_CONFIG;

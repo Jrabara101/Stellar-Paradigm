@@ -289,6 +289,7 @@ body {
     background: var(--theme-ambient-glow, radial-gradient(circle, rgba(64, 224, 208, 0.12) 0%, rgba(225, 173, 1, 0.05) 50%, rgba(0,0,0,0) 70%));
     z-index: 1;
     pointer-events: none;
+    will-change: transform;
     animation: ambient-drift 14s ease-in-out infinite;
 }
 @keyframes ambient-drift {
@@ -910,8 +911,28 @@ body[data-performance-mode="true"] .dashed-slot {
 }
 body[data-performance-mode="true"] .modal-backdrop,
 body[data-performance-mode="true"] .instructions-panel,
-body[data-performance-mode="true"] .hint-info-panel {
+body[data-performance-mode="true"] .hint-info-panel,
+body[data-performance-mode="true"] .victory-screen,
+body[data-performance-mode="true"] .loading-screen .tip-container,
+body[data-performance-mode="true"] .preview-hud-panel {
     backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* backdrop-filter is the single most expensive effect on Android WebView
+   (the .apk build's renderer) — drop it by default on small/mobile
+   viewports regardless of Performance Mode, since that's where it hurts
+   most and matters least visually (little content ever shows through). */
+@media (max-width: 768px) {
+    .instructions-panel,
+    .hint-info-panel,
+    .victory-screen,
+    .modal-backdrop,
+    .loading-screen .tip-container,
+    .preview-hud-panel {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
 }
 
 .wood-tile:hover {
@@ -2481,6 +2502,88 @@ body[data-chip-material="glass"] .wood-tile {
 }
 .player-level {
     font-weight: 700;
+}
+.credentials-list-wrapper {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+.credentials-list-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+.credentials-list-wrapper::-webkit-scrollbar-thumb {
+    background: var(--teak-dark);
+    border-radius: 3px;
+}
+.credentials-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.credential-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(64, 224, 208, 0.08);
+    border: 2px solid var(--teak-dark);
+    border-left: 4px solid var(--turquoise);
+    border-radius: 10px;
+    padding: 10px 14px;
+    text-align: left;
+}
+.credential-badge {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--mustard), var(--mustard-dark));
+    color: var(--teak-dark);
+    font-weight: 900;
+    font-size: 0.75rem;
+    border: 2px solid var(--teak-dark);
+    box-shadow: 0 0 6px rgba(225, 173, 1, 0.4);
+}
+.credential-info {
+    flex: 1;
+    min-width: 0;
+}
+.credential-subject {
+    font-weight: 900;
+    font-size: 0.95rem;
+    color: var(--off-white);
+    text-transform: capitalize;
+}
+.credential-meta {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.72rem;
+    color: var(--mustard);
+    margin-top: 2px;
+}
+.credential-id {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.65rem;
+    color: rgba(245, 245, 240, 0.5);
+    margin-top: 2px;
+    word-break: break-all;
+}
+.credential-verify-link {
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--turquoise);
+    text-decoration: none;
+    border: 1.5px solid var(--turquoise);
+    border-radius: 6px;
+    padding: 4px 8px;
+    white-space: nowrap;
+    transition: background-color 0.15s;
+}
+.credential-verify-link:hover {
+    background-color: rgba(64, 224, 208, 0.15);
 }
 .personal-best-box {
     margin-top: 14px;
@@ -4223,18 +4326,21 @@ body[data-tile-effect="none"].idle-shimmer .wood-tile:not(.locked):not(.inlaid):
     content: '';
     position: absolute;
     top: 0;
-    left: -120%;
+    left: 0;
     width: 55%;
     height: 100%;
     background: linear-gradient(105deg, transparent, rgba(255,255,255,0.55), transparent);
-    transform: skewX(-18deg);
     pointer-events: none;
     z-index: 2;
+    will-change: transform;
     animation: idle-shimmer-sweep 2.6s ease-in-out infinite;
 }
+/* Animates transform (GPU-composited) instead of the old left/skewX pair,
+   which forced a layout recalc on every frame for every idle tile on
+   screen — the costliest part of this effect on low-end devices. */
 @keyframes idle-shimmer-sweep {
-    0% { left: -120%; }
-    55%, 100% { left: 170%; }
+    0% { transform: translateX(-220%) skewX(-18deg); }
+    55%, 100% { transform: translateX(310%) skewX(-18deg); }
 }
 body[data-performance-mode="true"].streak-max::after,
 body[data-performance-mode="true"].idle-shimmer .wood-tile:not(.locked):not(.inlaid)::after {
@@ -4264,6 +4370,8 @@ body[data-performance-mode="true"].idle-shimmer .wood-tile:not(.locked):not(.inl
 .modal-backdrop.active .get-app-modal {
     transform: scale(1) translateY(0);
 }
+/* .credentials-modal composes .leaderboard-modal, so it already inherits
+   the entrance transform/transition and mobile bottom-sheet rules below. */
 
 /* ==========================================================================
    PHASE 2C — Mobile bottom-sheets. On narrow screens, modals dock to the

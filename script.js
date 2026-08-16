@@ -476,10 +476,14 @@ class ParticleSystem {
     burst(x, y) {
         this.active = true;
         this.particles = this.particles.filter(p => p.alpha > 0);
-        
+
         const colors = this.getColorsForTheme();
-        const count = 120;
-        
+        // Performance Mode (read from the body attribute rather than the
+        // game instance, since ParticleSystem has no reference to it) caps
+        // the confetti burst well below its normal 120 particles — this is
+        // the single most expensive canvas effect in the game.
+        const count = document.body.getAttribute('data-performance-mode') === 'true' ? 30 : 120;
+
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
             const Math_cos = Math.cos;
@@ -526,9 +530,13 @@ class ParticleSystem {
     streakEmberBurst(x, y, count) {
         this.active = true;
         this.particles = this.particles.filter(p => p.alpha > 0);
-        
+
+        if (document.body.getAttribute('data-performance-mode') === 'true') {
+            count = Math.min(count, 12);
+        }
+
         const colors = ['#FF4500', '#FF8C00', '#FFA500', '#FFD700', '#FF6347'];
-        
+
         for (let i = 0; i < count; i++) {
             const angle = Math.PI * 1.5 + (Math.random() - 0.5) * 0.4;
             const speed = 1.5 + Math.random() * 2.5;
@@ -816,9 +824,13 @@ class TeakScrambleGame {
             idleShimmer: localStorage.getItem('ws_fx_idleShimmer') !== 'false',
             dropPreview: localStorage.getItem('ws_fx_dropPreview') !== 'false',
             haptics: localStorage.getItem('ws_fx_haptics') !== 'false',
-            // Unlike the effects above, Performance Mode defaults OFF —
-            // it's an opt-in trade of visual polish for speed.
-            performanceMode: localStorage.getItem('ws_fx_performanceMode') === 'true'
+            // Performance Mode defaults OFF, but is auto-seeded ON for
+            // devices that look low-end (see _detectLowEndDevice) the
+            // first time a player loads the game, unless they've already
+            // made an explicit choice (localStorage key already set).
+            performanceMode: localStorage.getItem('ws_fx_performanceMode') !== null
+                ? localStorage.getItem('ws_fx_performanceMode') === 'true'
+                : this._detectLowEndDevice()
         };
         this._applyPerformanceModeAttr();
 
@@ -3217,6 +3229,90 @@ class TeakScrambleGame {
         tableWrapperEl.style.display = 'block';
     }
 
+    openCredentialsModal() {
+        this.sound.play('select');
+        document.getElementById('credentials-modal-backdrop').classList.add('active');
+        this.refreshCredentials();
+    }
+
+    closeCredentialsModal(event) {
+        if (!event || event.target === document.getElementById('credentials-modal-backdrop')) {
+            this.sound.play('select');
+            document.getElementById('credentials-modal-backdrop').classList.remove('active');
+        }
+    }
+
+    async refreshCredentials() {
+        const loadingEl = document.getElementById('credentials-loading');
+        const errorEl = document.getElementById('credentials-error');
+        const noWalletEl = document.getElementById('credentials-no-wallet');
+        const emptyEl = document.getElementById('credentials-empty');
+        const listWrapperEl = document.getElementById('credentials-list-wrapper');
+        const listEl = document.getElementById('credentials-list');
+
+        loadingEl.style.display = 'flex';
+        errorEl.style.display = 'none';
+        noWalletEl.style.display = 'none';
+        emptyEl.style.display = 'none';
+        listWrapperEl.style.display = 'none';
+        listEl.innerHTML = '';
+
+        const wallet = window.stellarWallet;
+        if (!wallet || !wallet.connected || !wallet.address) {
+            loadingEl.style.display = 'none';
+            noWalletEl.style.display = 'flex';
+            return;
+        }
+
+        try {
+            const credentials = await wallet.fetchCredentials();
+            loadingEl.style.display = 'none';
+
+            if (!credentials || credentials.length === 0) {
+                emptyEl.style.display = 'flex';
+                return;
+            }
+
+            this.renderCredentials(credentials);
+        } catch (err) {
+            console.error('Error refreshing credentials:', err);
+            loadingEl.style.display = 'none';
+            errorEl.style.display = 'flex';
+        }
+    }
+
+    renderCredentials(credentials) {
+        const listWrapperEl = document.getElementById('credentials-list-wrapper');
+        const listEl = document.getElementById('credentials-list');
+
+        listEl.innerHTML = '';
+
+        const sorted = [...credentials].sort((a, b) => b.timestamp - a.timestamp);
+
+        sorted.forEach(c => {
+            const card = document.createElement('div');
+            card.className = 'credential-card';
+
+            const issuedDate = c.timestamp
+                ? new Date(c.timestamp * 1000).toLocaleDateString()
+                : '';
+            const verifyUrl = `https://stellar.expert/explorer/testnet/contract/${window.STELLAR_CONFIG.credentialContractId}`;
+
+            card.innerHTML = `
+                <div class="credential-badge">${c.cefrLevel}</div>
+                <div class="credential-info">
+                    <div class="credential-subject">${c.subject} &mdash; Score ${c.score}</div>
+                    <div class="credential-meta">${issuedDate ? `Issued ${issuedDate}` : ''}</div>
+                    <div class="credential-id">ID: ${c.id.slice(0, 16)}...</div>
+                </div>
+                <a class="credential-verify-link" href="${verifyUrl}" target="_blank" rel="noopener noreferrer">Verify</a>
+            `;
+            listEl.appendChild(card);
+        });
+
+        listWrapperEl.style.display = 'block';
+    }
+
     async switchCategory(category) {
         // Note: even if `category` matches this.currentCategory, a real
         // switch must still happen when leaving Daily Challenge mode —
@@ -3770,6 +3866,38 @@ class TeakScrambleGame {
         } else {
             document.body.removeAttribute('data-performance-mode');
         }
+    }
+
+    // Best-effort heuristic for "this device probably can't afford heavy
+    // blur/glow/particle effects" — used once, on first-ever load, to seed
+    // Performance Mode's default. Never runs again once the player has an
+    // explicit ws_fx_performanceMode value in localStorage (see caller).
+    _detectLowEndDevice() {
+        try {
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                return true;
+            }
+            // deviceMemory/hardwareConcurrency are unsupported on iOS Safari
+            // and desktop Firefox — absence is not itself a low-end signal,
+            // only an explicit low value counts.
+            if (typeof navigator.deviceMemory === 'number' && navigator.deviceMemory <= 4) {
+                return true;
+            }
+            if (typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 4) {
+                return true;
+            }
+            // Android WebView (Capacitor's runtime for the .apk build) is
+            // consistently the slowest environment this game ships to —
+            // default it to Performance Mode regardless of core/memory info.
+            const ua = navigator.userAgent || '';
+            if (window.Capacitor || /wv\)|Android.*Version\/\d/.test(ua)) {
+                return true;
+            }
+        } catch (e) {
+            // Detection is best-effort; any failure just falls back to the
+            // pre-existing default (full effects on).
+        }
+        return false;
     }
 
     // --- Audio Settings Popover (2C) ---
