@@ -1427,8 +1427,8 @@ button:active {
     pointer-events: auto;
 }
 .victory-box {
-    background: radial-gradient(circle, var(--teak-light) 0%, var(--teak-dark) 100%);
-    border: 5px solid var(--teak-dark);
+    background: var(--theme-victory-box-bg, radial-gradient(circle, var(--teak-light) 0%, var(--teak-dark) 100%));
+    border: var(--theme-victory-box-border, 5px solid var(--teak-dark));
     padding: 35px;
     border-radius: 20px;
     text-align: center;
@@ -1446,31 +1446,31 @@ button:active {
 .victory-box h2 {
     font-size: 2rem;
     font-weight: 900;
-    color: #ffffff;
+    color: var(--theme-victory-h2-color, #ffffff);
     text-transform: uppercase;
     letter-spacing: 2px;
     margin-bottom: 8px;
-    text-shadow: 
+    text-shadow: var(--theme-victory-h2-shadow,
         1px 1px 0px var(--turquoise),
         2px 2px 0px var(--turquoise),
-        3px 3px 0px var(--teak-dark);
+        3px 3px 0px var(--teak-dark));
 }
 .victory-box p {
-    color: var(--off-white);
+    color: var(--theme-victory-p-color, var(--off-white));
     font-size: 0.95rem;
     margin-bottom: 20px;
     font-weight: 700;
 }
 .victory-btn {
-    background: var(--turquoise);
-    color: var(--teak-dark);
-    border: 2px solid var(--teak-dark);
+    background: var(--theme-victory-btn-bg, var(--turquoise));
+    color: var(--theme-victory-btn-color, var(--teak-dark));
+    border: var(--theme-victory-btn-border, 2px solid var(--teak-dark));
     padding: 12px 24px;
     font-size: 1.05rem;
     font-weight: 900;
     border-radius: 10px;
     cursor: pointer;
-    box-shadow: 0 5px 0 var(--turquoise-dark);
+    box-shadow: var(--theme-victory-btn-shadow, 0 5px 0 var(--turquoise-dark));
     text-transform: uppercase;
     letter-spacing: 1px;
     width: 100%;
@@ -1478,7 +1478,7 @@ button:active {
 }
 .victory-btn:active {
     transform: translateY(5px);
-    box-shadow: 0 0px 0 var(--teak-dark);
+    box-shadow: var(--theme-victory-btn-shadow-active, 0 0px 0 var(--teak-dark));
 }
 
 /* Stacked victory-box buttons (e.g. Share Card above Next Scramble) get a

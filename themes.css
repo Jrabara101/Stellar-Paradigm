@@ -70,6 +70,17 @@ body[data-theme="nordic"] {
     --theme-panel-bg: rgba(255, 255, 255, 0.95);
     --theme-panel-border: 2.5px solid rgba(0,0,0,0.15);
     --theme-panel-shadow: 0 10px 20px rgba(0,0,0,0.05);
+
+    --theme-victory-box-bg: radial-gradient(circle, #f1ebd9 0%, #cbd5e1 100%);
+    --theme-victory-box-border: 5px solid #90a4ae;
+    --theme-victory-h2-color: #333333;
+    --theme-victory-h2-shadow: 1px 1px 0px #ffffff, 2px 2px 0px #ffffff, 3px 3px 0px #90a4ae;
+    --theme-victory-p-color: #555555;
+    --theme-victory-btn-bg: #333333;
+    --theme-victory-btn-color: #ffffff;
+    --theme-victory-btn-border: 2px solid #1a1a1a;
+    --theme-victory-btn-shadow: 0 5px 0 #1a1a1a;
+    --theme-victory-btn-shadow-active: 0 0px 0 #1a1a1a;
 }
 body[data-theme="nordic"] .grid-container {
     --teak-light: #e3dec9;
@@ -149,6 +160,17 @@ body[data-theme="rustic"] {
     --theme-panel-h3-border: 2px solid #b08d57;
     --theme-panel-h3-shadow: 0.5px 0.5px 0px #000;
     --theme-panel-h3-color: #dee3e4;
+
+    --theme-victory-box-bg: radial-gradient(circle, #5c4033 0%, #20130f 100%);
+    --theme-victory-box-border: 5px solid #2d1b15;
+    --theme-victory-h2-color: #dee3e4;
+    --theme-victory-h2-shadow: 1px 1px 0px #b08d57, 2px 2px 0px #b08d57, 3px 3px 0px #2d1b15;
+    --theme-victory-p-color: #d9d0c1;
+    --theme-victory-btn-bg: #b08d57;
+    --theme-victory-btn-color: #1a0f0a;
+    --theme-victory-btn-border: 2px solid #6a4f2b;
+    --theme-victory-btn-shadow: 0 5px 0 #4e381c;
+    --theme-victory-btn-shadow-active: 0 0px 0 #4e381c;
 }
 body[data-theme="rustic"] .grid-container {
     --teak-light: #20130f;
@@ -237,6 +259,17 @@ body[data-theme="parchment"] {
     --theme-panel-color: #2b1d14;
     --theme-panel-h3-border: 2px solid #c85a17;
     --theme-panel-h3-color: #2b1d14;
+
+    --theme-victory-box-bg: radial-gradient(circle, #f4e8d2 0%, #c8a878 100%);
+    --theme-victory-box-border: 5px solid #5c2e16;
+    --theme-victory-h2-color: #2b1d14;
+    --theme-victory-h2-shadow: 1px 1px 0px #c85a17, 2px 2px 0px #c85a17, 3px 3px 0px #5c2e16;
+    --theme-victory-p-color: #5c2e16;
+    --theme-victory-btn-bg: #c85a17;
+    --theme-victory-btn-color: #ffffff;
+    --theme-victory-btn-border: 2px solid #9c450f;
+    --theme-victory-btn-shadow: 0 5px 0 #9c450f;
+    --theme-victory-btn-shadow-active: 0 0px 0 #9c450f;
 }
 body[data-theme="parchment"] .grid-container {
     --teak-light: rgba(220, 205, 180, 0.3);
@@ -302,6 +335,17 @@ body[data-theme="coastal"] {
     --theme-panel-bg: rgba(240, 235, 225, 0.95);
     --theme-panel-border: 3.5px solid #8a8883;
     --theme-panel-color: #3e3d3a;
+
+    --theme-victory-box-bg: radial-gradient(circle, #b8b8b8 0%, #4a4944 100%);
+    --theme-victory-box-border: 5px solid #5c5a55;
+    --theme-victory-h2-color: #ffffff;
+    --theme-victory-h2-shadow: 1px 1px 0px #e0e0e0, 2px 2px 0px #e0e0e0, 3px 3px 0px #4a4944;
+    --theme-victory-p-color: #f0ebe1;
+    --theme-victory-btn-bg: #b87333;
+    --theme-victory-btn-color: #ffffff;
+    --theme-victory-btn-border: 2px solid #5c2e0b;
+    --theme-victory-btn-shadow: 0 5px 0 #5c2e0b;
+    --theme-victory-btn-shadow-active: 0 0px 0 #5c2e0b;
 }
 body[data-theme="coastal"] .grid-container {
     --teak-light: #3d3c38;
@@ -402,6 +446,17 @@ body[data-theme="autumn"] {
     --theme-panel-color: #F5E6C8;
     --theme-panel-h3-border: var(--mustard);
     --theme-panel-h3-color: #F5E6C8;
+
+    --theme-victory-box-bg: radial-gradient(circle, #8A3B12 0%, #4A1B08 100%);
+    --theme-victory-box-border: 5px solid #4A1B08;
+    --theme-victory-h2-color: #F5E6C8;
+    --theme-victory-h2-shadow: 1px 1px 0px #E1AD01, 2px 2px 0px #E1AD01, 3px 3px 0px #4A1B08;
+    --theme-victory-p-color: #FFD98A;
+    --theme-victory-btn-bg: #F0BE23;
+    --theme-victory-btn-color: #4A2C05;
+    --theme-victory-btn-border: 2px solid #8A6914;
+    --theme-victory-btn-shadow: 0 5px 0 #8A6914;
+    --theme-victory-btn-shadow-active: 0 0px 0 #8A6914;
 }
 /* Re-scoping the checkerboard vars keeps the two-tone cell pattern
    (buildCheckerboard sets cell colors inline from these variables). */
@@ -475,6 +530,17 @@ body[data-theme="midnight-walnut"] {
     --theme-panel-h3-border: 2px solid #40E0D0;
     --theme-panel-h3-color: #F0E6D6;
     --theme-panel-h3-shadow: 0.5px 0.5px 0px #000;
+
+    --theme-victory-box-bg: radial-gradient(circle, #2E2118 0%, #17100C 100%);
+    --theme-victory-box-border: 5px solid #4A3826;
+    --theme-victory-h2-color: #F0E6D6;
+    --theme-victory-h2-shadow: 1px 1px 0px #40E0D0, 2px 2px 0px #40E0D0, 3px 3px 0px #17100C;
+    --theme-victory-p-color: #F0E6D6;
+    --theme-victory-btn-bg: #40E0D0;
+    --theme-victory-btn-color: #17100C;
+    --theme-victory-btn-border: 2px solid #00CED1;
+    --theme-victory-btn-shadow: 0 5px 0 #00CED1;
+    --theme-victory-btn-shadow-active: 0 0px 0 #00CED1;
 }
 body[data-theme="midnight-walnut"] .grid-container {
     --teak-light: #241a13;
@@ -551,6 +617,17 @@ body[data-theme="stellar-cosmos"] {
     --theme-panel-h3-border: 2px solid #40E0D0;
     --theme-panel-h3-color: #EAF0FF;
     --theme-panel-h3-shadow: 0.5px 0.5px 0px #000;
+
+    --theme-victory-box-bg: radial-gradient(circle, #141B3D 0%, #0A0E22 100%);
+    --theme-victory-box-border: 5px solid #2A3566;
+    --theme-victory-h2-color: #EAF0FF;
+    --theme-victory-h2-shadow: 1px 1px 0px #40E0D0, 2px 2px 0px #40E0D0, 3px 3px 0px #070A18;
+    --theme-victory-p-color: #DCE6FF;
+    --theme-victory-btn-bg: #40E0D0;
+    --theme-victory-btn-color: #0A0E22;
+    --theme-victory-btn-border: 2px solid #00CED1;
+    --theme-victory-btn-shadow: 0 5px 0 #00CED1;
+    --theme-victory-btn-shadow-active: 0 0px 0 #00CED1;
 }
 body[data-theme="stellar-cosmos"] .grid-container {
     --teak-light: #10152E;
@@ -620,6 +697,17 @@ body[data-theme="art-deco"] {
     --theme-panel-h3-border: 2px solid #C6A227;
     --theme-panel-h3-color: #E9D58A;
     --theme-panel-h3-shadow: 0.5px 0.5px 0px #000;
+
+    --theme-victory-box-bg: radial-gradient(circle, #12523E 0%, #0A2C22 100%);
+    --theme-victory-box-border: 5px solid #C6A227;
+    --theme-victory-h2-color: #F3E9C9;
+    --theme-victory-h2-shadow: 1px 1px 0px #C6A227, 2px 2px 0px #C6A227, 3px 3px 0px #062018;
+    --theme-victory-p-color: #E9D58A;
+    --theme-victory-btn-bg: #C6A227;
+    --theme-victory-btn-color: #0D3B2E;
+    --theme-victory-btn-border: 2px solid #A6841A;
+    --theme-victory-btn-shadow: 0 5px 0 #A6841A;
+    --theme-victory-btn-shadow-active: 0 0px 0 #A6841A;
 }
 body[data-theme="art-deco"] .grid-container {
     --teak-light: #0E4130;
@@ -694,6 +782,17 @@ body[data-theme="artisan-studio"] {
     --theme-panel-color: #2c1e16;
     --theme-panel-h3-border: 2px solid #e2725b;
     --theme-panel-h3-color: #2c1e16;
+
+    --theme-victory-box-bg: radial-gradient(circle, #d2b48c 0%, #8b5a2b 100%);
+    --theme-victory-box-border: 5px solid #3e2723;
+    --theme-victory-h2-color: #2c1e16;
+    --theme-victory-h2-shadow: 1px 1px 0px #fffdf8, 2px 2px 0px #fffdf8, 3px 3px 0px #8b5a2b;
+    --theme-victory-p-color: #fffdf8;
+    --theme-victory-btn-bg: #e2725b;
+    --theme-victory-btn-color: #fffdf8;
+    --theme-victory-btn-border: 2px solid #c15c46;
+    --theme-victory-btn-shadow: 0 5px 0 #c15c46;
+    --theme-victory-btn-shadow-active: 0 0px 0 #c15c46;
 }
 body[data-theme="artisan-studio"] .grid-container {
     --teak-light: #4a332c;
@@ -800,6 +899,17 @@ body[data-theme="brutalist-concrete"] {
     --theme-panel-color: #f5f5f5;
     --theme-panel-h3-border: 2px solid #ff5500;
     --theme-panel-h3-color: #f5f5f5;
+
+    --theme-victory-box-bg: radial-gradient(circle, #404040 0%, #171717 100%);
+    --theme-victory-box-border: 5px solid #2a2a2a;
+    --theme-victory-h2-color: #f5f5f5;
+    --theme-victory-h2-shadow: 1px 1px 0px #ff5500, 2px 2px 0px #ff5500, 3px 3px 0px #171717;
+    --theme-victory-p-color: #e5e5e5;
+    --theme-victory-btn-bg: #ff5500;
+    --theme-victory-btn-color: #171717;
+    --theme-victory-btn-border: 2px solid #171717;
+    --theme-victory-btn-shadow: 0 5px 0 #b33c00;
+    --theme-victory-btn-shadow-active: 0 0px 0 #b33c00;
 }
 body[data-theme="brutalist-concrete"] .grid-container {
     --teak-light: #d4d4d4;
@@ -906,6 +1016,17 @@ body[data-theme="cyber-grid"] {
     --theme-panel-h3-border: 2px solid #00ffff;
     --theme-panel-h3-color: #00ffff;
     --theme-panel-h3-shadow: 0 0 6px rgba(0,255,255,0.5);
+
+    --theme-victory-box-bg: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
+    --theme-victory-box-border: 5px solid #00ffff;
+    --theme-victory-h2-color: #dee3e4;
+    --theme-victory-h2-shadow: 1px 1px 0px #00ffff, 2px 2px 0px #00ffff, 3px 3px 0px #020617;
+    --theme-victory-p-color: #dee3e4;
+    --theme-victory-btn-bg: #00ffff;
+    --theme-victory-btn-color: #0f172a;
+    --theme-victory-btn-border: 2px solid #00cccc;
+    --theme-victory-btn-shadow: 0 5px 0 #00a3a3;
+    --theme-victory-btn-shadow-active: 0 0px 0 #00a3a3;
 }
 body[data-theme="cyber-grid"] .grid-container {
     --teak-light: #16213a;
@@ -1013,6 +1134,17 @@ body[data-theme="museum-archive"] {
     --theme-panel-color: #e3dac9;
     --theme-panel-h3-border: 2px solid #e3dac9;
     --theme-panel-h3-color: #b3aa99;
+
+    --theme-victory-box-bg: radial-gradient(circle, #2c2c2c 0%, #1a1a1a 100%);
+    --theme-victory-box-border: 5px solid #b3aa99;
+    --theme-victory-h2-color: #e3dac9;
+    --theme-victory-h2-shadow: 1px 1px 0px #b3aa99, 2px 2px 0px #b3aa99, 3px 3px 0px #000000;
+    --theme-victory-p-color: #e3dac9;
+    --theme-victory-btn-bg: #e3dac9;
+    --theme-victory-btn-color: #1a1a1a;
+    --theme-victory-btn-border: 2px solid #b3aa99;
+    --theme-victory-btn-shadow: 0 5px 0 #948c7d;
+    --theme-victory-btn-shadow-active: 0 0px 0 #948c7d;
 }
 body[data-theme="museum-archive"] .grid-container {
     --teak-light: rgba(227, 218, 201, 0.06);
@@ -1103,6 +1235,17 @@ body[data-theme="royal-court"] {
     --theme-panel-color: #f4e8d2;
     --theme-panel-h3-border: 2px solid #d4af37;
     --theme-panel-h3-color: #d4af37;
+
+    --theme-victory-box-bg: radial-gradient(circle, #d4af37 0%, #1a0f0c 100%);
+    --theme-victory-box-border: 5px solid #3a1f18;
+    --theme-victory-h2-color: #1a0f0c;
+    --theme-victory-h2-shadow: 1px 1px 0px #f4e8d2, 2px 2px 0px #f4e8d2, 3px 3px 0px #8a6d1f;
+    --theme-victory-p-color: #f4e8d2;
+    --theme-victory-btn-bg: #d4af37;
+    --theme-victory-btn-color: #1a0f0c;
+    --theme-victory-btn-border: 2px solid #8a6d1f;
+    --theme-victory-btn-shadow: 0 5px 0 #8a6d1f;
+    --theme-victory-btn-shadow-active: 0 0px 0 #8a6d1f;
 }
 body[data-theme="royal-court"] .grid-container {
     --teak-light: #2a1712;
@@ -1204,6 +1347,17 @@ body[data-theme="atomic-woodcraft"] {
     --theme-panel-color: #3e2723;
     --theme-panel-h3-border: 2px solid #4dd0e1;
     --theme-panel-h3-color: #3e2723;
+
+    --theme-victory-box-bg: radial-gradient(circle, #8d6e63 0%, #5d4037 100%);
+    --theme-victory-box-border: 5px solid #3e2723;
+    --theme-victory-h2-color: #f5f5f0;
+    --theme-victory-h2-shadow: 1px 1px 0px #4dd0e1, 2px 2px 0px #4dd0e1, 3px 3px 0px #3e2723;
+    --theme-victory-p-color: #f5f5f0;
+    --theme-victory-btn-bg: #fbc02d;
+    --theme-victory-btn-color: #402d00;
+    --theme-victory-btn-border: 2px solid #402d00;
+    --theme-victory-btn-shadow: 0 5px 0 #c99a1f;
+    --theme-victory-btn-shadow-active: 0 0px 0 #c99a1f;
 }
 body[data-theme="atomic-woodcraft"] .grid-container {
     --teak-light: #4a332c;
