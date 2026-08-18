@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atomic Scramble - Brutalist Concrete</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&amp;family=Inter:wght@400;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "concrete-dark": "#2a2a2a",
+                        "concrete-base": "#404040",
+                        "concrete-light": "#737373",
+                        "silver-metal": "#e5e5e5",
+                        "safety-orange": "#ff5500",
+                        "on-surface": "#f5f5f5",
+                        "surface": "#262626",
+                        "background": "#171717",
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0", // Brutalist hard edges
+                        "lg": "0",
+                        "xl": "0",
+                        "full": "0"
+                    },
+                    "spacing": {
+                        "slot-size": "48px",
+                        "margin-md": "16px",
+                        "margin-sm": "8px",
+                        "board-padding": "24px",
+                        "grid-gap": "2px", // Tighter gaps for metal lining
+                        "margin-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "score-readout": ["Archivo Black"],
+                        "display-lg": ["Archivo Black"],
+                        "display-lg-mobile": ["Archivo Black"],
+                        "body-md": ["Inter"],
+                        "tile-letter": ["Archivo Black"]
+                    },
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            background: linear-gradient(rgba(23, 23, 23, 0.85), rgba(23, 23, 23, 0.85)), url('https://images.unsplash.com/photo-1518640467707-6811f4a6ab73?q=80&w=2000&auto=format&fit=crop');
+            background-size: cover;
+            background-attachment: fixed;
+        }
+
+        /* Irregular poured-edge border (clip-path notches) instead of a
+           clean 8px rectangle, so the slab reads as cast-in-formwork rather
+           than a machined frame. */
+        .concrete-board {
+            background: url('https://images.unsplash.com/photo-1518640467707-6811f4a6ab73?q=80&w=2000&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            box-shadow:
+                inset 0 0 40px rgba(0,0,0,0.8),
+                20px 20px 40px rgba(0,0,0,0.9),
+                -2px -2px 10px rgba(255,255,255,0.05);
+            position: relative;
+            padding: 14px;
+            clip-path: polygon(
+                0 22px, 22px 0, calc(100% - 34px) 0, 100% 34px,
+                100% calc(100% - 22px), calc(100% - 22px) 100%, 34px 100%, 0 calc(100% - 34px)
+            );
+        }
+
+        .concrete-board::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(42, 42, 42, 0.7); /* Darkening overlay to make it look heavier */
+            pointer-events: none;
+        }
+
+        /* Exposed rebar cross running through the slab on top of the metal
+           grid — two bolted steel bars, the structural element a plain
+           routed-wood board would never show. */
+        .rebar-bar {
+            position: absolute;
+            z-index: 20;
+            pointer-events: none;
+            background: linear-gradient(180deg, #d4d4d4 0%, #8a8a8a 45%, #5a5a5a 55%, #9a9a9a 100%);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .rebar-bar.horizontal { left: 0; right: 0; top: 50%; height: 6px; transform: translateY(-50%); }
+        .rebar-bar.vertical { top: 0; bottom: 0; left: 50%; width: 6px; transform: translateX(-50%); }
+        .rebar-bolt {
+            position: absolute;
+            z-index: 21;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #e5e5e5, #737373 70%);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.7);
+            transform: translate(-50%, -50%);
+        }
+
+        .metal-slot {
+            background-color: theme('colors.background');
+            border: 2px solid theme('colors.silver-metal');
+            box-shadow: inset 5px 5px 15px rgba(0,0,0,0.9);
+            position: relative;
+            z-index: 10;
+        }
+
+        .metal-slot::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(0,0,0,0.5) 100%);
+            pointer-events: none;
+        }
+
+        .grid-container {
+            position: relative;
+            z-index: 10;
+            background-color: theme('colors.silver-metal'); /* Metal structural grid beneath */
+            padding: theme('spacing.grid-gap');
+        }
+
+        /* Grit overlay */
+        .grit {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            background: url('https://www.transparenttextures.com/patterns/stucco.png');
+            opacity: 0.2;
+            z-index: 100;
+            mix-blend-mode: multiply;
+        }
+    </style>
+</head>
+<body class="text-on-surface antialiased min-h-screen flex flex-col pt-16">
+<div class="grit"></div>
+<main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
+<!-- 12 Column Layout Container -->
+<div class="w-full grid grid-cols-12 gap-4">
+<!-- Board spans central 6 columns on md+, full width on mobile -->
+<div class="col-span-12 md:col-start-4 md:col-span-6 flex justify-center">
+<!-- The Game Board (Cast Concrete Block, irregular poured edge + exposed rebar cross) -->
+<div class="concrete-board w-full max-w-[480px] aspect-square flex items-center justify-center">
+<div class="rebar-bar horizontal"></div>
+<div class="rebar-bar vertical"></div>
+<div class="rebar-bolt" style="top:50%; left:50%;"></div>
+<div class="rebar-bolt" style="top:8%; left:50%;"></div>
+<div class="rebar-bolt" style="top:92%; left:50%;"></div>
+<div class="rebar-bolt" style="top:50%; left:8%;"></div>
+<div class="rebar-bolt" style="top:50%; left:92%;"></div>
+<!-- 10x10 Grid with Metal Lining -->
+<div class="grid-container w-full h-full">
+<div class="grid grid-cols-10 gap-grid-gap w-full h-full">
+<!-- Generate 100 slots for visual grid -->
+<script>
+                                    for(let i=0; i<100; i++) {
+                                        document.write('<div class="metal-slot w-full h-full"></div>');
+                                    }
+                                </script>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

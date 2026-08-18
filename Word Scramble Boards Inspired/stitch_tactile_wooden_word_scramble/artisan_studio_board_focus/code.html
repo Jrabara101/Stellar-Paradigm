@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atomic Scramble - Artisan Studio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&amp;family=Montserrat:wght@700;800&amp;family=Space+Grotesk:wght@700&amp;family=Work+Sans:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#004f57",
+                        "inverse-surface": "#dee3e4",
+                        "on-secondary-container": "#533c00",
+                        "surface-container-low": "#171d1e",
+                        "surface-container-lowest": "#090f10",
+                        "on-tertiary-fixed": "#2c1600",
+                        "on-error": "#690005",
+                        "surface-container": "#1b2122",
+                        "error-container": "#93000a",
+                        "on-secondary": "#402d00",
+                        "on-primary": "#00363c",
+                        "on-primary-container": "#00565f",
+                        "wood-mahogany-dark": "#3e2723", // Dark stain
+                        "primary-fixed-dim": "#56d7e9",
+                        "secondary-fixed-dim": "#f8bd2a",
+                        "secondary": "#f8bd2a",
+                        "on-background": "#2c1e16", // Sepia text
+                        "sun-gold": "#e2725b", // Terracotta
+                        "outline": "#869395",
+                        "on-tertiary-container": "#724200",
+                        "primary": "#6fecfe",
+                        "surface-container-highest": "#303637",
+                        "atomic-teal": "#4dd0e1",
+                        "surface-dim": "#fdfbf7",
+                        "surface": "#f4ebd8", // Cream/parchment
+                        "background": "#f4ebd8", // Cream/parchment
+                        "secondary-fixed": "#ffdfa0",
+                        "on-tertiary-fixed-variant": "#693c00",
+                        "walnut-inlay": "#20130f", // Darkened wood
+                        "on-surface": "#2c1e16", // Sepia
+                        "wood-teak-light": "#d2b48c", // Unfinished pine
+                        "outline-variant": "#3d494b",
+                        "surface-container-high": "#252b2c",
+                        "primary-container": "#4dd0e1",
+                        "on-secondary-fixed-variant": "#5c4300",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed": "#93f1ff",
+                        "on-secondary-fixed": "#261a00",
+                        "tertiary-fixed": "#ffdcbd",
+                        "tertiary-fixed-dim": "#ffb86e",
+                        "surface-variant": "#303637",
+                        "on-primary-fixed": "#001f23",
+                        "cream-wallpaper": "#fdfbf7",
+                        "on-tertiary": "#492900",
+                        "tertiary-container": "#ffae55",
+                        "surface-tint": "#56d7e9",
+                        "inverse-primary": "#006973",
+                        "surface-bright": "#343a3b",
+                        "on-surface-variant": "#8b5a2b", // Warm brown
+                        "secondary-container": "#d9a200",
+                        "error": "#ffb4ab",
+                        "tertiary": "#ffd3aa",
+                        "inverse-on-surface": "#2b3132",
+                        "iron": "#333333" 
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "slot-size": "48px",
+                        "margin-md": "16px",
+                        "margin-sm": "8px",
+                        "board-padding": "24px",
+                        "grid-gap": "4px",
+                        "margin-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "score-readout": ["Courier Prime", "monospace"],
+                        "display-lg": ["Courier Prime", "monospace"],
+                        "display-lg-mobile": ["Courier Prime", "monospace"],
+                        "body-md": ["Courier Prime", "monospace"],
+                        "tile-letter": ["Courier Prime", "monospace"]
+                    },
+                    "fontSize": {
+                        "score-readout": ["24px", { "lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "0.15em", "fontWeight": "800" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "1.2", "letterSpacing": "0.1em", "fontWeight": "800" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "tile-letter": ["28px", { "lineHeight": "1.0", "fontWeight": "700" }]
+                    },
+                    "backgroundImage": {
+                        'paper-texture': "url('https://images.unsplash.com/photo-1603484477859-abe6a73f9366?q=80&w=1974&auto=format&fit=crop')"
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-image: var(--tw-gradient-stops);
+            background-color: theme('colors.background');
+            background: linear-gradient(rgba(244, 235, 216, 0.8), rgba(244, 235, 216, 0.8)), url('https://images.unsplash.com/photo-1603484477859-abe6a73f9366?q=80&w=1974&auto=format&fit=crop');
+            background-size: cover;
+            background-attachment: fixed;
+            color: #2c1e16;
+            font-family: 'Courier Prime', monospace;
+        }
+
+        /* Pegboard panel, not a routed wood slab — the board reads as a
+           workshop tool-wall fixture, held by four exposed finger-joint
+           corners instead of a solid carved frame. */
+        .pegboard-panel {
+            background: theme('colors.wood-teak-light');
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .finger-joint {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: theme('colors.wood-mahogany-dark');
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.15), 0 2px 3px rgba(0,0,0,0.35);
+        }
+        .finger-joint.tl { top: -8px; left: -8px; clip-path: polygon(0 0, 100% 0, 100% 60%, 60% 60%, 60% 100%, 0 100%); }
+        .finger-joint.tr { top: -8px; right: -8px; clip-path: polygon(0 0, 100% 0, 100% 100%, 40% 100%, 40% 60%, 0 60%); }
+        .finger-joint.bl { bottom: -8px; left: -8px; clip-path: polygon(0 0, 40% 0, 40% 40%, 100% 40%, 100% 100%, 0 100%); }
+        .finger-joint.br { bottom: -8px; right: -8px; clip-path: polygon(60% 0, 100% 0, 100% 100%, 0 100%, 0 40%, 60% 40%); }
+
+        /* Pegboard hole — a punched circular hole with a drilled rim, not a
+           square routed groove. Letter tiles will read as pegs dropped in. */
+        .peg-slot {
+            position: relative;
+            background: transparent;
+        }
+        .peg-slot::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 60%; height: 60%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: theme('colors.wood-mahogany-dark');
+            box-shadow: inset 1px 2px 4px rgba(0,0,0,0.7), inset -1px -1px 1px rgba(255,255,255,0.08);
+        }
+
+        .parchment-note {
+            background: #fffdf8;
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid theme('colors.sun-gold');
+            position: relative;
+        }
+        
+        .parchment-note::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* Weathering overlay */
+        .weathering {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            background: url('https://www.transparenttextures.com/patterns/dust.png');
+            opacity: 0.1;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="text-on-surface antialiased min-h-screen flex flex-col pb-24 md:pb-0 pt-16">
+<div class="weathering"></div>
+<main class="flex-grow flex flex-col md:flex-row items-center justify-center p-4 gap-8 md:gap-16 max-w-6xl mx-auto w-full">
+<!-- Notes Area (Left) -->
+<div class="parchment-note p-8 rounded-sm w-full md:w-1/3 flex flex-col gap-4 transform -rotate-1 md:rotate-0">
+<h2 class="text-2xl font-bold text-sun-gold border-b-2 border-sun-gold/30 pb-2 mb-4">Studio Notes</h2>
+<div class="space-y-4 text-on-background">
+<p class="opacity-80">Project: ATOMIC SCRAMBLE</p>
+<p class="opacity-80">Material: Reclaimed Pine, Dark Stain</p>
+<p class="opacity-80">Status: In Progress...</p>
+</div>
+</div>
+<!-- The Game Board (Right) — pegboard panel with exposed finger-joint corners -->
+<div class="pegboard-panel p-board-padding rounded-sm border border-wood-mahogany-dark/20 flex-shrink-0">
+<div class="finger-joint tl"></div>
+<div class="finger-joint tr"></div>
+<div class="finger-joint bl"></div>
+<div class="finger-joint br"></div>
+<!-- 10x10 Grid of punched peg holes -->
+<div class="grid grid-cols-10 gap-grid-gap w-[320px] h-[320px] md:w-[480px] md:h-[480px]">
+<!-- Generate 100 slots for visual grid -->
+<script>
+                for(let i=0; i<100; i++) {
+                    document.write('<div class="peg-slot w-full h-full"></div>');
+                }
+            </script>
+</div>
+</div>
+</main>
+</body></html>

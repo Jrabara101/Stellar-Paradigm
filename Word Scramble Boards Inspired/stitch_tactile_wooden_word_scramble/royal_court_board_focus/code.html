@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atomic Scramble - Royal Court Edition</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;700&amp;family=Playfair+Display:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#004f57",
+                        "inverse-surface": "#dee3e4",
+                        "on-secondary-container": "#533c00",
+                        "surface-container-low": "#171d1e",
+                        "surface-container-lowest": "#090f10",
+                        "on-tertiary-fixed": "#2c1600",
+                        "on-error": "#690005",
+                        "surface-container": "#1b2122",
+                        "error-container": "#93000a",
+                        "on-secondary": "#402d00",
+                        "on-primary": "#00363c",
+                        "on-primary-container": "#00565f",
+                        "wood-mahogany-dark": "#3a1f18", // Rich burnt mahogany
+                        "primary-fixed-dim": "#56d7e9",
+                        "secondary-fixed-dim": "#f8bd2a",
+                        "secondary": "#f8bd2a",
+                        "on-background": "#dee3e4",
+                        "sun-gold": "#d4af37", // Polished gold
+                        "outline": "#869395",
+                        "on-tertiary-container": "#724200",
+                        "primary": "#6fecfe",
+                        "surface-container-highest": "#303637",
+                        "atomic-teal": "#4dd0e1",
+                        "surface-dim": "#0f1415",
+                        "surface": "#0a2a1a", // Deep emerald
+                        "background": "#0a2a1a", // Deep emerald velvet
+                        "secondary-fixed": "#ffdfa0",
+                        "on-tertiary-fixed-variant": "#693c00",
+                        "walnut-inlay": "#20130f", 
+                        "on-surface": "#dee3e4",
+                        "wood-teak-light": "#5c4033", 
+                        "outline-variant": "#3d494b",
+                        "surface-container-high": "#252b2c",
+                        "primary-container": "#4dd0e1",
+                        "on-secondary-fixed-variant": "#5c4300",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed": "#93f1ff",
+                        "on-secondary-fixed": "#261a00",
+                        "tertiary-fixed": "#ffdcbd",
+                        "tertiary-fixed-dim": "#ffb86e",
+                        "surface-variant": "#303637",
+                        "on-primary-fixed": "#001f23",
+                        "cream-wallpaper": "#d9d0c1", 
+                        "on-tertiary": "#492900",
+                        "tertiary-container": "#ffae55",
+                        "surface-tint": "#56d7e9",
+                        "inverse-primary": "#006973",
+                        "surface-bright": "#343a3b",
+                        "on-surface-variant": "#a39e99",
+                        "secondary-container": "#d9a200",
+                        "error": "#ffb4ab",
+                        "tertiary": "#ffd3aa",
+                        "inverse-on-surface": "#2b3132",
+                        "iron": "#333333" 
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "slot-size": "48px",
+                        "margin-md": "16px",
+                        "margin-sm": "8px",
+                        "board-padding": "24px",
+                        "grid-gap": "4px",
+                        "margin-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "score-readout": ["Playfair Display"],
+                        "display-lg": ["Playfair Display"],
+                        "display-lg-mobile": ["Playfair Display"],
+                        "body-md": ["EB Garamond"],
+                        "tile-letter": ["Playfair Display"]
+                    },
+                    "fontSize": {
+                        "score-readout": ["24px", { "lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "0.15em", "fontWeight": "800" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "1.2", "letterSpacing": "0.1em", "fontWeight": "800" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "tile-letter": ["28px", { "lineHeight": "1.0", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            background: linear-gradient(rgba(10, 42, 26, 0.95), rgba(10, 42, 26, 0.95)), url('https://images.unsplash.com/photo-1580136579312-94651dfd596d?q=80&w=2000&auto=format&fit=crop');
+            background-size: cover;
+            background-attachment: fixed;
+            font-family: 'EB Garamond', serif;
+        }
+
+        .board-container {
+            position: relative;
+            padding: 8px;
+            background: linear-gradient(45deg, #b8860b, #ffd700, #b8860b, #d4af37);
+            border-radius: theme('borderRadius.xl');
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* Velvet-lined court panel, not a wood-grain slab — the gold border
+           now carries four filigree corner medallions instead of running as
+           a plain rectangle. */
+        .court-panel {
+            background: radial-gradient(ellipse at center, #2a0f0c 0%, #1a0906 100%);
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.8), 0 15px 25px rgba(0,0,0,0.6);
+            position: relative;
+            border-radius: calc(theme('borderRadius.xl') - 4px);
+        }
+
+        .court-panel::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle, transparent 50%, rgba(0,0,0,0.7) 100%);
+            pointer-events: none;
+            border-radius: inherit;
+        }
+
+        .medallion {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #ffe9a8, #d4af37 55%, #8a6d1f 100%);
+            box-shadow: 0 0 0 2px #1a0f0c, 0 2px 6px rgba(0,0,0,0.6);
+            z-index: 2;
+        }
+        .medallion::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, #3a1f18, #20130f);
+        }
+        .medallion.tl { top: -15px; left: -15px; }
+        .medallion.tr { top: -15px; right: -15px; }
+        .medallion.bl { bottom: -15px; left: -15px; }
+        .medallion.br { bottom: -15px; right: -15px; }
+
+        /* Gem-inlay slot: a faceted diamond centerpiece set into a dark
+           mount, rather than a plain routed square groove. */
+        .gem-slot {
+            position: relative;
+            background-color: #1a0f0c;
+            border-radius: theme('borderRadius.DEFAULT');
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.9);
+        }
+        .gem-slot::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 34%; height: 34%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            background: linear-gradient(135deg, rgba(212,175,55,0.55), rgba(90,66,20,0.35));
+            border: 1px solid rgba(212, 175, 55, 0.4);
+        }
+        
+        /* Subtle gold dust overlay */
+        .weathering {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.4) 100%);
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="text-sun-gold antialiased min-h-screen flex flex-col justify-center items-center">
+<div class="weathering"></div>
+<main class="flex-grow flex flex-col items-center justify-center p-4">
+<!-- The Game Board Container with Gold Leaf Border -->
+<div class="board-container">
+<!-- The Game Board (Velvet Court Panel with gold filigree corners) -->
+<div class="court-panel p-board-padding border-2 border-wood-mahogany-dark">
+<div class="medallion tl"></div>
+<div class="medallion tr"></div>
+<div class="medallion bl"></div>
+<div class="medallion br"></div>
+<!-- 10x10 Grid of gem-inlay slots -->
+<div class="grid grid-cols-10 gap-grid-gap w-[320px] h-[320px] md:w-[480px] md:h-[480px]">
+<!-- Generate 100 slots for visual grid -->
+<script>
+                        for(let i=0; i<100; i++) {
+                            document.write('<div class="gem-slot w-full h-full"></div>');
+                        }
+                    </script>
+</div>
+</div>
+</div>
+</main>
+</body></html>

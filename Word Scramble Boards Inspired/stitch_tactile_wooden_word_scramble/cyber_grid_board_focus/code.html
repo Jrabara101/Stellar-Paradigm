@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atomic Scramble - Cyber-Grid Edition</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&amp;family=Rajdhani:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#004f57",
+                        "inverse-surface": "#dee3e4",
+                        "on-secondary-container": "#533c00",
+                        "surface-container-low": "#171d1e",
+                        "surface-container-lowest": "#090f10",
+                        "on-tertiary-fixed": "#2c1600",
+                        "on-error": "#690005",
+                        "surface-container": "#1b2122",
+                        "error-container": "#93000a",
+                        "on-secondary": "#402d00",
+                        "on-primary": "#00363c",
+                        "on-primary-container": "#00565f",
+                        "primary-fixed-dim": "#56d7e9",
+                        "secondary-fixed-dim": "#f8bd2a",
+                        "secondary": "#f8bd2a",
+                        "on-background": "#dee3e4",
+                        "outline": "#869395",
+                        "on-tertiary-container": "#724200",
+                        "primary": "#00ffff", // Neon cyan
+                        "surface-container-highest": "#303637",
+                        "atomic-teal": "#4dd0e1",
+                        "surface-dim": "#0f172a", // Dark slate
+                        "surface": "#0f172a",
+                        "background": "#0f172a",
+                        "secondary-fixed": "#ffdfa0",
+                        "on-tertiary-fixed-variant": "#693c00",
+                        "on-surface": "#dee3e4",
+                        "outline-variant": "#3d494b",
+                        "surface-container-high": "#252b2c",
+                        "primary-container": "#4dd0e1",
+                        "on-secondary-fixed-variant": "#5c4300",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed": "#93f1ff",
+                        "on-secondary-fixed": "#261a00",
+                        "tertiary-fixed": "#ffdcbd",
+                        "tertiary-fixed-dim": "#ffb86e",
+                        "surface-variant": "#303637",
+                        "on-primary-fixed": "#001f23",
+                        "on-tertiary": "#492900",
+                        "tertiary-container": "#ffae55",
+                        "surface-tint": "#56d7e9",
+                        "inverse-primary": "#006973",
+                        "surface-bright": "#343a3b",
+                        "on-surface-variant": "#a39e99",
+                        "secondary-container": "#d9a200",
+                        "error": "#ffb4ab",
+                        "tertiary": "#ffd3aa",
+                        "inverse-on-surface": "#2b3132"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "slot-size": "48px",
+                        "margin-md": "16px",
+                        "margin-sm": "8px",
+                        "board-padding": "24px",
+                        "grid-gap": "4px",
+                        "margin-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "score-readout": ["Orbitron"],
+                        "display-lg": ["Orbitron"],
+                        "display-lg-mobile": ["Orbitron"],
+                        "body-md": ["Rajdhani"],
+                        "tile-letter": ["Orbitron"]
+                    },
+                    "fontSize": {
+                        "score-readout": ["24px", { "lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "0.15em", "fontWeight": "800" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "1.2", "letterSpacing": "0.1em", "fontWeight": "800" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "500" }],
+                        "tile-letter": ["28px", { "lineHeight": "1.0", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0f172a;
+            background-image:
+                linear-gradient(to right, rgba(0, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-attachment: fixed;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .peripheral-status {
+            box-shadow: 0 0 15px 2px rgba(0, 255, 255, 0.5);
+        }
+
+        /* No wood board, no wood board frame — the grid floats directly on the
+           HUD backdrop, held only by four corner brackets, like a targeting
+           reticle rather than a physical object. */
+        .cyber-board {
+            background: transparent;
+            position: relative;
+            padding: 28px;
+        }
+
+        .hud-corner {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border: 2px solid #00ffff;
+            filter: drop-shadow(0 0 4px rgba(0, 255, 255, 0.8));
+        }
+        .hud-corner.tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+        .hud-corner.tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+        .hud-corner.bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+        .hud-corner.br { bottom: 0; right: 0; border-left: none; border-top: none; }
+
+        /* Slow diagonal scanline sweep across the whole board */
+        .scan-sweep {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            border-radius: inherit;
+        }
+        .scan-sweep::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -20%;
+            width: 16%; height: 200%;
+            background: linear-gradient(100deg, transparent 0%, rgba(0,255,255,0.05) 45%, rgba(0,255,255,0.10) 50%, rgba(0,255,255,0.05) 55%, transparent 100%);
+            animation: cyber-sweep 5s linear infinite;
+        }
+        @keyframes cyber-sweep {
+            0%   { transform: translateX(-60%); }
+            100% { transform: translateX(360%); }
+        }
+
+        /* Hexagon slot instead of a routed square — cut with a clip-path so
+           the cell reads as an etched panel cell, not a carved wood groove. */
+        .hex-slot {
+            position: relative;
+            background-color: rgba(0, 255, 255, 0.04);
+            clip-path: polygon(25% 5%, 75% 5%, 95% 50%, 75% 95%, 25% 95%, 5% 50%);
+        }
+        .hex-slot::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            clip-path: polygon(25% 5%, 75% 5%, 95% 50%, 75% 95%, 25% 95%, 5% 50%);
+            box-shadow: inset 0 0 8px rgba(0, 255, 255, 0.45);
+            border: 1px solid rgba(0, 255, 255, 0.35);
+        }
+        .hex-slot::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 4px; height: 4px;
+            transform: translate(-50%, -50%);
+            background: #00ffff;
+            border-radius: 50%;
+            box-shadow: 0 0 6px 2px rgba(0, 255, 255, 0.8);
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body class="text-on-surface antialiased min-h-screen flex flex-col pb-24 md:pb-0 pt-16 relative">
+<!-- Peripheral Status Lines -->
+<div class="fixed top-0 left-0 w-full h-1 bg-cyan-400 peripheral-status z-50"></div>
+<div class="fixed bottom-0 left-0 w-full h-1 bg-cyan-400 peripheral-status z-50"></div>
+<!-- TopAppBar -->
+<main class="flex-grow flex flex-col items-center justify-center p-4">
+<!-- Score & Info Area -->
+<!-- The Game Board (Cyber-Grid) — HUD reticle, not a wood/stone slab -->
+<div class="cyber-board">
+<div class="hud-corner tl"></div>
+<div class="hud-corner tr"></div>
+<div class="hud-corner bl"></div>
+<div class="hud-corner br"></div>
+<div class="scan-sweep"></div>
+<!-- 10x10 Grid -->
+<div class="grid grid-cols-10 gap-grid-gap w-[320px] h-[320px] md:w-[480px] md:h-[480px]">
+<!-- Generate 100 hex-cut slots -->
+<script>
+                    for(let i=0; i<100; i++) {
+                        document.write('<div class="hex-slot w-full h-full"></div>');
+                    }
+                </script>
+</div>
+</div>
+<!-- Controls -->
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+</body></html>

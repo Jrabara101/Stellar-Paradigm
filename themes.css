@@ -625,3 +625,607 @@ body[data-theme="art-deco"] .grid-container {
     --teak-light: #0E4130;
     --teak-base: #0A2C22;
 }
+
+/* ==========================================================================
+   PHASE 3 — Artisan Studio, Brutalist Concrete, Cyber Grid, Museum Archive,
+   Royal Court. Adapted from the "Word Scramble Boards Inspired" mockups
+   into the Stage 2A --theme-* custom-property system.
+   ========================================================================== */
+
+/* Artisan Studio — cream parchment wallpaper, terracotta accents, sepia ink,
+   reclaimed-pine board with routed mahogany slots. */
+body[data-theme="artisan-studio"] {
+    --theme-body-bg-color: #f4ebd8;
+    --theme-body-bg-image: radial-gradient(circle at 30% 20%, rgba(226, 114, 91, 0.08) 0%, transparent 55%), radial-gradient(circle at 80% 80%, rgba(139, 90, 43, 0.06) 0%, transparent 55%);
+    --theme-body-color: #2c1e16;
+    --theme-body-font: 'Courier Prime', 'Courier New', Courier, monospace;
+
+    --theme-ambient-glow: radial-gradient(circle, rgba(226, 114, 91, 0.14) 0%, rgba(139, 90, 43, 0.05) 50%, rgba(0,0,0,0) 70%);
+
+    --theme-h1-color: #2c1e16;
+    --theme-h1-shadow: 2px 2px 0px #fffdf8, 4px 4px 0px #e2725b;
+
+    --theme-board-plate-bg: #d2b48c;
+    --theme-board-plate-border: 1px solid rgba(32, 19, 15, 0.2);
+    --theme-board-plate-outline: 4px solid #20130f;
+    --theme-board-plate-shadow: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.1), inset 0 0 20px rgba(139, 69, 19, 0.2);
+
+    --theme-grid-bg: #3e2723;
+    --theme-grid-border: 4px solid #3e2723;
+    --theme-grid-shadow: inset 0 4px 10px rgba(0,0,0,0.4);
+    --theme-cell-shadow: inset 2px 2px 5px rgba(0,0,0,0.6), inset -1px -1px 2px rgba(255,255,255,0.1);
+
+    --theme-slot-border: #8b5a2b;
+    --theme-slot-bg: rgba(139, 90, 43, 0.15);
+
+    --theme-tile-bg: linear-gradient(145deg, #fffdf8 0%, #f4ebd8 100%);
+    --theme-tile-color: #2c1e16;
+    --theme-tile-border: 1px solid rgba(62, 39, 35, 0.3);
+    --theme-tile-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 1px 0px rgba(255,255,255,0.9);
+    --theme-tile-radius: 4px;
+    --theme-tile-hover-shadow: 0 6px 12px rgba(0,0,0,0.25);
+    --theme-tile-locked-bg: #e2725b;
+    --theme-tile-locked-border: #c15c46;
+    --theme-tile-locked-color: #fffdf8;
+    --theme-tile-locked-shadow: 0 2px 0 #c15c46;
+
+    --theme-rack-bg: linear-gradient(to bottom, #d2b48c 0%, #b3906a 100%);
+    --theme-rack-border: 2px solid #8b5a2b;
+
+    --theme-clue-bg: #fffdf8;
+    --theme-clue-border: 2.5px solid rgba(139, 90, 43, 0.3);
+    --theme-clue-color: #2c1e16;
+    --theme-clue-text-shadow: none;
+
+    --theme-button-bg: #fffdf8;
+    --theme-button-color: #2c1e16;
+    --theme-button-border: 2px solid #8b5a2b;
+    --theme-button-shadow: 0 5px 0 #b3906a;
+    --theme-button-hover-bg: #f4ebd8;
+
+    --theme-submit-bg: #e2725b;
+    --theme-submit-color: #fffdf8;
+    --theme-submit-border: #c15c46;
+    --theme-submit-shadow: 0 5px 0 #c15c46;
+    --theme-submit-hover-bg: #ea8871;
+
+    --theme-panel-bg: #fffdf8;
+    --theme-panel-border: 2.5px solid #8b5a2b;
+    --theme-panel-color: #2c1e16;
+    --theme-panel-h3-border: 2px solid #e2725b;
+    --theme-panel-h3-color: #2c1e16;
+}
+body[data-theme="artisan-studio"] .grid-container {
+    --teak-light: #4a332c;
+    --teak-base: #3e2723;
+}
+body[data-theme="artisan-studio"] .clue-panel,
+body[data-theme="artisan-studio"] .instructions-panel,
+body[data-theme="artisan-studio"] .hint-info-panel {
+    border-left: 4px solid #e2725b;
+}
+/* Structural identity: a punched circular pegboard hole centered in every
+   cell instead of a routed square groove, plus four exposed finger-joint
+   corner tabs on the board frame (single ::before using four
+   corner-positioned clipped squares — no extra DOM nodes). */
+body[data-theme="artisan-studio"] .grid-cell::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 62%; height: 62%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: #3e2723;
+    box-shadow: inset 1px 2px 4px rgba(0,0,0,0.7), inset -1px -1px 1px rgba(255,255,255,0.08);
+    pointer-events: none;
+}
+body[data-theme="artisan-studio"] .board-plate::before {
+    content: '';
+    position: absolute;
+    top: -10px; left: -10px; right: -10px; bottom: -10px;
+    pointer-events: none;
+    background-image:
+        linear-gradient(135deg, #4a332c, #3e2723), linear-gradient(135deg, #4a332c, #3e2723),
+        linear-gradient(135deg, #4a332c, #3e2723), linear-gradient(135deg, #4a332c, #3e2723);
+    background-repeat: no-repeat;
+    background-size: 20px 20px;
+    background-position: top left, top right, bottom left, bottom right;
+    box-shadow: none;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
+}
+
+/* Brutalist Concrete — hard edges, cast-concrete board, safety-orange accent,
+   silver-metal slot lining. CSS-generated aggregate texture (no remote images). */
+body[data-theme="brutalist-concrete"] {
+    --theme-body-bg-color: #171717;
+    --theme-body-bg-image:
+        radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        radial-gradient(rgba(0,0,0,0.4) 1px, transparent 1px);
+    --theme-body-bg-size: 6px 6px, 9px 9px;
+    --theme-body-bg-position: 0 0, 3px 4px;
+    --theme-body-color: #f5f5f5;
+    --theme-body-font: 'Archivo Black', 'Inter', sans-serif;
+
+    --theme-ambient-glow: radial-gradient(circle, rgba(255, 85, 0, 0.14) 0%, rgba(115, 115, 115, 0.05) 50%, rgba(0,0,0,0) 70%);
+
+    --theme-h1-color: #f5f5f5;
+    --theme-h1-shadow: 2px 2px 0px #000000, 4px 4px 0px #ff5500;
+
+    --theme-board-plate-bg: #404040;
+    --theme-board-plate-border: 8px solid #2a2a2a;
+    --theme-board-plate-outline: 0;
+    --theme-board-plate-shadow: inset 0 0 40px rgba(0,0,0,0.8), 20px 20px 40px rgba(0,0,0,0.9), -2px -2px 10px rgba(255,255,255,0.05);
+
+    --theme-grid-bg: #e5e5e5;
+    --theme-grid-border: 0;
+    --theme-grid-shadow: none;
+    --theme-cell-shadow: inset 5px 5px 15px rgba(0,0,0,0.9);
+
+    --theme-slot-border: #e5e5e5;
+    --theme-slot-bg: #171717;
+
+    --theme-tile-bg: linear-gradient(135deg, #e5e5e5 0%, #a3a3a3 100%);
+    --theme-tile-color: #171717;
+    --theme-tile-border: 2px solid #171717;
+    --theme-tile-shadow: 3px 3px 0 #000000;
+    --theme-tile-radius: 0;
+    --theme-tile-hover-shadow: 5px 5px 0 #000000;
+    --theme-tile-locked-bg: #ff5500;
+    --theme-tile-locked-border: #171717;
+    --theme-tile-locked-color: #171717;
+    --theme-tile-locked-shadow: 3px 3px 0 #000000;
+
+    --theme-rack-bg: linear-gradient(to bottom, #404040 0%, #262626 100%);
+    --theme-rack-border: 2px solid #171717;
+
+    --theme-clue-bg: rgba(255, 255, 255, 0.04);
+    --theme-clue-border: 2.5px solid #737373;
+    --theme-clue-color: #f5f5f5;
+    --theme-clue-text-shadow: none;
+
+    --theme-button-bg: #404040;
+    --theme-button-color: #f5f5f5;
+    --theme-button-border: 2px solid #737373;
+    --theme-button-shadow: 0 5px 0 #171717;
+    --theme-button-hover-bg: #4d4d4d;
+
+    --theme-submit-bg: #ff5500;
+    --theme-submit-color: #171717;
+    --theme-submit-border: #171717;
+    --theme-submit-shadow: 0 5px 0 #b33c00;
+    --theme-submit-hover-bg: #ff7733;
+
+    --theme-panel-bg: #262626;
+    --theme-panel-border: 3.5px solid #737373;
+    --theme-panel-color: #f5f5f5;
+    --theme-panel-h3-border: 2px solid #ff5500;
+    --theme-panel-h3-color: #f5f5f5;
+}
+body[data-theme="brutalist-concrete"] .grid-container {
+    --teak-light: #d4d4d4;
+    --teak-base: #e5e5e5;
+}
+/* Structural identity: an irregular poured-edge silhouette (clipped
+   notched corners instead of a clean rounded rectangle) plus an exposed
+   rebar cross with bolt heads laid over the grid — the structural steel a
+   plain wood board would never show. */
+body[data-theme="brutalist-concrete"] .board-plate {
+    border-radius: 4px;
+    clip-path: polygon(
+        0 22px, 22px 0, calc(100% - 34px) 0, 100% 34px,
+        100% calc(100% - 22px), calc(100% - 22px) 100%, 34px 100%, 0 calc(100% - 34px)
+    );
+}
+body[data-theme="brutalist-concrete"] .grid-container::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 20;
+    pointer-events: none;
+    /* Two steel bars (horizontal + vertical) plus five bolt heads: one at
+       the crossing and one at each arm end — scoped to the grid itself so
+       it doesn't stretch across the clue panel/buttons below it. */
+    background-image:
+        linear-gradient(180deg, #e5e5e5 0%, #9a9a9a 45%, #6a6a6a 55%, #b5b5b5 100%),
+        linear-gradient(90deg, #e5e5e5 0%, #9a9a9a 45%, #6a6a6a 55%, #b5b5b5 100%),
+        radial-gradient(circle at 35% 30%, #f0f0f0, #6a6a6a 75%),
+        radial-gradient(circle at 35% 30%, #f0f0f0, #6a6a6a 75%),
+        radial-gradient(circle at 35% 30%, #f0f0f0, #6a6a6a 75%),
+        radial-gradient(circle at 35% 30%, #f0f0f0, #6a6a6a 75%),
+        radial-gradient(circle at 35% 30%, #f0f0f0, #6a6a6a 75%);
+    background-repeat: no-repeat;
+    background-position: 50% 0, 0 50%, 50% 50%, 50% 8%, 50% 92%, 8% 50%, 92% 50%;
+    background-size: 7px 100%, 100% 7px, 16px 16px, 16px 16px, 16px 16px, 16px 16px, 16px 16px;
+    filter: drop-shadow(0 0 1px rgba(0,0,0,0.8));
+}
+
+/* Cyber Grid — neon-cyan HUD grid on dark slate, glowing tile edges. */
+body[data-theme="cyber-grid"] {
+    --theme-body-bg-color: #0f172a;
+    --theme-body-bg-image:
+        linear-gradient(to right, rgba(0, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+    --theme-body-bg-size: 40px 40px;
+    --theme-body-bg-attachment: fixed;
+    --theme-body-color: #dee3e4;
+    --theme-body-font: 'Rajdhani', 'Orbitron', sans-serif;
+
+    --theme-ambient-glow: radial-gradient(circle, rgba(0, 255, 255, 0.16) 0%, rgba(0, 255, 255, 0.05) 50%, rgba(0,0,0,0) 70%);
+
+    --theme-h1-color: #dee3e4;
+    --theme-h1-shadow: 2px 2px 0px #020617, 4px 4px 0px #00ffff;
+
+    --theme-board-plate-bg: #1e293b;
+    --theme-board-plate-border: 1px solid rgba(0, 255, 255, 0.3);
+    --theme-board-plate-outline: 0;
+    --theme-board-plate-shadow: 0 0 30px rgba(0, 255, 255, 0.15), inset 0 0 20px rgba(0, 255, 255, 0.05);
+
+    --theme-grid-bg: #0f172a;
+    --theme-grid-border: 1px solid rgba(0, 255, 255, 0.15);
+    --theme-grid-shadow: none;
+    --theme-cell-shadow: inset 0 0 10px rgba(0, 255, 255, 0.4);
+
+    --theme-slot-border: rgba(0, 255, 255, 0.4);
+    --theme-slot-bg: rgba(0, 255, 255, 0.06);
+
+    --theme-tile-bg: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+    --theme-tile-color: #00ffff;
+    --theme-tile-border: 1px solid #00ffff;
+    --theme-tile-shadow: 0 0 10px rgba(0, 255, 255, 0.5), inset 0 1px 0px rgba(255,255,255,0.1);
+    --theme-tile-radius: 4px;
+    --theme-tile-text-shadow: 0 0 6px rgba(0, 255, 255, 0.6);
+    --theme-tile-hover-shadow: 0 0 18px rgba(0, 255, 255, 0.8);
+    --theme-tile-locked-bg: #00ffff;
+    --theme-tile-locked-border: #00cccc;
+    --theme-tile-locked-color: #0f172a;
+    --theme-tile-locked-shadow: 0 0 12px rgba(0, 255, 255, 0.8);
+
+    --theme-rack-bg: linear-gradient(to bottom, #1e293b 0%, #0f172a 100%);
+    --theme-rack-border: 2px solid rgba(0, 255, 255, 0.3);
+
+    --theme-clue-bg: rgba(0, 255, 255, 0.05);
+    --theme-clue-border: 2.5px solid rgba(0, 255, 255, 0.3);
+    --theme-clue-color: #dee3e4;
+    --theme-clue-text-shadow: none;
+
+    --theme-button-bg: #1e293b;
+    --theme-button-color: #dee3e4;
+    --theme-button-border: 2px solid rgba(0, 255, 255, 0.4);
+    --theme-button-shadow: 0 5px 0 #05080f;
+    --theme-button-hover-bg: #263449;
+
+    --theme-submit-bg: #00ffff;
+    --theme-submit-color: #0f172a;
+    --theme-submit-border: #00cccc;
+    --theme-submit-shadow: 0 5px 0 #00a3a3;
+    --theme-submit-hover-bg: #4dffff;
+
+    --theme-panel-bg: rgba(15, 23, 42, 0.95);
+    --theme-panel-border: 3.5px solid rgba(0, 255, 255, 0.3);
+    --theme-panel-color: #dee3e4;
+    --theme-panel-h3-border: 2px solid #00ffff;
+    --theme-panel-h3-color: #00ffff;
+    --theme-panel-h3-shadow: 0 0 6px rgba(0,255,255,0.5);
+}
+body[data-theme="cyber-grid"] .grid-container {
+    --teak-light: #16213a;
+    --teak-base: #0f172a;
+}
+/* Structural identity: hex-cut cells with a glowing center pip instead of
+   Teak's carved square groove, plus four HUD reticle corner brackets on the
+   board frame (single ::before using four corner-positioned linear-gradients
+   so no extra DOM nodes are needed). */
+body[data-theme="cyber-grid"] .grid-cell {
+    clip-path: polygon(25% 5%, 75% 5%, 95% 50%, 75% 95%, 25% 95%, 5% 50%);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+}
+body[data-theme="cyber-grid"] .grid-cell::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 4px; height: 4px;
+    transform: translate(-50%, -50%);
+    background: #00ffff;
+    border-radius: 50%;
+    box-shadow: 0 0 6px 2px rgba(0, 255, 255, 0.8);
+    opacity: 0.65;
+    pointer-events: none;
+}
+body[data-theme="cyber-grid"] .board-plate::before {
+    content: '';
+    position: absolute;
+    top: -10px; left: -10px; right: -10px; bottom: -10px;
+    pointer-events: none;
+    background-image:
+        linear-gradient(#00ffff, #00ffff), linear-gradient(#00ffff, #00ffff),
+        linear-gradient(#00ffff, #00ffff), linear-gradient(#00ffff, #00ffff),
+        linear-gradient(#00ffff, #00ffff), linear-gradient(#00ffff, #00ffff),
+        linear-gradient(#00ffff, #00ffff), linear-gradient(#00ffff, #00ffff);
+    background-repeat: no-repeat;
+    background-size: 24px 2px, 2px 24px;
+    background-position:
+        top 0 left 0, top 0 left 0,
+        top 0 right 0, top 0 right 0,
+        bottom 0 left 0, bottom 0 left 0,
+        bottom 0 right 0, bottom 0 right 0;
+    filter: drop-shadow(0 0 4px rgba(0, 255, 255, 0.8));
+}
+
+/* Museum Archive — charcoal/bone/slate specimen-catalog aesthetic, thin
+   hairline dividers, technical monospace labels. */
+body[data-theme="museum-archive"] {
+    --theme-body-bg-color: #1a1a1a;
+    --theme-body-bg-image: radial-gradient(circle at 65% 50%, rgba(60,60,60,0.8) 0%, rgba(26,26,26,1) 70%);
+    --theme-body-color: #e3dac9;
+    --theme-body-font: 'Space Mono', monospace;
+
+    --theme-ambient-glow: radial-gradient(circle, rgba(227, 218, 201, 0.10) 0%, rgba(179, 170, 153, 0.04) 50%, rgba(0,0,0,0) 70%);
+
+    --theme-h1-color: #e3dac9;
+    --theme-h1-shadow: 2px 2px 0px #000000, 4px 4px 0px #b3aa99;
+
+    --theme-board-plate-bg: #1a1a1a;
+    --theme-board-plate-border: 8px solid #2c2c2c;
+    --theme-board-plate-outline: 0;
+    --theme-board-plate-shadow: inset 0 0 0 2px #b3aa99, 0 20px 40px rgba(0,0,0,0.8);
+
+    --theme-grid-bg: transparent;
+    --theme-grid-border: 0;
+    --theme-grid-shadow: none;
+    --theme-cell-shadow: 0 0 0 1px #e3dac9;
+
+    --theme-slot-border: #e3dac9;
+    --theme-slot-bg: transparent;
+
+    --theme-tile-bg: #e3dac9;
+    --theme-tile-color: #1a1a1a;
+    --theme-tile-border: 1px solid #b3aa99;
+    --theme-tile-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    --theme-tile-radius: 2px;
+    --theme-tile-hover-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    --theme-tile-locked-bg: #2c2c2c;
+    --theme-tile-locked-border: #b3aa99;
+    --theme-tile-locked-color: #e3dac9;
+    --theme-tile-locked-shadow: 0 2px 4px rgba(0,0,0,0.4);
+
+    --theme-rack-bg: linear-gradient(to bottom, #2c2c2c 0%, #1a1a1a 100%);
+    --theme-rack-border: 2px solid #b3aa99;
+
+    --theme-clue-bg: rgba(179, 170, 153, 0.06);
+    --theme-clue-border: 2.5px solid #b3aa99;
+    --theme-clue-color: #e3dac9;
+    --theme-clue-text-shadow: none;
+
+    --theme-button-bg: #2c2c2c;
+    --theme-button-color: #e3dac9;
+    --theme-button-border: 2px solid #b3aa99;
+    --theme-button-shadow: 0 5px 0 #0d0d0d;
+    --theme-button-hover-bg: #383838;
+
+    --theme-submit-bg: #e3dac9;
+    --theme-submit-color: #1a1a1a;
+    --theme-submit-border: #b3aa99;
+    --theme-submit-shadow: 0 5px 0 #948c7d;
+    --theme-submit-hover-bg: #f0e8d8;
+
+    --theme-panel-bg: #1a1a1a;
+    --theme-panel-border: 3.5px solid #b3aa99;
+    --theme-panel-color: #e3dac9;
+    --theme-panel-h3-border: 2px solid #e3dac9;
+    --theme-panel-h3-color: #b3aa99;
+}
+body[data-theme="museum-archive"] .grid-container {
+    --teak-light: rgba(227, 218, 201, 0.06);
+    --teak-base: rgba(227, 218, 201, 0.02);
+}
+/* Structural identity: specimen-case calibration crosshairs at the four
+   corners of the board frame, the detail that reads as a museum display
+   case rather than a carved wood board. Single ::before, four
+   corner-positioned cross linear-gradients — no extra DOM nodes. */
+body[data-theme="museum-archive"] .board-plate::before {
+    content: '';
+    position: absolute;
+    top: -8px; left: -8px; right: -8px; bottom: -8px;
+    pointer-events: none;
+    background-image:
+        linear-gradient(#b3aa99, #b3aa99), linear-gradient(#b3aa99, #b3aa99),
+        linear-gradient(#b3aa99, #b3aa99), linear-gradient(#b3aa99, #b3aa99),
+        linear-gradient(#b3aa99, #b3aa99), linear-gradient(#b3aa99, #b3aa99),
+        linear-gradient(#b3aa99, #b3aa99), linear-gradient(#b3aa99, #b3aa99);
+    background-repeat: no-repeat;
+    background-size: 16px 1px, 1px 16px;
+    background-position:
+        top 8px left 0, top 0 left 8px,
+        top 8px right 0, top 0 right 8px,
+        bottom 8px left 0, bottom 0 left 8px,
+        bottom 8px right 0, bottom 0 right 8px;
+}
+
+/* Royal Court — deep emerald velvet, polished gold leaf, burnt mahogany,
+   Playfair Display serif display type. */
+body[data-theme="royal-court"] {
+    --theme-body-bg-color: #0a2a1a;
+    --theme-body-bg-image: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 60%);
+    --theme-body-color: #d4af37;
+    --theme-body-font: 'EB Garamond', 'Playfair Display', serif;
+
+    --theme-ambient-glow: radial-gradient(circle, rgba(212, 175, 55, 0.18) 0%, rgba(10, 42, 26, 0.06) 50%, rgba(0,0,0,0) 70%);
+
+    --theme-h1-color: #d4af37;
+    --theme-h1-shadow: 2px 2px 0px #04140c, 4px 4px 0px #8a6d1f;
+
+    --theme-board-plate-bg: linear-gradient(45deg, #b8860b, #ffd700, #b8860b, #d4af37);
+    --theme-board-plate-border: 2px solid #3a1f18;
+    --theme-board-plate-outline: 0;
+    --theme-board-plate-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.5);
+
+    --theme-grid-bg: #1a0f0c;
+    --theme-grid-border: 4px solid #3a1f18;
+    --theme-grid-shadow: inset 0 10px 20px rgba(0,0,0,0.8);
+    --theme-cell-shadow: inset 2px 2px 5px rgba(0,0,0,0.9), inset -1px -1px 2px rgba(212, 175, 55, 0.3);
+
+    --theme-slot-border: rgba(212, 175, 55, 0.4);
+    --theme-slot-bg: rgba(212, 175, 55, 0.1);
+
+    --theme-tile-bg: linear-gradient(145deg, #f4e8d2 0%, #e0cba0 100%);
+    --theme-tile-color: #3a1f18;
+    --theme-tile-border: 2px solid #d4af37;
+    --theme-tile-shadow: 0 6px 0 #8a6d1f, 0 10px 15px rgba(0,0,0,0.5);
+    --theme-tile-radius: 4px;
+    --theme-tile-hover-shadow: 0 8px 0 #8a6d1f, 0 12px 18px rgba(0,0,0,0.55);
+    --theme-tile-locked-bg: #d4af37;
+    --theme-tile-locked-border: #8a6d1f;
+    --theme-tile-locked-color: #1a0f0c;
+    --theme-tile-locked-shadow: 0 2px 0 #8a6d1f;
+
+    --theme-rack-bg: linear-gradient(to bottom, #3a1f18 0%, #20130f 100%);
+    --theme-rack-border: 2px solid #d4af37;
+
+    --theme-clue-bg: rgba(20, 10, 5, 0.6);
+    --theme-clue-border: 2.5px solid #d4af37;
+    --theme-clue-color: #f4e8d2;
+    --theme-clue-text-shadow: none;
+
+    --theme-button-bg: linear-gradient(to bottom, #3a1f18, #20130f);
+    --theme-button-color: #d4af37;
+    --theme-button-border: 2px solid #d4af37;
+    --theme-button-shadow: 0 5px 0 #0a0605;
+    --theme-button-hover-bg: linear-gradient(to bottom, #4a2a20, #2a1a14);
+
+    --theme-submit-bg: #d4af37;
+    --theme-submit-color: #1a0f0c;
+    --theme-submit-border: #8a6d1f;
+    --theme-submit-shadow: 0 5px 0 #8a6d1f;
+    --theme-submit-hover-bg: #e6c34d;
+
+    --theme-panel-bg: rgba(10, 42, 26, 0.95);
+    --theme-panel-border: 3.5px solid #d4af37;
+    --theme-panel-color: #f4e8d2;
+    --theme-panel-h3-border: 2px solid #d4af37;
+    --theme-panel-h3-color: #d4af37;
+}
+body[data-theme="royal-court"] .grid-container {
+    --teak-light: #2a1712;
+    --teak-base: #1a0f0c;
+}
+/* Structural identity: a faceted gold diamond inlay centered in every cell
+   (via ::before) instead of a plain routed square, plus four round gold
+   filigree medallions at the board frame's corners (single ::after using
+   four corner-positioned radial-gradients — no extra DOM nodes). */
+body[data-theme="royal-court"] .grid-cell::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 34%; height: 34%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    background: linear-gradient(135deg, rgba(212,175,55,0.55), rgba(90,66,20,0.35));
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    pointer-events: none;
+}
+body[data-theme="royal-court"] .board-plate::after {
+    content: '';
+    position: absolute;
+    top: -15px; left: -15px; right: -15px; bottom: -15px;
+    pointer-events: none;
+    background-image:
+        radial-gradient(circle at 35% 30%, #ffe9a8, #d4af37 55%, #8a6d1f 100%),
+        radial-gradient(circle at 35% 30%, #ffe9a8, #d4af37 55%, #8a6d1f 100%),
+        radial-gradient(circle at 35% 30%, #ffe9a8, #d4af37 55%, #8a6d1f 100%),
+        radial-gradient(circle at 35% 30%, #ffe9a8, #d4af37 55%, #8a6d1f 100%);
+    background-repeat: no-repeat;
+    background-size: 30px 30px;
+    background-position: top left, top right, bottom left, bottom right;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+}
+
+/* Atomic Woodcraft — retro-futuristic "Atomic Age" wood block, teal/gold
+   accents on a mahogany-teak radial gradient, cream dot-grid wallpaper. */
+body[data-theme="atomic-woodcraft"] {
+    --theme-body-bg-color: #f5f5f0;
+    --theme-body-bg-image:
+        radial-gradient(circle, rgba(77, 208, 225, 0.12) 1.5px, transparent 1.5px),
+        radial-gradient(circle, rgba(251, 192, 45, 0.12) 1.5px, transparent 1.5px);
+    --theme-body-bg-size: 32px 32px;
+    --theme-body-bg-position: 0 0, 16px 16px;
+    --theme-body-color: #3e2723;
+    --theme-body-font: 'Montserrat', sans-serif;
+
+    --theme-ambient-glow: radial-gradient(circle, rgba(77, 208, 225, 0.14) 0%, rgba(251, 192, 45, 0.05) 50%, rgba(0,0,0,0) 70%);
+
+    --theme-h1-color: #3e2723;
+    --theme-h1-shadow: 2px 2px 0px #4dd0e1, 4px 4px 0px #3e2723;
+
+    --theme-board-plate-bg: radial-gradient(circle, #8d6e63 0%, #5d4037 100%);
+    --theme-board-plate-border: 0;
+    --theme-board-plate-outline: 0;
+    --theme-board-plate-shadow: 0 20px 40px rgba(0,0,0,0.35), inset 0 2px 0 rgba(255,255,255,0.15), inset 0 -6px 12px rgba(0,0,0,0.3);
+
+    --theme-grid-bg: #3e2723;
+    --theme-grid-border: 0;
+    --theme-grid-shadow: inset 3px 3px 6px rgba(0,0,0,0.6), inset -2px -2px 4px rgba(255,255,255,0.05);
+    --theme-cell-shadow: inset 2px 2px 5px rgba(0,0,0,0.7), inset -1px -1px 2px rgba(255,255,255,0.05);
+
+    --theme-slot-border: #4dd0e1;
+    --theme-slot-bg: rgba(77, 208, 225, 0.08);
+
+    --theme-tile-bg: linear-gradient(145deg, #a1887f 0%, #6d4c41 100%);
+    --theme-tile-color: #f5f5f0;
+    --theme-tile-border: 1px solid rgba(255,255,255,0.15);
+    --theme-tile-shadow: 0 6px 10px rgba(0,0,0,0.4), inset 0 2px 0px rgba(255,255,255,0.3), inset 0 -3px 0px rgba(0,0,0,0.25);
+    --theme-tile-radius: 4px;
+    --theme-tile-hover-shadow: 0 8px 14px rgba(0,0,0,0.5);
+    --theme-tile-locked-bg: #4dd0e1;
+    --theme-tile-locked-border: #35a3b3;
+    --theme-tile-locked-color: #00363c;
+    --theme-tile-locked-shadow: 0 2px 4px rgba(0,0,0,0.3);
+
+    --theme-rack-bg: linear-gradient(to bottom, #6d4c41 0%, #3e2723 100%);
+    --theme-rack-border: 2px solid #8d6e63;
+
+    --theme-clue-bg: rgba(77, 208, 225, 0.06);
+    --theme-clue-border: 2.5px solid #8d6e63;
+    --theme-clue-color: #3e2723;
+    --theme-clue-text-shadow: none;
+
+    --theme-button-bg: #fbc02d;
+    --theme-button-color: #402d00;
+    --theme-button-border: 2px solid #402d00;
+    --theme-button-shadow: 0 5px 0 #c99a1f;
+    --theme-button-hover-bg: #fdd85d;
+
+    --theme-submit-bg: #4dd0e1;
+    --theme-submit-color: #00363c;
+    --theme-submit-border: #00565f;
+    --theme-submit-shadow: 0 5px 0 #35a3b3;
+    --theme-submit-hover-bg: #6fecfe;
+
+    --theme-panel-bg: #fffdf8;
+    --theme-panel-border: 2.5px solid #8d6e63;
+    --theme-panel-color: #3e2723;
+    --theme-panel-h3-border: 2px solid #4dd0e1;
+    --theme-panel-h3-color: #3e2723;
+}
+body[data-theme="atomic-woodcraft"] .grid-container {
+    --teak-light: #4a332c;
+    --teak-base: #3e2723;
+}
+/* Structural identity: an atomic orbit ring etched around every cell
+   instead of a plain routed groove — a single crossed-ellipse motif built
+   with two conic gradients on one ::before (::after is reserved by the
+   base wave-highlight flash effect in style.css and must not be touched),
+   echoing the DESIGN.md orbit-badge scoring motif. */
+body[data-theme="atomic-woodcraft"] .grid-cell::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 70%; height: 70%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background:
+        linear-gradient(rgba(77, 208, 225, 0.35), rgba(77, 208, 225, 0.35)) center / 100% 1px no-repeat,
+        linear-gradient(rgba(77, 208, 225, 0.35), rgba(77, 208, 225, 0.35)) center / 1px 100% no-repeat;
+    background-color: transparent;
+    box-sizing: border-box;
+    border: 1px solid rgba(77, 208, 225, 0.35);
+    pointer-events: none;
+}
