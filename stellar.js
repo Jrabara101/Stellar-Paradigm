@@ -13,16 +13,13 @@ const STELLAR_NETWORKS = {
     },
     mainnet: {
         networkPassphrase: 'Public Global Stellar Network ; September 2015',
-        // SDF does not run a free public Soroban RPC for mainnet — pick a provider
-        // from https://developers.stellar.org/docs/data/apis/rpc/providers and fill
-        // this in before deploying (see Workstream A in the Level 6 plan).
-        rpcUrl: null,
+        rpcUrl: 'https://mainnet.sorobanrpc.com',
         horizonUrl: 'https://horizon.stellar.org',
         friendbotUrl: null, // no Friendbot on mainnet — see fee-sponsorship worker instead
-        contractId: null,           // filled in after mainnet contract deploy
-        adminAddress: null,         // filled in once the mainnet admin account is created
-        rewardContractId: null,     // filled in after mainnet contract deploy
-        credentialContractId: null, // filled in after mainnet contract deploy
+        contractId: 'CA37MRPVFGLRRENBW75CYZVBZPWZIS2FJQDMUFYU7MSLUNKFIDV2ZCQS',
+        adminAddress: 'GBEKJPCB3IPPVWSYXLRBOSWJ3L4JKFGXEGZRDFIIY2H2OQQK7LEYLRFV',
+        rewardContractId: 'CAPRQAUNC3L54PX54ELLFHGOEIWE5GEOSOHEQ4IWBMKK6E73D32BOLF3',
+        credentialContractId: 'CDK5KW5SY2IHOBARDDFIQFTYWMECZA3RDC6NYDB3ZCWH72CKWHJJP4JN',
     },
 };
 

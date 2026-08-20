@@ -32,8 +32,17 @@ impl WordScrambleContract {
         env.storage().instance().set(&DataKey::Admin, &admin);
     }
 
-    /// Store the RewardContract address so submit_score can call it.
-    pub fn set_reward_contract(env: Env, reward_contract_id: Address) {
+    /// Admin-only: store the RewardContract address so submit_score can call it.
+    pub fn set_reward_contract(env: Env, admin: Address, reward_contract_id: Address) {
+        admin.require_auth();
+        let stored_admin: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::Admin)
+            .expect("admin not initialised — call init_admin first");
+        if admin != stored_admin {
+            panic!("unauthorised");
+        }
         env.storage().instance().set(&DataKey::RewardContract, &reward_contract_id);
     }
 
@@ -309,6 +318,22 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected = "unauthorised")]
+    fn test_set_reward_contract_rejects_non_admin() {
+        let env = Env::default();
+        env.mock_all_auths();
+        let contract_id = env.register(WordScrambleContract, ());
+        let client = WordScrambleContractClient::new(&env, &contract_id);
+
+        let admin = Address::generate(&env);
+        client.init_admin(&admin);
+
+        let not_admin = Address::generate(&env);
+        let reward_contract_id = Address::generate(&env);
+        client.set_reward_contract(&not_admin, &reward_contract_id);
+    }
+
+    #[test]
     fn test_submit_score_mints_badge_via_reward_contract() {
         let env = Env::default();
         env.mock_all_auths();
@@ -321,8 +346,10 @@ mod tests {
         let reward_client = reward_contract::RewardContractClient::new(&env, &reward_id);
 
         // Wire them together
+        let admin = Address::generate(&env);
+        word_client.init_admin(&admin);
         reward_client.init(&word_id);
-        word_client.set_reward_contract(&reward_id);
+        word_client.set_reward_contract(&admin, &reward_id);
 
         // Submit a GOLD-tier score
         let player = Address::generate(&env);
@@ -353,7 +380,29 @@ mod tests {
         let reward_client = reward_contract::RewardContractClient::new(&env, &reward_id);
 
         reward_client.init(&word_id);
-        word_client.set_reward_contract(&reward_id);
+
+        let admin = Address::generate(&env);
+        env.mock_auths(&[MockAuth {
+            address: &admin,
+            invoke: &MockAuthInvoke {
+                contract: &word_id,
+                fn_name: "init_admin",
+                args: (admin.clone(),).into_val(&env),
+                sub_invokes: &[],
+            },
+        }]);
+        word_client.init_admin(&admin);
+
+        env.mock_auths(&[MockAuth {
+            address: &admin,
+            invoke: &MockAuthInvoke {
+                contract: &word_id,
+                fn_name: "set_reward_contract",
+                args: (admin.clone(), reward_id.clone()).into_val(&env),
+                sub_invokes: &[],
+            },
+        }]);
+        word_client.set_reward_contract(&admin, &reward_id);
 
         let player = Address::generate(&env);
         env.mock_auths(&[MockAuth {
