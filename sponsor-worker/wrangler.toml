@@ -1,0 +1,26 @@
+name = "word-scramble-sponsor"
+main = "src/index.mjs"
+compatibility_date = "2025-06-01"
+compatibility_flags = ["nodejs_compat"]
+
+# The sponsor's Stellar secret key lives ONLY as a Wrangler secret, never in
+# this repo or client code:
+#   wrangler secret put SPONSOR_SECRET_KEY
+#
+# Rate limiting / abuse prevention for the sponsored-account-creation route
+# uses this KV namespace to track per-IP daily counts. Create it once with:
+#   wrangler kv namespace create SPONSOR_RATE_LIMIT
+# then paste the returned id below.
+# [[kv_namespaces]]
+# binding = "SPONSOR_RATE_LIMIT"
+# id = "REPLACE_ME"
+
+[vars]
+STELLAR_NETWORK = "mainnet"
+HORIZON_URL = "https://horizon.stellar.org"
+RPC_URL = "https://rpc.lightsail.network"
+NETWORK_PASSPHRASE = "Public Global Stellar Network ; September 2015"
+LEADERBOARD_CONTRACT_ID = "CA37MRPVFGLRRENBW75CYZVBZPWZIS2FJQDMUFYU7MSLUNKFIDV2ZCQS"
+
+[observability]
+enabled = true

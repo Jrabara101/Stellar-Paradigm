@@ -13,13 +13,16 @@ const STELLAR_NETWORKS = {
     },
     mainnet: {
         networkPassphrase: 'Public Global Stellar Network ; September 2015',
-        rpcUrl: 'https://mainnet.sorobanrpc.com',
+        rpcUrl: 'https://rpc.lightsail.network',
         horizonUrl: 'https://horizon.stellar.org',
-        friendbotUrl: null, // no Friendbot on mainnet — see fee-sponsorship worker instead
+        friendbotUrl: null, // no Friendbot on mainnet — sponsorWorkerUrl below takes over this job
         contractId: 'CA37MRPVFGLRRENBW75CYZVBZPWZIS2FJQDMUFYU7MSLUNKFIDV2ZCQS',
         adminAddress: 'GBEKJPCB3IPPVWSYXLRBOSWJ3L4JKFGXEGZRDFIIY2H2OQQK7LEYLRFV',
         rewardContractId: 'CAPRQAUNC3L54PX54ELLFHGOEIWE5GEOSOHEQ4IWBMKK6E73D32BOLF3',
         credentialContractId: 'CDK5KW5SY2IHOBARDDFIQFTYWMECZA3RDC6NYDB3ZCWH72CKWHJJP4JN',
+        // Fee-sponsorship worker: sponsors new-account creation and fee-bumps
+        // submit_score so mainnet players never need to own XLM themselves.
+        sponsorWorkerUrl: 'https://word-scramble-sponsor.jrabara101.workers.dev',
     },
 };
 
@@ -111,20 +114,63 @@ class StellarWallet {
         return this._sdk;
     }
 
-    // Auto-fund any address that isn't activated on Testnet yet.
-    // No-op on mainnet (no Friendbot) until the fee-sponsorship worker's
-    // sponsored-account-creation route takes over this job.
+    // Auto-fund any address that isn't activated yet. Testnet uses Friendbot;
+    // mainnet uses the fee-sponsorship worker (sponsor pays the reserve, the
+    // player only has to approve one wallet signature — no XLM required).
     async _ensureFunded(address) {
-        if (!STELLAR_CONFIG.friendbotUrl) return;
+        if (STELLAR_CONFIG.friendbotUrl) {
+            try {
+                const res = await fetch(`${STELLAR_CONFIG.horizonUrl}/accounts/${address}`);
+                if (res.status === 404) {
+                    this._showStatus('Funding your Testnet account...', 'info');
+                    await fetch(`${STELLAR_CONFIG.friendbotUrl}/?addr=${address}`);
+                    this._showStatus('Testnet account funded! Ready to play.', 'success');
+                }
+            } catch (e) {
+                // Non-fatal — account may already exist
+            }
+            return;
+        }
+
+        if (!STELLAR_CONFIG.sponsorWorkerUrl) return;
         try {
             const res = await fetch(`${STELLAR_CONFIG.horizonUrl}/accounts/${address}`);
-            if (res.status === 404) {
-                this._showStatus('Funding your Testnet account...', 'info');
-                await fetch(`${STELLAR_CONFIG.friendbotUrl}/?addr=${address}`);
-                this._showStatus('Testnet account funded! Ready to play.', 'success');
+            if (res.status !== 404) return; // already activated
+
+            this._showStatus('Setting up your free mainnet account...', 'info');
+            const sdk = await this._getSDK();
+            const kit = await this._getKit();
+
+            const prepRes = await fetch(
+                `${STELLAR_CONFIG.sponsorWorkerUrl}/sponsor/create-account/prepare?address=${encodeURIComponent(address)}`
+            );
+            if (!prepRes.ok) {
+                const body = await prepRes.json().catch(() => ({}));
+                throw new Error(body.error || `prepare failed (${prepRes.status})`);
             }
+            const { xdr } = await prepRes.json();
+
+            this._showStatus('Please approve free account setup in your wallet...', 'info');
+            const { signedTxXdr } = await kit.signTransaction(xdr, {
+                address,
+                networkPassphrase: STELLAR_CONFIG.networkPassphrase,
+            });
+
+            const submitRes = await fetch(`${STELLAR_CONFIG.sponsorWorkerUrl}/sponsor/create-account/submit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ signedXdr: signedTxXdr }),
+            });
+            if (!submitRes.ok) {
+                const body = await submitRes.json().catch(() => ({}));
+                throw new Error(body.error || `submit failed (${submitRes.status})`);
+            }
+
+            this._showStatus('Mainnet account ready — no XLM needed!', 'success');
+            trackEvent('sponsored_account_created', {});
         } catch (e) {
-            // Non-fatal — account may already exist
+            this._showStatus(`Couldn't set up a free account: ${e.message}`, 'error');
+            trackEvent('error_sponsored_account', { message: e.message });
         }
     }
 
@@ -234,26 +280,44 @@ class StellarWallet {
                 networkPassphrase: STELLAR_CONFIG.networkPassphrase,
             });
 
-            const signedTx = sdk.TransactionBuilder.fromXDR(
-                signedTxXdr,
-                STELLAR_CONFIG.networkPassphrase
-            );
-            const response = await rpc.sendTransaction(signedTx);
-
-            if (response.status === 'ERROR') {
-                throw new Error(`Transaction failed: ${this._describeTxError(response.errorResult)}`);
+            // On mainnet, the sponsor worker fee-bumps this so the player
+            // never has to hold XLM for network fees. On testnet the player's
+            // own (Friendbot-funded) account pays its own tiny fee directly.
+            let hash;
+            if (STELLAR_CONFIG.sponsorWorkerUrl) {
+                this._showStatus('Submitting via fee sponsor...', 'info');
+                const bumpRes = await fetch(`${STELLAR_CONFIG.sponsorWorkerUrl}/sponsor/fee-bump`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ signedXdr: signedTxXdr }),
+                });
+                const bumpBody = await bumpRes.json().catch(() => ({}));
+                if (!bumpRes.ok) {
+                    throw new Error(`Fee-bump submission failed: ${bumpBody.error || bumpRes.status}`);
+                }
+                hash = bumpBody.hash;
+            } else {
+                const signedTx = sdk.TransactionBuilder.fromXDR(
+                    signedTxXdr,
+                    STELLAR_CONFIG.networkPassphrase
+                );
+                const response = await rpc.sendTransaction(signedTx);
+                if (response.status === 'ERROR') {
+                    throw new Error(`Transaction failed: ${this._describeTxError(response.errorResult)}`);
+                }
+                hash = response.hash;
             }
 
-            let result = await rpc.getTransaction(response.hash);
+            let result = await rpc.getTransaction(hash);
             let attempts = 0;
             while (result.status === 'NOT_FOUND' && attempts < 20) {
                 await new Promise(r => setTimeout(r, 1000));
-                result = await rpc.getTransaction(response.hash);
+                result = await rpc.getTransaction(hash);
                 attempts++;
             }
 
             if (result.status === 'SUCCESS') {
-                this._showStatus(`Score ${score} saved on-chain! Tx: ${this._short(response.hash)}`, 'success');
+                this._showStatus(`Score ${score} saved on-chain! Tx: ${this._short(hash)}`, 'success');
                 this.invalidateLeaderboardCache(); // our own score changed the board
                 this._updateBalanceUI();
                 this._updateBadgeUI(); // refresh badge in case a new one was earned

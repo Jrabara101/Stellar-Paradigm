@@ -1,0 +1,14 @@
+{
+  "name": "word-scramble-sponsor-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker holding the Word Scramble fee-sponsorship key. Sponsors new mainnet account creation and fee-bumps submit_score transactions so players never need to own XLM.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "^16.2.0"
+  }
+}
