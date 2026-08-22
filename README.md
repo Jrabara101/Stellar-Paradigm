@@ -45,6 +45,8 @@ Word Scramble is a fully client-side browser game (no backend) that integrates W
 
 ## 🏗️ Smart Contracts
 
+> 🔒 **Security review:** see [SECURITY.md](SECURITY.md) for the contracts' authorization model, two access-control gaps found and fixed before mainnet deploy, and the fee-sponsorship worker's trust model.
+
 ### WordScramble Contract
 **Contract ID (Testnet):** `CDTTHP4T5IUDCG2MWJJZXOF5LUHXWMHN54E4PKKRQ56FSEQHSTIILWH3`
 
