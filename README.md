@@ -370,7 +370,9 @@ Mapped directly to the official Level 5 requirements — every item below links 
 - [x] **Excel export attached** — [`Updated 50 test net users.xlsx`](Updated%2050%20test%20net%20users.xlsx), linked in [Analytics & Feedback](#-analytics-monitoring--user-feedback) above
 - [x] **Improvement plan with commit links** — [Feedback → Action: Next-Phase Improvement Plan](#-feedback--action-next-phase-improvement-plan) below maps every theme to its actual commit
 
-> ⚠️ **Known gap:** the Level 5 spec asks the form to collect an email address; ours collects name + wallet + feedback but not email. Everything else in the User Onboarding requirements is satisfied.
+> ⚠️ **Known gap (at Level 5 submission time):** the Level 5 spec asks the form to collect an email address; ours collected name + wallet + feedback but not email. Everything else in the User Onboarding requirements is satisfied.
+>
+> ✅ **Resolved for Level 6 (2026-08-22):** a required, validated email field was added to this same form ahead of mainnet user onboarding — see the Level 6 Submission Checklist below.
 
 ### Submission Checklist
 - [x] Public GitHub repository — [github.com/Jrabara101/Stellar-Paradigm](https://github.com/Jrabara101/Stellar-Paradigm)
