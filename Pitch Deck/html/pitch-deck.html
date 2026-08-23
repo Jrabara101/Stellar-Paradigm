@@ -1,0 +1,547 @@
+<title>Word Scramble Pitch</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Jost:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<style>
+  :root {
+    --parchment: #f6f1e6;
+    --parchment-dim: #ece3d1;
+    --ink: #241407;
+    --ink-soft: #4a3324;
+    --teak: #5c3a21;
+    --teak-deep: #3a2313;
+    --mustard: #e1ad01;
+    --mustard-deep: #b8890a;
+    --turquoise: #2fb8ab;
+    --turquoise-soft: #d9f2ef;
+    --rule: rgba(36, 20, 7, 0.14);
+    --tile-shadow: rgba(36, 20, 7, 0.28);
+
+    --bg: var(--parchment);
+    --bg-alt: var(--parchment-dim);
+    --surface: #fffdf8;
+    --text: var(--ink);
+    --text-soft: var(--ink-soft);
+    --accent: var(--mustard);
+    --accent-deep: var(--mustard-deep);
+    --accent-2: var(--turquoise);
+    --accent-2-soft: var(--turquoise-soft);
+    --border: var(--rule);
+    --tile-bg: var(--surface);
+    --tile-shadow-c: var(--tile-shadow);
+    --nav-dot: rgba(36, 20, 7, 0.22);
+    --nav-dot-active: var(--teak);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1b120a;
+      --bg-alt: #241708;
+      --surface: #2a1c0f;
+      --text: #f3e9d8;
+      --text-soft: #cbb99f;
+      --accent: #f0bd1a;
+      --accent-deep: #e1ad01;
+      --accent-2: #4fd6c7;
+      --accent-2-soft: #17322e;
+      --border: rgba(243, 233, 216, 0.14);
+      --tile-bg: #2f2013;
+      --tile-shadow-c: rgba(0, 0, 0, 0.55);
+      --nav-dot: rgba(243, 233, 216, 0.28);
+      --nav-dot-active: #f0bd1a;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #1b120a;
+    --bg-alt: #241708;
+    --surface: #2a1c0f;
+    --text: #f3e9d8;
+    --text-soft: #cbb99f;
+    --accent: #f0bd1a;
+    --accent-deep: #e1ad01;
+    --accent-2: #4fd6c7;
+    --accent-2-soft: #17322e;
+    --border: rgba(243, 233, 216, 0.14);
+    --tile-bg: #2f2013;
+    --tile-shadow-c: rgba(0, 0, 0, 0.55);
+    --nav-dot: rgba(243, 233, 216, 0.28);
+    --nav-dot-active: #f0bd1a;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Jost', ui-sans-serif, system-ui, sans-serif;
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+  }
+
+  .deck {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(28px, 5vw, 88px);
+    opacity: 0;
+    transform: translateY(24px);
+    pointer-events: none;
+    transition: opacity 0.55s cubic-bezier(.2,.7,.3,1), transform 0.55s cubic-bezier(.2,.7,.3,1);
+  }
+  .slide.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .slide { transition: opacity 0.2s linear; transform: none; }
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: clamp(11px, 1vw, 13px);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-deep);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 22px;
+    height: 2px;
+    background: var(--accent-deep);
+    display: inline-block;
+  }
+
+  h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; margin: 0; text-wrap: balance; }
+
+  .tile {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 900;
+    background: var(--tile-bg);
+    border: 1.5px solid var(--border);
+    box-shadow: 0 6px 0 var(--tile-shadow-c), 0 10px 18px rgba(0,0,0,0.18);
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-soft);
+    position: relative;
+  }
+  :root[data-theme="dark"] .tile,
+  :root:not([data-theme="light"]) .tile { color: var(--text); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .tile { color: var(--text); }
+  }
+
+  .tile-value {
+    position: absolute;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    bottom: 6%;
+    right: 10%;
+    opacity: 0.5;
+  }
+
+  .progress {
+    position: fixed;
+    bottom: clamp(18px, 3vh, 34px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 9px;
+    z-index: 50;
+  }
+  .progress button {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: none;
+    background: var(--nav-dot);
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.25s, transform 0.25s;
+  }
+  .progress button.active {
+    background: var(--nav-dot-active);
+    transform: scale(1.35);
+  }
+
+  .slide-index {
+    position: fixed;
+    top: clamp(18px, 3vh, 32px);
+    right: clamp(24px, 4vw, 60px);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-soft);
+    letter-spacing: 0.08em;
+    z-index: 50;
+  }
+  .slide-index b { color: var(--accent-deep); }
+
+  .brand {
+    position: fixed;
+    top: clamp(18px, 3vh, 32px);
+    left: clamp(24px, 4vw, 60px);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .brand-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-2); }
+
+  .arrow-nav {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 50;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: transform 0.15s, background 0.15s;
+    opacity: 0.55;
+  }
+  .arrow-nav:hover { opacity: 1; transform: translateY(-50%) scale(1.06); }
+  .arrow-nav.prev { left: clamp(10px, 2vw, 28px); }
+  .arrow-nav.next { right: clamp(10px, 2vw, 28px); }
+  @media (max-width: 720px) { .arrow-nav { display: none; } }
+
+  .content-max { max-width: 1180px; margin: 0 auto; width: 100%; }
+
+  .stat-mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  a { color: var(--accent-2); }
+
+  ::selection { background: var(--accent); color: var(--ink); }
+</style>
+
+<div class="brand"><span class="brand-dot"></span> WORD SCRAMBLE — STELLAR</div>
+<div class="slide-index"><b id="slideNum">01</b> / 08</div>
+
+<div class="deck" id="deck">
+
+  <!-- SLIDE 1 — HOOK -->
+  <section class="slide active" data-slide="0" style="align-items:center; justify-content:center; text-align:center; position:relative;">
+    <div style="position:absolute; top:14%; left:8%; display:flex; gap:14px; transform:rotate(-6deg);">
+      <div class="tile" style="width:64px;height:64px;font-size:30px;">W<span class="tile-value" style="font-size:9px;">4</span></div>
+      <div class="tile" style="width:64px;height:64px;font-size:30px; transform:translateY(14px) rotate(4deg);">O<span class="tile-value" style="font-size:9px;">1</span></div>
+      <div class="tile" style="width:64px;height:64px;font-size:30px;">R<span class="tile-value" style="font-size:9px;">1</span></div>
+    </div>
+    <div style="position:absolute; bottom:12%; right:9%; display:flex; gap:14px; transform:rotate(5deg);">
+      <div class="tile" style="width:58px;height:58px;font-size:26px; transform:translateY(-10px);">D<span class="tile-value" style="font-size:8px;">2</span></div>
+      <div class="tile" style="width:58px;height:58px;font-size:26px;">✓<span class="tile-value" style="font-size:8px;">∞</span></div>
+    </div>
+
+    <div class="eyebrow" style="justify-content:center; margin-bottom:28px;">A Word Game on Stellar</div>
+    <h1 style="font-size:clamp(40px, 7.5vw, 108px); line-height:0.98; font-weight:900; letter-spacing:-0.01em;">
+      Every word you solve<br><span style="color:var(--accent-deep); font-style:italic; font-weight:700;">becomes proof.</span>
+    </h1>
+    <p style="max-width:640px; margin:30px auto 0; font-size:clamp(16px,1.6vw,20px); color:var(--text-soft); line-height:1.6;">
+      A retro tile puzzle where your best score isn't stored in someone's database —
+      it's a transaction on the Stellar blockchain, yours to keep, forever.
+    </p>
+    <div style="margin-top:44px; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-soft); letter-spacing:0.05em;">
+      word-scramble-v1.surge.sh &nbsp;·&nbsp; Rise In — Level 6 Submission
+    </div>
+  </section>
+
+  <!-- SLIDE 2 — PROBLEM -->
+  <section class="slide" data-slide="1" style="justify-content:center;">
+    <div class="content-max">
+      <div class="eyebrow">The Problem</div>
+      <h2 style="font-size:clamp(32px,4.6vw,64px); margin-top:18px; max-width:16ch; line-height:1.05;">
+        Web3 onboarding is a wall. Word games are a habit. Nobody built the door between them.
+      </h2>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr)); gap:22px; margin-top:56px;">
+        <div style="border-left:3px solid var(--teak); padding-left:20px;">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent-deep); letter-spacing:0.08em; margin-bottom:8px;">01 — WALLETS</div>
+          <p style="margin:0; color:var(--text-soft); line-height:1.55;">Seed phrases, gas fees, faucets. Every step is a place a newcomer quits.</p>
+        </div>
+        <div style="border-left:3px solid var(--teak); padding-left:20px;">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent-deep); letter-spacing:0.08em; margin-bottom:8px;">02 — EDUCATION</div>
+          <p style="margin:0; color:var(--text-soft); line-height:1.55;">Docs and videos never put a wallet in someone's hand for a real first transaction.</p>
+        </div>
+        <div style="border-left:3px solid var(--turquoise); padding-left:20px;">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent-deep); letter-spacing:0.08em; margin-bottom:8px;">03 — THE GAP</div>
+          <p style="margin:0; color:var(--text-soft); line-height:1.55;">Word games already earn a daily habit for hundreds of millions. None of them touch a chain.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 3 — SOLUTION -->
+  <section class="slide" data-slide="2" style="justify-content:center;">
+    <div class="content-max">
+      <div class="eyebrow">The Solution</div>
+      <h2 style="font-size:clamp(30px,4.2vw,58px); margin-top:18px; max-width:20ch; line-height:1.08;">
+        Make the blockchain invisible — <em style="color:var(--accent-deep); font-style:italic;">until it delights you.</em>
+      </h2>
+
+      <div style="display:grid; grid-template-columns: 1.1fr 1fr; gap:56px; margin-top:50px; align-items:center;">
+        <div style="display:flex; flex-direction:column; gap:22px;">
+          <div style="display:flex; gap:16px; align-items:flex-start;">
+            <div class="tile" style="width:40px;height:40px;font-size:17px; flex-shrink:0; background:var(--accent); border-color:var(--accent-deep); box-shadow:0 4px 0 var(--accent-deep);">1</div>
+            <p style="margin:0; line-height:1.6;">Drag tiles, solve the word. <b>Submit</b> triggers a real Soroban contract call — not a mock, verifiable on Stellar Expert.</p>
+          </div>
+          <div style="display:flex; gap:16px; align-items:flex-start;">
+            <div class="tile" style="width:40px;height:40px;font-size:17px; flex-shrink:0; background:var(--accent); border-color:var(--accent-deep); box-shadow:0 4px 0 var(--accent-deep);">2</div>
+            <p style="margin:0; line-height:1.6;">The leaderboard contract auto-calls a reward contract, minting a Bronze → Legend badge, in <em>one</em> transaction.</p>
+          </div>
+          <div style="display:flex; gap:16px; align-items:flex-start;">
+            <div class="tile" style="width:40px;height:40px;font-size:17px; flex-shrink:0; background:var(--turquoise); border-color:#1d8a80; color:#06322d; box-shadow:0 4px 0 #1d8a80;">3</div>
+            <p style="margin:0; line-height:1.6;"><b>Fee Sponsorship</b> covers account creation and gas — brand-new players never need to own XLM to start.</p>
+          </div>
+        </div>
+
+        <div style="background:var(--surface); border:1.5px solid var(--border); border-radius:16px; padding:28px; box-shadow:0 10px 0 var(--tile-shadow-c);">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-soft); letter-spacing:0.08em; margin-bottom:14px;">SUBMIT_SCORE()</div>
+          <div style="display:flex; gap:10px; margin-bottom:18px;">
+            <div class="tile" style="width:46px;height:46px;font-size:20px;">P</div>
+            <div class="tile" style="width:46px;height:46px;font-size:20px;">R</div>
+            <div class="tile" style="width:46px;height:46px;font-size:20px;">O</div>
+            <div class="tile" style="width:46px;height:46px;font-size:20px;">O</div>
+            <div class="tile" style="width:46px;height:46px;font-size:20px; background:var(--turquoise); border-color:#1d8a80; color:#06322d;">F</div>
+          </div>
+          <div style="font-size:13px; color:var(--text-soft); line-height:1.6;">
+            Multi-wallet: Freighter · xBull · Albedo · HOT<br>
+            Guided walkthrough for total beginners<br>
+            Live event stream — see other players in real time
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 4 — MARKET -->
+  <section class="slide" data-slide="3" style="justify-content:center;">
+    <div class="content-max">
+      <div class="eyebrow">Why Now</div>
+      <h2 style="font-size:clamp(30px,4.2vw,56px); margin-top:18px; max-width:18ch; line-height:1.1;">
+        Casual word games × Web3's newest, most curious audience.
+      </h2>
+      <p style="max-width:60ch; margin-top:20px; color:var(--text-soft); font-size:18px; line-height:1.6;">
+        Wordle proved a single mechanic can become a daily habit for hundreds of millions.
+        Stellar's whole mission is lowering the barrier for non-technical users. We sit exactly
+        at that intersection — and our expansion modes reuse mechanics already proven in market,
+        so growth doesn't require inventing new player behavior.
+      </p>
+
+      <div style="display:flex; gap:60px; margin-top:56px; flex-wrap:wrap;">
+        <div>
+          <div class="stat-mono" style="font-size:clamp(38px,5vw,64px); font-weight:700; color:var(--accent-deep); font-family:'Fraunces',serif; font-style:italic;">Daily</div>
+          <div style="color:var(--text-soft); font-size:14px; margin-top:6px;">habit category, proven by Wordle &amp; peers</div>
+        </div>
+        <div>
+          <div class="stat-mono" style="font-size:clamp(38px,5vw,64px); font-weight:700; color:var(--accent-deep); font-family:'Fraunces',serif; font-style:italic;">Zero</div>
+          <div style="color:var(--text-soft); font-size:14px; margin-top:6px;">XLM required for a player's first transaction</div>
+        </div>
+        <div>
+          <div class="stat-mono" style="font-size:clamp(38px,5vw,64px); font-weight:700; color:var(--accent-deep); font-family:'Fraunces',serif; font-style:italic;">De-risked</div>
+          <div style="color:var(--text-soft); font-size:14px; margin-top:6px;">growth path — proven mechanics, not new behavior</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 5 — ARCHITECTURE -->
+  <section class="slide" data-slide="4" style="justify-content:center;">
+    <div class="content-max">
+      <div class="eyebrow">Under the Hood</div>
+      <h2 style="font-size:clamp(30px,4.2vw,56px); margin-top:18px; max-width:20ch; line-height:1.1;">
+        Lean enough to audit in an afternoon. Robust enough for mainnet.
+      </h2>
+
+      <div style="margin-top:48px; background:var(--surface); border:1.5px solid var(--border); border-radius:16px; padding:clamp(20px,3vw,40px); box-shadow:0 10px 0 var(--tile-shadow-c);">
+        <div style="display:flex; align-items:center; gap:0; flex-wrap:wrap; font-family:'JetBrains Mono',monospace; font-size:clamp(12px,1.3vw,15px);">
+          <span style="padding:10px 16px; border:1.5px solid var(--border); border-radius:8px; background:var(--bg-alt);">Player Wallet</span>
+          <span style="padding:0 14px; color:var(--text-soft);">→</span>
+          <span style="padding:10px 16px; border:1.5px solid var(--accent-deep); border-radius:8px; background:var(--accent); color:var(--ink);">leaderboard-contract</span>
+          <span style="padding:0 14px; color:var(--text-soft);">→</span>
+          <span style="padding:10px 16px; border:1.5px solid #1d8a80; border-radius:8px; background:var(--turquoise); color:#06322d;">reward-contract</span>
+          <span style="padding:0 14px; color:var(--text-soft);">→</span>
+          <span style="padding:10px 16px; border:1.5px solid var(--border); border-radius:8px; background:var(--bg-alt);">Badge Minted</span>
+        </div>
+        <div style="margin-top:28px; display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:24px; font-size:14px; color:var(--text-soft); line-height:1.6;">
+          <div><b style="color:var(--text);">Frontend</b><br>Vanilla HTML/CSS/JS, static — no backend, no build step</div>
+          <div><b style="color:var(--text);">Bridge</b><br>stellar.js — stellar-sdk + Stellar Wallets Kit</div>
+          <div><b style="color:var(--text);">Sponsorship</b><br>Isolated Cloudflare Worker holds the fee-sponsor key</div>
+          <div><b style="color:var(--text);">CI/CD</b><br>GitHub Actions — contract tests + build checks on every push</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 6 — GROWTH -->
+  <section class="slide" data-slide="5" style="justify-content:center;">
+    <div class="content-max">
+      <div class="eyebrow">Growth — Verified, Not Self-Reported</div>
+      <h2 style="font-size:clamp(30px,4.2vw,56px); margin-top:18px; max-width:20ch; line-height:1.1;">
+        Recruit → connect → submit on-chain → independently verify.
+      </h2>
+
+      <div style="display:flex; gap:22px; margin-top:48px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:200px; background:var(--surface); border:1.5px solid var(--border); border-radius:14px; padding:24px; box-shadow:0 8px 0 var(--tile-shadow-c);">
+          <div class="stat-mono" style="font-size:44px; font-weight:700; color:var(--accent-deep);">51+</div>
+          <div style="font-size:13px; color:var(--text-soft); margin-top:6px;">verified testnet users<br>— proved the model</div>
+        </div>
+        <div style="flex:1; min-width:200px; background:var(--surface); border:1.5px solid var(--border); border-radius:14px; padding:24px; box-shadow:0 8px 0 var(--tile-shadow-c);">
+          <div class="stat-mono" style="font-size:44px; font-weight:700; color:var(--turquoise);">182+</div>
+          <div style="font-size:13px; color:var(--text-soft); margin-top:6px;">on-chain transactions<br>cross-checked on Horizon</div>
+        </div>
+        <div style="flex:1; min-width:200px; background:var(--surface); border:1.5px solid var(--border); border-radius:14px; padding:24px; box-shadow:0 8px 0 var(--tile-shadow-c);">
+          <div class="stat-mono" style="font-size:44px; font-weight:700; color:var(--accent-deep);">100%</div>
+          <div style="font-size:13px; color:var(--text-soft); margin-top:6px;">cryptographically verified<br>— not self-reported</div>
+        </div>
+      </div>
+
+      <p style="max-width:62ch; margin-top:36px; color:var(--text-soft); font-size:16px; line-height:1.6;">
+        Now onboarding real players onto <b style="color:var(--text);">Stellar mainnet</b> with that same
+        gasless experience. A built-in feedback loop — auto-prompted after every first score — has already
+        shipped real product fixes. Next: Speedrun, Weekly Arena, Category Rush — each reusing systems already built.
+      </p>
+    </div>
+  </section>
+
+  <!-- SLIDE 7 — FEEDBACK -->
+  <section class="slide" data-slide="6" style="justify-content:center;">
+    <div class="content-max">
+      <div class="eyebrow">We Listened, Then Shipped</div>
+      <h2 style="font-size:clamp(30px,4.2vw,56px); margin-top:18px; max-width:20ch; line-height:1.1;">
+        The loop actually closes.
+      </h2>
+
+      <div style="display:flex; flex-direction:column; gap:0; margin-top:44px;">
+        <div style="display:grid; grid-template-columns: 1.1fr 40px 1fr; align-items:center; padding:18px 0; border-bottom:1px solid var(--border);">
+          <p style="margin:0; color:var(--text-soft); font-style:italic;">"The hint button is confusing"</p>
+          <span style="text-align:center; color:var(--accent-deep); font-size:18px;">→</span>
+          <p style="margin:0; font-weight:600;">Renamed to a clear <b style="color:var(--accent-deep);">Definition</b> button</p>
+        </div>
+        <div style="display:grid; grid-template-columns: 1.1fr 40px 1fr; align-items:center; padding:18px 0; border-bottom:1px solid var(--border);">
+          <p style="margin:0; color:var(--text-soft); font-style:italic;">"Not every word has a definition"</p>
+          <span style="text-align:center; color:var(--accent-deep); font-size:18px;">→</span>
+          <p style="margin:0; font-weight:600;">Improved fallback clue coverage</p>
+        </div>
+        <div style="display:grid; grid-template-columns: 1.1fr 40px 1fr; align-items:center; padding:18px 0;">
+          <p style="margin:0; color:var(--text-soft); font-style:italic;">"I want a bigger, persistent board"</p>
+          <span style="text-align:center; color:var(--accent-deep); font-size:18px;">→</span>
+          <p style="margin:0; font-weight:600;">Shipped <b style="color:var(--turquoise);">Scramble Board v2.0</b> — 2–4 players, 15×15</p>
+        </div>
+      </div>
+
+      <p style="max-width:64ch; margin-top:38px; color:var(--text-soft); font-size:15px; line-height:1.6;">
+        Long-term: on-chain daily leaderboards with streaks, seasons, player profiles — and badges
+        evolving into <b style="color:var(--text);">verifiable on-chain vocabulary credentials</b> schools could recognize.
+      </p>
+    </div>
+  </section>
+
+  <!-- SLIDE 8 — CLOSE -->
+  <section class="slide" data-slide="7" style="align-items:center; justify-content:center; text-align:center;">
+    <div class="eyebrow" style="justify-content:center;">Live Right Now</div>
+    <h2 style="font-size:clamp(34px,5.5vw,76px); margin-top:20px; max-width:20ch; line-height:1.08;">
+      Come solve a word.<br>
+      <em style="color:var(--accent-deep); font-style:italic;">Make your first blockchain transaction without realizing it.</em>
+    </h2>
+
+    <div style="display:flex; gap:40px; margin-top:48px; flex-wrap:wrap; justify-content:center;">
+      <div class="stat-mono" style="font-size:15px; color:var(--text-soft);"><b style="color:var(--text); font-size:20px;">4.8/5</b><br>avg. rating</div>
+      <div class="stat-mono" style="font-size:15px; color:var(--text-soft);"><b style="color:var(--text); font-size:20px;">98%</b><br>would play again</div>
+      <div class="stat-mono" style="font-size:15px; color:var(--text-soft);"><b style="color:var(--text); font-size:20px;">Mainnet</b><br>live &amp; gasless</div>
+    </div>
+
+    <div style="margin-top:52px; padding:16px 32px; background:var(--surface); border:1.5px solid var(--border); border-radius:100px; box-shadow:0 6px 0 var(--tile-shadow-c); font-family:'JetBrains Mono',monospace; font-size:15px;">
+      word-scramble-v1.surge.sh
+    </div>
+  </section>
+
+</div>
+
+<button class="arrow-nav prev" id="prevBtn" aria-label="Previous slide">‹</button>
+<button class="arrow-nav next" id="nextBtn" aria-label="Next slide">›</button>
+<div class="progress" id="progress"></div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const progress = document.getElementById('progress');
+  const slideNum = document.getElementById('slideNum');
+  let current = 0;
+
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+    dot.addEventListener('click', () => goTo(i));
+    progress.appendChild(dot);
+  });
+  const dots = Array.from(progress.children);
+
+  function render() {
+    slides.forEach((s, i) => s.classList.toggle('active', i === current));
+    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+    slideNum.textContent = String(current + 1).padStart(2, '0');
+    try {
+      localStorage.setItem('wsp_slide', String(current));
+    } catch (e) {}
+  }
+
+  function goTo(i) {
+    current = Math.max(0, Math.min(slides.length - 1, i));
+    render();
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); goTo(current + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); goTo(current - 1); }
+    if (e.key === 'Home') goTo(0);
+    if (e.key === 'End') goTo(slides.length - 1);
+  });
+
+  let touchStartX = null;
+  window.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  window.addEventListener('touchend', (e) => {
+    if (touchStartX === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) goTo(dx < 0 ? current + 1 : current - 1);
+    touchStartX = null;
+  }, { passive: true });
+
+  try {
+    const saved = parseInt(localStorage.getItem('wsp_slide'), 10);
+    if (!isNaN(saved) && saved >= 0 && saved < slides.length) current = saved;
+  } catch (e) {}
+  render();
+</script>

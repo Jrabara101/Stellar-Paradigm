@@ -1,0 +1,349 @@
+<title>Word Scramble Stellar Roadmap</title>
+
+<style>
+  :root {
+    --bg: #F5F0E6;
+    --bg-raised: #FFFFFF;
+    --ink: #2A2119;
+    --ink-soft: #5C4F3F;
+    --teak: #8B5E34;
+    --teak-deep: #6B4623;
+    --jade: #3F6E62;
+    --jade-bg: #E4EDE9;
+    --brass: #9C7A1F;
+    --brass-bg: #F3E9CC;
+    --rose: #A6452E;
+    --rose-bg: #F3E1DA;
+    --line: #DCD2BF;
+    --shadow: rgba(42, 33, 25, 0.10);
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --bg: #1C1712;
+      --bg-raised: #26201A;
+      --ink: #EDE6D9;
+      --ink-soft: #B8AB94;
+      --teak: #C99A63;
+      --teak-deep: #E0B37E;
+      --jade: #7FBBAA;
+      --jade-bg: #223330;
+      --brass: #D8B75C;
+      --brass-bg: #3A3220;
+      --rose: #D98266;
+      --rose-bg: #3A2621;
+      --line: #3A3226;
+      --shadow: rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1C1712;
+    --bg-raised: #26201A;
+    --ink: #EDE6D9;
+    --ink-soft: #B8AB94;
+    --teak: #C99A63;
+    --teak-deep: #E0B37E;
+    --jade: #7FBBAA;
+    --jade-bg: #223330;
+    --brass: #D8B75C;
+    --brass-bg: #3A3220;
+    --rose: #D98266;
+    --rose-bg: #3A2621;
+    --line: #3A3226;
+    --shadow: rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+
+  h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; text-wrap: balance; color: var(--ink); }
+
+  .kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--teak);
+    font-weight: 600;
+  }
+
+  header {
+    margin-bottom: 3.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--line);
+  }
+  header h1 {
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    font-weight: 600;
+    margin: 0.5rem 0 0.75rem;
+    letter-spacing: -0.01em;
+  }
+  header p {
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    max-width: 60ch;
+    margin: 0;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1.75rem;
+    flex-wrap: wrap;
+  }
+  .stat { display: flex; flex-direction: column; gap: 0.15rem; }
+  .stat .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--teak-deep);
+  }
+  .stat .label {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .phase {
+    position: relative;
+    padding-left: 1.75rem;
+    margin-bottom: 3rem;
+    border-left: 2px solid var(--line);
+  }
+  .phase:last-child { margin-bottom: 0; }
+  .phase::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 0.35rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--teak);
+  }
+  .phase.shipped::before { background: var(--jade); border-color: var(--jade); }
+
+  .phase-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.35rem;
+  }
+  .phase-head h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  .phase-when {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+  }
+  .phase-sub {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    margin: 0 0 1.25rem;
+    max-width: 58ch;
+  }
+
+  .card {
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1.1rem 1.3rem;
+    margin-bottom: 0.85rem;
+    box-shadow: 0 1px 2px var(--shadow);
+  }
+  .card:last-child { margin-bottom: 0; }
+  .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+  }
+  .card-top h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  .card p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+  }
+  .card .why {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    border-top: 1px dashed var(--line);
+    padding-top: 0.5rem;
+  }
+  .card .why b { color: var(--ink); font-weight: 600; }
+
+  .chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.22rem 0.55rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .chip.shipped { background: var(--jade-bg); color: var(--jade); }
+  .chip.scoped { background: var(--brass-bg); color: var(--brass); }
+  .chip.blocked { background: var(--rose-bg); color: var(--rose); }
+  .chip.next { background: var(--teak); color: var(--bg-raised); }
+
+  .lift {
+    display: inline-flex;
+    gap: 0.2rem;
+    margin-left: 0.5rem;
+  }
+  .lift span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--line);
+  }
+  .lift span.on { background: var(--teak); }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+  footer code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--brass-bg);
+    color: var(--teak-deep);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.82rem;
+  }
+
+  @media (max-width: 560px) {
+    body { padding: 2.5rem 1.1rem 4rem; }
+    .stats-row { gap: 1.25rem; }
+  }
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+<header>
+  <div class="kicker">Word Scramble Stellar — Product Roadmap</div>
+  <h1>Where the game goes from here</h1>
+  <p>Four phases, sequenced by what's already shipped, what's scoped with real numbers worked out, and what's still just an idea. Nothing here is speculative filler — every item traces back to a design decision already made.</p>
+  <div class="stats-row">
+    <div class="stat"><span class="num">51+</span><span class="label">verified testnet users</span></div>
+    <div class="stat"><span class="num">182+</span><span class="label">on-chain transactions</span></div>
+    <div class="stat"><span class="num">v2.0.0</span><span class="label">latest shipped release</span></div>
+    <div class="stat"><span class="num">14</span><span class="label">live board themes</span></div>
+  </div>
+</header>
+
+<div class="phase shipped">
+  <div class="phase-head">
+    <h2>Just shipped</h2>
+    <span class="phase-when">Jul – Aug 2026</span>
+  </div>
+  <p class="phase-sub">The foundation the rest of this roadmap builds on. Mentioned briefly since the pitch leads with it — full detail lives in the changelog.</p>
+  <div class="card">
+    <div class="card-top"><h3>Scramble Board — 2–4 player multiplayer</h3><span class="chip shipped">Shipped</span></div>
+    <p>Full 15×15 Scrabble-style tile game. Opponents are drawn from real wallets on the on-chain leaderboard — a deliberate stand-in for real player-vs-player, built so live peers can replace the AI later without a rebuild.</p>
+  </div>
+  <div class="card">
+    <div class="card-top"><h3>On-chain vocabulary credentials</h3><span class="chip shipped">Shipped</span></div>
+    <p>Scores and achievements post to a Soroban contract on Stellar testnet — verifiable, wallet-owned proof of skill instead of a database row only the app can see.</p>
+  </div>
+</div>
+
+<div class="phase">
+  <div class="phase-head">
+    <h2>Next — Mainnet &amp; Real Adoption</h2>
+    <span class="phase-when">Target: ~2 weeks out</span>
+  </div>
+  <p class="phase-sub">The highest-stakes phase: moving from testnet play-money to a real production app with real users. Everything else waits behind the first item.</p>
+  <div class="card">
+    <div class="card-top"><h3>Mainnet contract deployment</h3><span class="chip next">Blocking</span></div>
+    <p>Redeploy the leaderboard and reward contracts to Stellar mainnet; point the live app at them instead of testnet.</p>
+    <div class="why"><b>Blocked on:</b> funding a mainnet Stellar account — covers deploy fees and becomes the fee-sponsorship source below. Nothing after this can start until it's funded.</div>
+  </div>
+  <div class="card">
+    <div class="card-top"><h3>Fee Sponsorship (gasless onboarding)</h3><span class="chip scoped">Scoped</span></div>
+    <p>New players get a sponsored account + fee-bumped transactions, so they can earn on-chain credentials without buying crypto first — the single biggest drop-off point for any Web3 game.</p>
+    <div class="why"><b>Why this over alternatives:</b> chosen over multi-sig, cross-border (SEP-24/31), and account abstraction specifically because it directly unblocks new users, not because it's the flashiest option.</div>
+  </div>
+  <div class="card">
+    <div class="card-top"><h3>Security review</h3><span class="chip scoped">Scoped</span></div>
+    <p>Self-conducted contract review, written up and signed off before mainnet traffic — includes a fix already found: <code style="font-family:'JetBrains Mono',monospace;font-size:0.85em;background:var(--brass-bg);color:var(--teak-deep);padding:0.05rem 0.35rem;border-radius:4px;">mint_badge</code> currently has no caller restriction and needs one before deploy.</p>
+  </div>
+  <div class="card">
+    <div class="card-top"><h3>Launch marketing + 20 verified mainnet users</h3><span class="chip scoped">Scoped</span></div>
+    <p>Public launch post, demo content, and the user-verification pass repeated for mainnet (the testnet 51-user proof doesn't carry over — mainnet needs its own count).</p>
+  </div>
+</div>
+
+<div class="phase">
+  <div class="phase-head">
+    <h2>Later — New Ways to Play</h2>
+    <span class="phase-when">Post-mainnet</span>
+  </div>
+  <p class="phase-sub">Already researched with real numbers, not just ideas — ordered by lift, cheapest first.</p>
+  <div class="card">
+    <div class="card-top"><h3>Speedrun mode</h3><span class="chip scoped">Scoped<span class="lift"><span class="on"></span><span></span><span></span></span></span></div>
+    <p>Timed word-scramble runs on a time-bank formula. Reuses the existing word pool and scoring engine as-is — the only new surface is a clock.</p>
+  </div>
+  <div class="card">
+    <div class="card-top"><h3>Weekly Arena &amp; Category Rush</h3><span class="chip scoped">Scoped<span class="lift"><span class="on"></span><span></span><span></span></span></span></div>
+    <p>A recurring competitive window and a category-focused variant — both pure configuration on top of systems that already exist (leaderboard, categories).</p>
+  </div>
+  <div class="card">
+    <div class="card-top"><h3>Streak Freeze</h3><span class="chip scoped">Scoped<span class="lift"><span class="on"></span><span class="on"></span><span></span></span></span></div>
+    <p>One miss no longer resets a win streak. Targets the most-cited complaint about Wordle-style streak systems: zero partial credit on a slip.</p>
+  </div>
+  <div class="card">
+    <div class="card-top"><h3>Scramble Board Duel</h3><span class="chip scoped">Scoped<span class="lift"><span class="on"></span><span class="on"></span><span class="on"></span></span></span></div>
+    <p>A 2-player scoped-down version of the shipped 15×15 board, proving out real player-vs-player before attempting full 4-player parallel play.</p>
+  </div>
+</div>
+
+<div class="phase">
+  <div class="phase-head">
+    <h2>Vision — Fully On-Chain</h2>
+    <span class="phase-when">No committed date</span>
+  </div>
+  <p class="phase-sub">Where the on-chain identity idea from the pitch goes if it's taken all the way.</p>
+  <div class="card">
+    <div class="card-top"><h3>On-chain seasons</h3><span class="chip scoped">Scoped</span></div>
+    <p>Daily leaderboard, streaks, and commit-reveal scoring framed as "Season 1" — needs one further contract redeploy.</p>
+  </div>
+  <div class="card">
+    <div class="card-top"><h3>Player profiles</h3><span class="chip scoped">Scoped</span></div>
+    <p>A persistent on-chain identity tying every credential, badge, and season result to one wallet.</p>
+  </div>
+  <div class="card">
+    <div class="card-top"><h3>Tradeable badge marketplace</h3><span class="chip scoped">Concept</span></div>
+    <p>Badges already mint on-chain via the reward contract — letting players trade or gift them turns a static reward into a real collectible, and doubles as a second on-chain feature.</p>
+  </div>
+</div>
+
+<footer>
+  Full specs and exact numbers for each scoped item live in project memory, not duplicated here — this page is the pitch-ready summary. Dot-lift indicator (<code>●○○</code> → <code>●●●</code>) shows relative build effort within the "Later" phase only.
+</footer>
