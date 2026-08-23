@@ -61,7 +61,16 @@ async function accountExists(horizonUrl, address) {
 // the /submit call, which requires the sponsor's real co-signature to a
 // specific address, so this is a defence-in-depth budget line, not the
 // only control).
-const MAX_STARTING_BALANCE_STROOPS = '0'; // sponsor pays reserves via sponsorship, not a balance gift
+//
+// This is NOT spent by submit_score: once a transaction is wrapped in a
+// FeeBumpTransaction, the network always treats the inner transaction's fee
+// as 0 — the sponsor's outer fee absorbs the entire cost, so this balance is
+// never actually touched by normal gameplay. It exists purely so wallets
+// (Freighter, xBull, etc.) pass their own pre-signing "can this account
+// afford its declared fee" check, since they have no way to know a
+// fee-bump is coming later. 0.5 XLM comfortably covers the highest
+// Soroban resource fee observed for submit_score (~0.055 XLM) with margin.
+const STARTING_BALANCE_STROOPS = '0.5';
 
 async function prepareCreateAccount(env, address) {
     if (!isValidStellarAddress(address)) {
@@ -85,7 +94,7 @@ async function prepareCreateAccount(env, address) {
         }))
         .addOperation(StellarSdk.Operation.createAccount({
             destination: address,
-            startingBalance: MAX_STARTING_BALANCE_STROOPS,
+            startingBalance: STARTING_BALANCE_STROOPS,
             source: sponsorKeypair.publicKey(),
         }))
         .addOperation(StellarSdk.Operation.endSponsoringFutureReserves({
