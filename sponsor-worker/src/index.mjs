@@ -112,27 +112,36 @@ async function prepareCreateAccount(env, address) {
     return tx.toXDR();
 }
 
-async function submitCreateAccount(env, signedXdr) {
-    const rpc = new StellarSdk.rpc.Server(env.RPC_URL);
-    const tx = StellarSdk.TransactionBuilder.fromXDR(signedXdr, env.NETWORK_PASSPHRASE);
-
+// The free-tier public RPC we use has been observed to sometimes take much
+// longer than usual to include an accepted (PENDING) transaction in a ledger
+// — confirmed via testing that transactions reported as unconfirmed after
+// 15-20s of polling had, in fact, genuinely landed on-chain a bit later; this
+// is real confirmation latency, not the RPC silently dropping transactions.
+// So we poll for longer (up to 40s) in a single pass rather than giving up
+// early and resubmitting, which would just waste a duplicate submission for
+// a transaction that was going to land anyway.
+async function submitAndConfirm(rpc, tx) {
     const response = await rpc.sendTransaction(tx);
     if (response.status === 'ERROR') {
         throw Object.assign(new Error('submission_failed'), { status: 502, detail: response.errorResult });
     }
 
     let result = await rpc.getTransaction(response.hash);
-    let attempts = 0;
-    while (result.status === 'NOT_FOUND' && attempts < 20) {
+    let polls = 0;
+    while (result.status === 'NOT_FOUND' && polls < 38) {
         await new Promise((r) => setTimeout(r, 1000));
         result = await rpc.getTransaction(response.hash);
-        attempts++;
+        polls++;
     }
 
-    if (result.status !== 'SUCCESS') {
-        throw Object.assign(new Error('transaction_failed'), { status: 502, detail: result.status });
-    }
-    return response.hash;
+    if (result.status === 'SUCCESS') return response.hash;
+    throw Object.assign(new Error('transaction_failed'), { status: 502, detail: result.status });
+}
+
+async function submitCreateAccount(env, signedXdr) {
+    const rpc = new StellarSdk.rpc.Server(env.RPC_URL);
+    const tx = StellarSdk.TransactionBuilder.fromXDR(signedXdr, env.NETWORK_PASSPHRASE);
+    return submitAndConfirm(rpc, tx);
 }
 
 // Sanity-check the inner transaction before the sponsor ever signs a fee
@@ -175,23 +184,7 @@ async function feeBumpAndSubmit(env, signedXdr) {
     );
     feeBumpTx.sign(sponsorKeypair);
 
-    const response = await rpc.sendTransaction(feeBumpTx);
-    if (response.status === 'ERROR') {
-        throw Object.assign(new Error('submission_failed'), { status: 502, detail: response.errorResult });
-    }
-
-    let result = await rpc.getTransaction(response.hash);
-    let attempts = 0;
-    while (result.status === 'NOT_FOUND' && attempts < 20) {
-        await new Promise((r) => setTimeout(r, 1000));
-        result = await rpc.getTransaction(response.hash);
-        attempts++;
-    }
-
-    if (result.status !== 'SUCCESS') {
-        throw Object.assign(new Error('transaction_failed'), { status: 502, detail: result.status });
-    }
-    return response.hash;
+    return submitAndConfirm(rpc, feeBumpTx);
 }
 
 export default {
