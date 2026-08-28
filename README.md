@@ -246,8 +246,10 @@ Live [GoatCounter](https://word-scramble-stellar.goatcounter.com) dashboard show
 
 **CI** (`.github/workflows/ci.yml`) runs automatically on every push to `main`:
 
-1. **Soroban Contract Tests** — builds both contracts targeting `wasm32v1-none` and runs all 9 unit tests with `cargo test`
+1. **Soroban Contract Tests** — builds both contracts targeting `wasm32v1-none` and runs all unit tests with `cargo test`
 2. **Frontend Build & Validate** — verifies `index.html`, `style.css`, `script.js`, `stellar.js`, `feedback.js`, and `wallet-guide.js` are present, syntax-checks every JS file with `node --check`, and cross-checks that every `contract.call(...)` in `stellar.js` matches a real `pub fn` on one of the two contracts ([`check-contract-calls.js`](.github/scripts/check-contract-calls.js))
+3. **Fee-Sponsorship Worker Validate** *(added for Level 6)* — syntax-checks `sponsor-worker/src/index.mjs`, fails the build if a Stellar secret key (`S…`) is ever committed under `sponsor-worker/`, asserts the fee-bump validation guards (`assertFeeBumpEligible` and its four rejection paths) are still present so the sponsor can never be tricked into paying for arbitrary transactions, and asserts `STARTING_BALANCE_STROOPS` stays above zero — a `0` balance is protocol-valid but wallets pre-check fee affordability before signing and would silently block every new sponsored player
+4. **Mainnet Config Guard** *(added for Level 6)* — asserts every mainnet field in `stellar.js` (`rpcUrl`, `contractId`, `rewardContractId`, `credentialContractId`, `sponsorWorkerUrl`) is populated. A `null` here once caused the live site to serve a stale pre-mainnet config; this makes that failure loud instead of silent
 
 **CD** (`.github/workflows/cd.yml`) runs after CI succeeds on `main`:
 
@@ -336,6 +338,71 @@ Real player feedback in [`FEEDBACK_SUMMARY.md`](FEEDBACK_SUMMARY.md) surfaced fo
 ├── .github/workflows/cd.yml            # CD: deploy frontend (surge.sh) + package contract wasm
 └── screenshots/                        # Submission screenshots
 ```
+
+---
+
+## 🚀 Level 6 Submission Checklist — Mainnet Launch, Security & Real Adoption
+
+*Status as of 2026-08-26. Items still open are marked honestly rather than claimed.*
+
+### Mainnet Deployment
+- [x] **Contracts live on Stellar Public Network** — all three deployed 2026-08-20:
+  - Leaderboard — [`CA37MRPV…ZCQS`](https://stellar.expert/explorer/public/contract/CA37MRPVFGLRRENBW75CYZVBZPWZIS2FJQDMUFYU7MSLUNKFIDV2ZCQS)
+  - Reward — [`CAPRQAUN…OLF3`](https://stellar.expert/explorer/public/contract/CAPRQAUNC3L54PX54ELLFHGOEIWE5GEOSOHEQ4IWBMKK6E73D32BOLF3)
+  - Credential — [`CDK5KW5S…P4JN`](https://stellar.expert/explorer/public/contract/CDK5KW5SY2IHOBARDDFIQFTYWMECZA3RDC6NYDB3ZCWH72CKWHJJP4JN)
+- [x] **Public production app** — [word-scramble-v1.surge.sh/?network=mainnet](https://word-scramble-v1.surge.sh/?network=mainnet)
+- [x] **Deploy cost documented** — 30.49 XLM of real XLM, itemised per transaction
+
+### Real Adoption
+- [x] **22 distinct players with on-chain scores** — [`WALLET_VERIFICATION_MAINNET.md`](WALLET_VERIFICATION_MAINNET.md); **21 independent** of the developer after disclosing the author's own wallet, clearing the 20+ bar even after every deduction
+- [x] **Real transaction activity** — **55 fee-bumped `submit_score` transactions**, every one verified against Horizon
+- [x] **Roster with per-user on-chain evidence** — [`MAINNET_USERS_LEVEL6.csv`](MAINNET_USERS_LEVEL6.csv) · [Google Sheet](https://docs.google.com/spreadsheets/d/1W_9ug14yZ__HFro8doEryZ7rh1R9XNyw4BhGz9AHZtc/edit)
+- [x] **Independently reproducible** — [verification commands](WALLET_VERIFICATION_MAINNET.md#reproducing-this-verification) let any reviewer re-derive every figure
+
+### Security
+- [x] **Security review** — [`SECURITY.md`](SECURITY.md): full `require_auth()` table across all three contracts
+- [x] **Two access-control gaps found and fixed pre-launch** — `mint_badge` caller restriction; `set_reward_contract` admin gate
+- [x] **Known limitations disclosed** — `init` front-running window and the `admin_seed_score` backdoor documented rather than hidden
+- [x] **Sponsor key isolation** — the fee-sponsorship worker is a separate Cloudflare Worker from word-curation, and validates every inner transaction before co-signing
+
+### Advanced ("Black Belt") Feature — Fee Sponsorship
+- [x] **Gasless onboarding via CAP-33 + fee bump** — `sponsor-worker/`, live at `word-scramble-sponsor.jrabara101.workers.dev`
+- [x] **20 of 22 players never held XLM** — sponsor created their accounts and paid every fee
+- [x] **Total cost 1.43 XLM for 55 submissions** (~0.026 XLM each)
+
+### Technical Standards
+- [x] **30+ meaningful commits** — 73 on `main`
+- [x] **Production setup** — GitHub Actions CI/CD, contract unit tests, automated surge.sh deploy
+- [x] **Full documentation** — README, [`SECURITY.md`](SECURITY.md), [`WALLET_VERIFICATION_MAINNET.md`](WALLET_VERIFICATION_MAINNET.md), user guide
+
+### User Onboarding
+- [x] **Google Form collects wallet, name, rating, feedback** — [form](https://docs.google.com/forms/d/e/1FAIpQLSeHiCmcXKAWSnRyRMX7GbVMN4mMuhZukWUVFmX9pDBWbqPODA/viewform)
+- [x] **Email field added** (2026-08-22)
+- [x] **Mainnet roster exported** — [`MAINNET_USERS_LEVEL6.csv`](MAINNET_USERS_LEVEL6.csv)
+- [ ] ⚠️ **Email addresses collected** — the email field postdates all 53 existing responses; a direct collection round is in progress
+- [ ] ⚠️ **Form rows for all players** — Rico, Hessah, Peter and Jerry are verified on-chain but have not yet submitted the form
+
+### Marketing & Ecosystem
+- [x] **Twitter/X launch post** — published 2026-08-26 as a 3-post thread by [@JRABARA1](https://x.com/JRABARA1), announcing the mainnet launch and the gasless (CAP-33 + fee-bump) onboarding flow:
+  - [Post 1 — mainnet launch announcement](https://x.com/JRABARA1/status/2092621617608405473)
+  - [Post 2 — CAP-33 co-signing + wallet fee pre-check gotchas](https://x.com/JRABARA1/status/2092621791852376244)
+  - [Post 3 — verified on-chain cost data](https://x.com/JRABARA1/status/2092622049089094068)
+  - Draft and alternate single-post version: [`LAUNCH_POST_X.md`](LAUNCH_POST_X.md)
+- [x] **Ecosystem contribution — technical blog post published 2026-08-28 on dev.to:** [*"Gasless Onboarding on Stellar: What CAP-33 and Fee Bumps Actually Cost"*](https://dev.to/johnrick_rabara_50eca3330/gasless-onboarding-on-stellar-what-cap-33-and-fee-bumps-actually-cost-53l4) — a build report covering the CAP-33 co-signing requirement for not-yet-existent accounts, the wallet fee pre-check that silently blocks 0-balance sponsored accounts, confirmation latency vs. genuinely dropped transactions, and real mainnet cost data (99.7% of a 30.49 XLM Soroban deploy is WASM upload). Source: [`BLOG_FEE_SPONSORSHIP.md`](BLOG_FEE_SPONSORSHIP.md)
+
+### Submission Checklist
+- [x] Public GitHub repository — [github.com/Jrabara101/Stellar-Paradigm](https://github.com/Jrabara101/Stellar-Paradigm)
+- [x] 30+ meaningful commits — 73
+- [x] Live mainnet app URL — [word-scramble-v1.surge.sh/?network=mainnet](https://word-scramble-v1.surge.sh/?network=mainnet)
+- [x] Mainnet contract addresses — three, listed above
+- [x] Proof of mainnet users — [`WALLET_VERIFICATION_MAINNET.md`](WALLET_VERIFICATION_MAINNET.md)
+- [x] Transaction activity proof — 50 verified fee-bumped submissions
+- [x] Security review proof — [`SECURITY.md`](SECURITY.md)
+- [x] Technical documentation — this README + linked docs
+- [x] User guide — in-app 5-slide wallet guide (`wallet-guide.js`)
+- [x] Demo video — [`Video/Word Scramble Full Walkthrough.mp4`](Video/Word%20Scramble%20Full%20Walkthrough.mp4)
+- [x] Twitter/X launch post link — [thread by @JRABARA1](https://x.com/JRABARA1/status/2092621617608405473) (3 posts, published 2026-08-26)
+- [x] Community contribution link — [dev.to: *Gasless Onboarding on Stellar*](https://dev.to/johnrick_rabara_50eca3330/gasless-onboarding-on-stellar-what-cap-33-and-fee-bumps-actually-cost-53l4) (published 2026-08-28)
 
 ---
 
