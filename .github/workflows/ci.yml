@@ -74,3 +74,95 @@ jobs:
 
       - name: Cross-check stellar.js calls exist on the contracts
         run: node .github/scripts/check-contract-calls.js
+
+  sponsor-worker-check:
+    name: Fee-Sponsorship Worker Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Syntax-check worker source
+        run: node --check sponsor-worker/src/index.mjs
+
+      - name: Assert no secret key is committed
+        run: |
+          # The sponsor's secret must only ever live in a Wrangler secret.
+          # A literal S... seed in the repo would be a real-money leak.
+          if grep -rEn '"S[A-Z2-7]{55}"' sponsor-worker/ --include='*.mjs' --include='*.js' --include='*.toml' --include='*.json'; then
+            echo "❌ A Stellar secret key appears to be committed in sponsor-worker/"
+            exit 1
+          fi
+          echo "✅ No committed secret keys."
+
+      - name: Assert fee-bump validation is still present
+        run: |
+          # These guards are what stop the sponsor being tricked into paying
+          # for arbitrary transactions. Removing one must fail the build.
+          for needle in \
+            "assertFeeBumpEligible" \
+            "unsupported_operation_count" \
+            "unsupported_operation_type" \
+            "unsupported_contract" \
+            "unsupported_function"; do
+            grep -q "$needle" sponsor-worker/src/index.mjs \
+              && echo "✅ $needle" \
+              || (echo "❌ missing sponsor guard: $needle" && exit 1)
+          done
+
+      - name: Assert sponsored accounts get a non-zero starting balance
+        run: |
+          # A 0 starting balance is protocol-valid but wallets reject it:
+          # Freighter pre-checks fee affordability before signing and has no
+          # idea the app will fee-bump the tx. Regressing this to '0' silently
+          # blocks every new sponsored player. See BLOG_FEE_SPONSORSHIP.md.
+          node -e "
+            const fs = require('fs');
+            const src = fs.readFileSync('sponsor-worker/src/index.mjs', 'utf8');
+            const m = src.match(/STARTING_BALANCE_STROOPS\s*=\s*'([^']+)'/);
+            if (!m) { console.error('❌ STARTING_BALANCE_STROOPS not found'); process.exit(1); }
+            if (parseFloat(m[1]) <= 0) {
+              console.error('❌ STARTING_BALANCE_STROOPS is ' + m[1] + ' — wallets will block signing');
+              process.exit(1);
+            }
+            console.log('✅ starting balance ' + m[1] + ' XLM');
+          "
+
+  mainnet-config-check:
+    name: Mainnet Config Guard
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Assert mainnet config is fully populated
+        run: |
+          # A null rpcUrl/contractId here is what caused the live site to
+          # serve a stale pre-mainnet config once before. Fail loudly instead.
+          node -e "
+            const fs = require('fs');
+            const src = fs.readFileSync('stellar.js', 'utf8');
+            const block = src.slice(src.indexOf('mainnet'));
+            for (const key of ['rpcUrl', 'contractId', 'rewardContractId', 'credentialContractId', 'sponsorWorkerUrl']) {
+              const m = block.match(new RegExp(key + \"\\\\s*:\\\\s*([^,\\\\n]+)\"));
+              if (!m) { console.error('❌ mainnet.' + key + ' missing'); process.exit(1); }
+              const v = m[1].trim();
+              if (v === 'null' || v === \"''\" || v === '\\\"\\\"') {
+                console.error('❌ mainnet.' + key + ' is empty (' + v + ')');
+                process.exit(1);
+              }
+              console.log('✅ mainnet.' + key);
+            }
+          "
