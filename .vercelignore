@@ -1,0 +1,56 @@
+# Mirrors .surgeignore — keep both in sync when changing deploy contents.
+
+# Dependencies — not needed at runtime (SDK + Wallets Kit load from esm.sh CDN)
+node_modules/
+
+# Build / package metadata
+package.json
+package-lock.json
+
+# Soroban contract source + Rust target dir (~2.3GB, already deployed on-chain)
+word-scramble-contract/
+
+# Android / Capacitor build output — not part of the web deploy
+android/
+
+# Cloudflare worker source — deployed separately to workers.dev
+sponsor-worker/
+
+# Documentation / submission assets — not needed at runtime (~136MB)
+Video/
+Test Mobile UI/
+Idea Submissions/
+Pitch Deck/
+*.docx
+*.xlsx
+
+# Theme board mockups — only the 4 screen.png previews are used at runtime
+Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/atomic_woodcraft/
+Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/coastal_board_focus_updated/code.html
+Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/nordic_oak_board_focus_empty/code.html
+Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/rustic_reclaimed_board_focus/code.html
+Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/vintage_parchment_board_regenerated_grid/code.html
+
+# Wallet-connect walkthrough screenshots — only 3 are referenced by wallet-guide.js
+screenshots/README.txt
+screenshots/balance-displayed.png
+screenshots/balance-displayed-2.png
+screenshots/transaction-result.png
+screenshots/transaction-result-2.png
+screenshots/successful-transaction-2.png
+screenshots/wallet-approval.png
+screenshots/wallet-balance.png
+
+# Tooling / editor config
+.claude/
+.vscode/
+.github/
+.gitignore
+.surgeignore
+
+# Surge-specific — CNAME would confuse Vercel's domain handling
+CNAME
+
+# OS cruft
+.DS_Store
+Thumbs.db
