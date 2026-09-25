@@ -1177,6 +1177,35 @@ button:active {
     color: var(--teak-dark);
 }
 
+/* Close (×) button shown on the How to Play / Hint Guide cards; the card
+   hides and a "Show ..." entry appears in the ☰ Menu to bring it back
+   (see game.hidePanel/showPanel in script.js). */
+.panel-close-btn {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    line-height: 1;
+    font-weight: 900;
+    border-radius: 50%;
+    border: 1.5px solid var(--teak-dark);
+    background: var(--off-white, #F5F1E8);
+    color: var(--teak-dark);
+    cursor: pointer;
+    box-shadow: 0 2px 0 var(--teak-dark);
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+.panel-close-btn:hover {
+    background: var(--turquoise);
+}
+.panel-close-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 0px 0 var(--teak-dark);
+}
+
 /* Hint Rules Panel (Desktop Right Column) */
 .hint-info-panel {
     background: var(--theme-panel-bg, rgba(245, 245, 240, 0.95));
@@ -4453,6 +4482,66 @@ body[data-performance-mode="true"] .grid-cell.cascade-gold::after {
         transform: none;
         transition: none;
     }
+}
+
+/* ==========================================================================
+   SHORT-VIEWPORT COMPACTING
+   The board, header and rack used to only fit on one non-scrolling screen
+   above ~1080px of viewport height (e.g. only when the browser was zoomed
+   out to ~75%). These two tiers shrink the fixed-height chrome (header
+   bubbles, board-plate padding, clue panel, buttons, rack spacing) as the
+   viewport gets shorter, so common laptop heights (900/800/768/720) fit
+   without a vertical scrollbar at normal 100% zoom. --cell-size already
+   scales with vh on its own; this handles everything that didn't.
+   ========================================================================== */
+@media (max-height: 1040px) {
+    body { padding: 54px 8px 12px; }
+    .header-container { margin-bottom: 8px; }
+    h1 { font-size: 2rem; letter-spacing: 3px; }
+    .stats-container { gap: 10px; }
+    .stats-bubble-wrapper { width: 74px; height: 74px; }
+    .stats-bubble { width: 58px; height: 58px; }
+    .stats-bubble span:first-child { font-size: 0.65rem; }
+    .stats-bubble span:last-child { font-size: 1.1rem; }
+    .score-orbit.orbit-1, .score-orbit.orbit-2 { width: 80px; height: 26px; }
+    .board-plate { padding: 14px; gap: 10px; }
+    .clue-panel { min-height: 70px; padding: 8px 14px; }
+    .controls { gap: 8px; margin-top: 2px; }
+    button { padding: 8px; font-size: 0.8rem; }
+    .rack-container { margin-top: 10px; }
+}
+
+@media (max-height: 800px) {
+    body { padding: 50px 8px 8px; }
+    .header-container { margin-bottom: 4px; }
+    h1 { font-size: 1.6rem; letter-spacing: 2px; }
+    .stats-bubble-wrapper { width: 60px; height: 60px; }
+    .stats-bubble { width: 48px; height: 48px; }
+    .stats-bubble span:first-child { font-size: 0.55rem; }
+    .stats-bubble span:last-child { font-size: 0.95rem; }
+    .score-orbit.orbit-1, .score-orbit.orbit-2 { width: 64px; height: 22px; }
+    .board-plate { padding: 10px; border-width: 3px; outline-width: 4px; gap: 6px; }
+    .clue-panel { min-height: 54px; padding: 6px 12px; font-size: 0.78rem; }
+    .controls { gap: 6px; margin-top: 0; }
+    button { padding: 6px; font-size: 0.72rem; letter-spacing: 1px; }
+    .rack-container { margin-top: 6px; }
+    .rack-shelf { height: 8px; }
+}
+
+@media (max-height: 650px) {
+    body { padding: 46px 8px 6px; }
+    .header-container { margin-bottom: 2px; }
+    h1 { font-size: 1.3rem; letter-spacing: 1px; }
+    .stats-bubble-wrapper { width: 48px; height: 48px; }
+    .stats-bubble { width: 40px; height: 40px; border-width: 2px; }
+    .stats-bubble span:first-child { font-size: 0.45rem; margin-bottom: 0; }
+    .stats-bubble span:last-child { font-size: 0.8rem; }
+    .score-orbit.orbit-1, .score-orbit.orbit-2 { display: none; }
+    .board-plate { padding: 8px; border-width: 2px; outline-width: 3px; gap: 4px; }
+    .clue-panel { min-height: 40px; padding: 4px 10px; font-size: 0.72rem; }
+    .controls { gap: 4px; }
+    button { padding: 4px; font-size: 0.65rem; letter-spacing: 0.5px; }
+    .rack-container { margin-top: 4px; }
 }
 
 

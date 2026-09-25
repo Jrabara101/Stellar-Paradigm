@@ -834,6 +834,18 @@ class TeakScrambleGame {
         };
         this._applyPerformanceModeAttr();
 
+        // Side-panel visibility (How to Play / Hint Guide) — each card has a
+        // close (×) button; hiding one reveals a "Show ..." entry in the
+        // ☰ Menu so it can be brought back. State persists across sessions.
+        this._sidePanels = {
+            howtoplay: { elId: 'instructions-panel', menuBtnId: 'show-howtoplay-btn', storageKey: 'ws_ui_howtoplay_hidden' },
+            hintguide: { elId: 'hint-info-panel', menuBtnId: 'show-hintguide-btn', storageKey: 'ws_ui_hintguide_hidden' },
+        };
+        Object.keys(this._sidePanels).forEach((key) => {
+            const hidden = localStorage.getItem(this._sidePanels[key].storageKey) === 'true';
+            this.setPanelVisible(key, !hidden, false);
+        });
+
         // Initialize drag-and-drop trackers
         this.activeDragTile = null;
         this.dragOffset = { x: 0, y: 0 };
@@ -861,6 +873,20 @@ class TeakScrambleGame {
         // Trigger initial loader
         this.runLoadingScreen(this.initLevel());
     }
+
+    // --- Side-panel show/hide (How to Play / Hint Guide) ---
+    setPanelVisible(key, visible, save = true) {
+        const cfg = this._sidePanels[key];
+        if (!cfg) return;
+        const panel = document.getElementById(cfg.elId);
+        const menuBtn = document.getElementById(cfg.menuBtnId);
+        if (panel) panel.style.display = visible ? '' : 'none';
+        if (menuBtn) menuBtn.style.display = visible ? 'none' : '';
+        if (save) localStorage.setItem(cfg.storageKey, (!visible).toString());
+    }
+
+    hidePanel(key) { this.setPanelVisible(key, false); }
+    showPanel(key) { this.setPanelVisible(key, true); }
 
     // --- Hybrid localStorage / on-chain save helpers ---
     _progressKey(addr) { return addr ? `ws_prog_${addr}` : 'ws_prog_anon'; }

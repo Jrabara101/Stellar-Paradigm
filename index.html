@@ -113,6 +113,8 @@
                     <button class="menu-item" id="audio-settings-btn" role="menuitem" onclick="game.openAudioModal()">🔊 Audio</button>
                     <button class="menu-item" id="api-settings-btn" role="menuitem" onclick="game.openApiSettingsModal()">⚙️ API Settings</button>
                     <button class="menu-item" id="get-app-btn" role="menuitem" onclick="game.openGetAppModal()">📱 Get Android App</button>
+                    <button class="menu-item" id="show-howtoplay-btn" role="menuitem" onclick="game.showPanel('howtoplay')" style="display:none;">👁 Show How to Play</button>
+                    <button class="menu-item" id="show-hintguide-btn" role="menuitem" onclick="game.showPanel('hintguide')" style="display:none;">👁 Show Hint Guide</button>
                 </div>
             </div>
             <div class="daily-banner" id="daily-banner" onclick="game.exitDailyChallenge()" title="Click to exit Daily Challenge and return to regular play">
@@ -185,10 +187,13 @@
     </div>
 
     <!-- How to Play Instructions Board (Visible to All) -->
-    <div class="instructions-panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--mustard); padding-bottom: 6px;">
+    <div class="instructions-panel" id="instructions-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--mustard); padding-bottom: 6px; gap: 8px;">
             <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0; text-shadow: 0.5px 0.5px 0px var(--off-white);">How to Play</h3>
-            <button onclick="game.openChangelogModal()" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--mustard); color: var(--teak-dark); font-weight: 900; box-shadow: 0 2px 0 var(--mustard-dark); cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;" onmousedown="this.style.transform='translateY(2px)'; this.style.boxShadow='0 0px 0 var(--mustard-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 2px 0 var(--mustard-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 2px 0 var(--mustard-dark)'">Updates</button>
+            <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                <button onclick="game.openChangelogModal()" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--mustard); color: var(--teak-dark); font-weight: 900; box-shadow: 0 2px 0 var(--mustard-dark); cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;" onmousedown="this.style.transform='translateY(2px)'; this.style.boxShadow='0 0px 0 var(--mustard-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 2px 0 var(--mustard-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 2px 0 var(--mustard-dark)'">Updates</button>
+                <button class="panel-close-btn" onclick="game.hidePanel('howtoplay')" title="Hide this card" aria-label="Hide How to Play">✕</button>
+            </div>
         </div>
         <ul>
             <li>
@@ -207,8 +212,11 @@
     </div>
 
     <!-- Hint Rules Panel (Visible to All) -->
-    <div class="hint-info-panel">
-        <h3>Hint Guide</h3>
+    <div class="hint-info-panel" id="hint-info-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--turquoise); padding-bottom: 6px; gap: 8px;">
+            <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Hint Guide</h3>
+            <button class="panel-close-btn" onclick="game.hidePanel('hintguide')" title="Hide this card" aria-label="Hide Hint Guide">✕</button>
+        </div>
         <ul>
             <li>
                 <span class="step-num">1</span>
