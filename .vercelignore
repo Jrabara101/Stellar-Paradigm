@@ -23,7 +23,9 @@ Pitch Deck/
 *.xlsx
 
 # Theme board mockups — only the 4 screen.png previews are used at runtime
-Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/atomic_woodcraft/
+# atomic_woodcraft/screen.png IS used (theme picker preview) — only skip its mockup sources.
+Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/atomic_woodcraft/code.html
+Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/atomic_woodcraft/DESIGN.md
 Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/coastal_board_focus_updated/code.html
 Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/nordic_oak_board_focus_empty/code.html
 Word Scramble Boards Inspired/stitch_tactile_wooden_word_scramble/rustic_reclaimed_board_focus/code.html

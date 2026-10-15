@@ -62,6 +62,21 @@ jobs:
             node --check "$f"
           done
 
+      - name: Assert .vercelignore keeps every runtime asset
+        run: |
+          # Vercel only uploads what .vercelignore lets through, and the build's
+          # copy-legacy-assets step fails on any referenced file that is missing.
+          # An over-broad ignore line (atomic_woodcraft/) broke the Vercel build once.
+          git ls-files -c -i --exclude-from=.vercelignore > /tmp/ignored.txt
+          grep -ohE "(Word Scramble Boards Inspired|screenshots)/[^'\"\`)]+\.(png|jpe?g|webp|svg)" \
+            index.html public/*.js public/*.css | sort -u > /tmp/used.txt
+          git ls-files -c public index.html package.json package-lock.json vite.config.mts tsconfig.json src >> /tmp/used.txt
+          if grep -xF -f /tmp/used.txt /tmp/ignored.txt; then
+            echo "❌ the files above are needed by the build but excluded by .vercelignore"
+            exit 1
+          fi
+          echo "✅ .vercelignore keeps all $(wc -l < /tmp/used.txt) build/runtime files"
+
       - name: Typecheck + production build (Vite)
         run: npm run build
 
