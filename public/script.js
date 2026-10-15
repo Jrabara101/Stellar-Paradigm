@@ -2853,7 +2853,7 @@ class TeakScrambleGame {
 
     // Debug APK direct-download link (GitHub Release asset — stable URL, no
     // size-interstitial like Drive/Dropbox hit on files this size).
-    static ANDROID_APK_URL = 'https://github.com/Jrabara101/Stellar-Paradigm/releases/download/android-debug-v1/app-debug.apk';
+    static ANDROID_APK_URL = 'https://github.com/Jrabara101/Stellar-Paradigm/releases/download/android-debug-v2/app-debug.apk';
 
     // qrcode.js (~55KB, vendored MIT lib) is only needed by this modal, so it's
     // lazy-loaded on first open rather than shipped on every page load —

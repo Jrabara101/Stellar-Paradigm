@@ -12,7 +12,7 @@ Word Scramble implements **fee sponsorship end-to-end** — CAP-33 sponsored res
 |---|---|
 | GitHub repo | https://github.com/Jrabara101/Stellar-Paradigm |
 | Live link | https://word-scramble-v1.surge.sh?network=mainnet |
-| Android app (APK) | [Download](https://github.com/Jrabara101/Stellar-Paradigm/releases/download/android-debug-v1/app-debug.apk) — debug build; in-app: menu → 📱 Get Android App |
+| Android app (APK) | [Download](https://github.com/Jrabara101/Stellar-Paradigm/releases/download/android-debug-v2/app-debug.apk) — debug build; in-app: menu → 📱 Get Android App |
 | 1-min pitch | [PITCH_1MIN_HACKATHON.md](PITCH_1MIN_HACKATHON.md) |
 | Pitch deck | [Pitch Deck/html/pitch-deck.html](Pitch%20Deck/html/pitch-deck.html) |
 | Idea | [Project Description](#-project-description) |

@@ -65,7 +65,7 @@ The demo is the risky part. De-risk it:
 |---|---|---|
 | GitHub repo | ✅ | https://github.com/Jrabara101/Stellar-Paradigm |
 | Live link | ✅ | https://word-scramble-v1.surge.sh?network=mainnet |
-| Android app (APK) | ✅ | [Download](https://github.com/Jrabara101/Stellar-Paradigm/releases/download/android-debug-v1/app-debug.apk) |
+| Android app (APK) | ✅ | [Download](https://github.com/Jrabara101/Stellar-Paradigm/releases/download/android-debug-v2/app-debug.apk) |
 | 1-min pitch | ✅ | this file |
 | README — idea | ✅ | [Project Description](README.md#-project-description) |
 | README — stack | ✅ | [Tech Stack](README.md#-tech-stack) |
