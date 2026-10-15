@@ -270,7 +270,7 @@ body {
     height: auto;
     overflow-x: hidden;
     overflow-y: auto;
-    padding: 62px 8px 16px; /* top clears the fixed stellar bar */
+    padding: 58px 12px 8px; /* top clears the fixed stellar bar */
     font-family: var(--theme-body-font, 'Jost', 'Futura', sans-serif);
 
     /* Victory and Shockwave visual effects theme colors default (turquoise) */
@@ -310,16 +310,16 @@ body[data-performance-mode="true"] .ambient-glow {
     align-items: center;
     justify-content: space-between;
     width: 510px;
-    margin-bottom: 15px;
+    margin-bottom: 6px;
     position: relative;
     z-index: 10;
 }
 
 h1 {
     margin: 0;
-    font-size: 2.5rem;
+    font-size: clamp(1.6rem, 2.2vw, 2.2rem); white-space: nowrap;
     text-transform: uppercase;
-    letter-spacing: 5px;
+    letter-spacing: 3px;
     color: var(--theme-h1-color, var(--teak-dark));
     font-weight: 900;
     text-shadow: var(--theme-h1-shadow, 2px 2px 0px var(--off-white), 4px 4px 0px var(--turquoise));
@@ -608,7 +608,7 @@ h1 {
 /* Full Grid Board Cabinet - Teak & Inlay */
 .board-plate {
     background: var(--theme-board-plate-bg, linear-gradient(135deg, var(--teak-base), var(--teak-dark)));
-    padding: 20px;
+    padding: 12px 16px;
     border-radius: 16px;
     border: var(--theme-board-plate-border, 4px solid var(--teak-light));
     outline: var(--theme-board-plate-outline, 6px solid var(--teak-dark));
@@ -617,7 +617,7 @@ h1 {
         inset 0 2px 10px rgba(255,255,255,0.15));
     display: flex;
     flex-direction: column; 
-    gap: 16px; 
+    gap: 8px; 
     align-items: center;
     position: relative;
     z-index: 10;
@@ -705,12 +705,12 @@ body[data-performance-mode="true"] .drop-preview { animation: none !important; }
     background: var(--theme-clue-bg, rgba(40, 20, 10, 0.45));
     border: var(--theme-clue-border, 2.5px solid var(--teak-dark));
     border-radius: 8px;
-    padding: 12px 14px;
+    padding: 8px 12px;
     font-size: 0.85rem;
     color: var(--theme-clue-color, #ffb74d); /* Amber glow */
     text-shadow: var(--theme-clue-text-shadow, 0 0 4px rgba(255, 183, 77, 0.4));
     text-align: center;
-    min-height: 96px;
+    min-height: 58px;
     height: auto;
     max-height: 150px;
     display: flex;
@@ -1038,7 +1038,7 @@ button:active {
     /* Sits in the page flow directly below the board (body is a centered
        flex column), instead of floating in the bottom-right corner */
     position: static;
-    margin-top: 18px;
+    margin-top: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2095,9 +2095,60 @@ button:active {
     text-align: center;
     position: relative;
     z-index: 1600;
+    /* Never taller than the viewport. Without this the tallest modals (Visual
+       Effects at ~1385px) overflow a centered flex backdrop in BOTH directions,
+       pushing the title off the top and the close button off the bottom with no
+       way to scroll to either. The column layout lets the inner scroll region
+       below absorb the excess instead. dvh tracks mobile browser chrome; the
+       vh line is the fallback for engines that don't know dvh. */
+    max-height: 90vh;
+    max-height: 90dvh;
+    display: flex;
+    flex-direction: column;
 }
 .modal-backdrop.active .theme-modal {
     transform: scale(1);
+}
+/* Title and close button hold their size; the body between them gives way. */
+.theme-modal > h3,
+.theme-modal > .theme-close-btn {
+    flex: 0 0 auto;
+}
+/* The scrolling middle of a modal. `min-height: 0` is required — a flex item's
+   default `min-height: auto` refuses to shrink below its content, which would
+   defeat the max-height above. */
+.modal-scroll-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* Keeps the scrollbar off the toggle rows rather than on top of them. */
+    padding-right: 8px;
+}
+.modal-scroll-body::-webkit-scrollbar {
+    width: 8px;
+}
+.modal-scroll-body::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 4px;
+}
+/* Light thumb, not --teak-dark: the track sits on the modal's own dark teak
+   gradient, where a dark thumb is invisible and the body reads as simply
+   cut off rather than scrollable. */
+.modal-scroll-body::-webkit-scrollbar-thumb {
+    background: var(--turquoise);
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+}
+.modal-scroll-body {
+    scrollbar-width: thin;
+    scrollbar-color: var(--turquoise) rgba(0, 0, 0, 0.25);
+}
+/* .theme-grid is its own scroll region (max-height: 380px, set below), so it
+   just needs permission to shrink further on short viewports. */
+.theme-modal > .theme-grid {
+    flex: 1 1 auto;
+    min-height: 0;
 }
 .theme-modal h3 {
     font-size: 1.5rem;
@@ -2861,6 +2912,9 @@ input:checked + .retro-slider:before {
     letter-spacing: 1px;
     cursor: pointer;
     transition: transform 0.1s, box-shadow 0.1s, background-color 0.2s;
+    /* These sit on pale blue / mustard fills. Without this they inherit
+       .theme-modal's off-white and render at ~1.06:1 contrast — invisible. */
+    color: var(--teak-dark);
 }
 .preview-btn:active {
     transform: translateY(3px) !important;
@@ -4457,3 +4511,142 @@ body[data-performance-mode="true"] .grid-cell.cascade-gold::after {
 
 
 
+
+/* --- Max-Width Layout Wrapper & Side Cards (Desktop / Full Browser) --- */
+.game-layout-wrapper {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.game-center-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* Card Hide Button */
+.panel-hide-btn {
+    font-size: 0.68rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1.5px solid var(--teak-dark, #5C3A21);
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--theme-panel-color, var(--teak-dark, #5C3A21));
+    font-weight: 800;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-family: inherit;
+    transition: all 0.15s ease;
+}
+.panel-hide-btn:hover {
+    background: #e74c3c;
+    color: #ffffff;
+    border-color: #c0392b;
+    transform: translateY(-1px);
+}
+.panel-hide-btn:active {
+    transform: translateY(1px);
+}
+
+/* Quick Floating Toggle Pills (Shown when cards are hidden) */
+.panel-toggle-tab {
+    position: absolute;
+    top: 35px;
+    z-index: 25;
+    background: var(--theme-panel-bg, rgba(245, 245, 240, 0.96));
+    color: var(--theme-panel-color, var(--teak-dark, #5C3A21));
+    border: 2px solid var(--theme-panel-border-color, var(--teak-dark, #5C3A21));
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 0.75rem;
+    padding: 7px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.18), 0 2px 0 var(--teak-dark, #5C3A21);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.panel-toggle-tab.left-tab { left: 20px; }
+.panel-toggle-tab.right-tab { right: 20px; }
+.panel-toggle-tab:hover {
+    background: var(--mustard, #E1AD01);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.22), 0 3px 0 var(--teak-dark, #5C3A21);
+}
+.panel-toggle-tab:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2), 0 1px 0 var(--teak-dark, #5C3A21);
+}
+.panel-toggle-tab.hidden {
+    display: none !important;
+}
+
+/* Side Panels within Max-Width Container on Desktop */
+@media (min-width: 1200px) {
+    .instructions-panel {
+        position: absolute !important;
+        left: 20px !important;
+        right: auto !important;
+        top: 35px !important;
+        width: 320px !important;
+        z-index: 15 !important;
+        margin-top: 0 !important;
+        box-sizing: border-box;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .hint-info-panel {
+        position: absolute !important;
+        right: 20px !important;
+        left: auto !important;
+        top: 35px !important;
+        width: 320px !important;
+        z-index: 15 !important;
+        margin-top: 0 !important;
+        box-sizing: border-box;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+}
+
+.instructions-panel.hidden-panel,
+.hint-info-panel.hidden-panel {
+    display: none !important;
+}
+
+/* 4-button single-row controls on desktop / wide view for compact vertical footprint */
+@media (min-width: 580px) {
+    .controls {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 8px !important;
+        margin-top: 2px !important;
+    }
+    .controls button {
+        padding: 8px 6px !important;
+        font-size: 0.82rem !important;
+        height: 38px !important;
+    }
+}
+
+/* One-page non-scrollable lock on 75% zoom / sufficient height */
+@media (min-height: 800px) and (min-width: 1200px) {
+    html, body {
+        overflow: hidden !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+    }
+}
+body.fit-one-page {
+    overflow: hidden !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+}

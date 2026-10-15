@@ -33,3 +33,6 @@ android/**/*.iml
 *.apk
 *.aab
 .vercel
+
+# Vite build output
+dist/

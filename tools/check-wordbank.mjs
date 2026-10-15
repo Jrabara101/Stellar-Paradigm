@@ -1,6 +1,6 @@
 // Quick QA for wordbank.js: counts, self-leaks, short defs, cross-category dup rate.
 globalThis.window = {};
-await import('../wordbank.js');
+await import('../public/wordbank.js');
 const b = window.WORD_BANK;
 
 let total = 0, leaks = 0, shortDefs = 0;

@@ -460,7 +460,7 @@ class ParticleSystem {
         const theme = document.body.getAttribute('data-theme') || 'teak';
         switch (theme) {
             case 'nordic':
-                return ['#90a4ae', '#f9f9f9', '#b0bec5'];
+                return ['#d0e7ee', '#ffffff', '#e3dec9'];
             case 'rustic':
                 return ['#b08d57', '#8B0000', '#dee3e4'];
             case 'parchment':
@@ -736,6 +736,13 @@ class TeakScrambleGame {
                 4: ["SECURITY", "PROTOCOL", "FIREWALL", "MONITORS", "KEYBOARD", "SYSTEMS"],
                 5: ["ALGORITHM", "PROGRAMMIN", "PROCESSORS", "ENCRYPTIONS", "TELEPHONIC"]
             },
+            programming: {
+                1: ["LOOP", "BYTE", "NULL", "ENUM", "HASH", "HEAP", "JAVA", "RUST"],
+                2: ["ARRAY", "CLASS", "QUEUE", "STACK", "SCOPE", "DEBUG", "REGEX"],
+                3: ["STRING", "OBJECT", "METHOD", "LAMBDA", "COMMIT", "SYNTAX", "PYTHON"],
+                4: ["BOOLEAN", "INTEGER", "COMPILE", "PROMISE", "POINTER", "RUNTIME"],
+                5: ["FUNCTION", "VARIABLE", "COMPILER", "CALLBACK", "REFACTOR"]
+            },
             novel: {
                 1: ["PLAY", "POEM", "TALE", "PAGE", "BOOK", "PLOT", "EPIC", "CAST"],
                 2: ["NOVEL", "DRAMA", "PROSE", "GENRE", "WRITE", "STORY", "FOLIO"],
@@ -788,7 +795,14 @@ class TeakScrambleGame {
         // do we consult the OS preference. Once word_scramble_theme exists
         // in storage — no matter its value — it always wins, and nothing
         // here ever writes to storage (the OS-driven default stays "soft").
-        const savedTheme = localStorage.getItem('word_scramble_theme');
+        let savedTheme = localStorage.getItem('word_scramble_theme');
+        // 'nordic-carved' briefly existed as a separate theme before its carved
+        // board was folded back into 'nordic' itself; retire the orphaned id so
+        // anyone holding it doesn't silently fall through to an unstyled board.
+        if (savedTheme === 'nordic-carved') {
+            savedTheme = 'nordic';
+            localStorage.setItem('word_scramble_theme', savedTheme);
+        }
         if (savedTheme) {
             this.currentTheme = savedTheme;
         } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -843,6 +857,7 @@ class TeakScrambleGame {
         
         this.buildCheckerboard();
         this.registerGlobalEvents();
+        this.initPanelToggles();
         
         this.isEntranceLoad = true;
 
@@ -893,7 +908,7 @@ class TeakScrambleGame {
 
             if (progress.category) {
                 this.currentCategory = progress.category;
-                const prettyNames = { general: 'General', science: 'Science', math: 'Mathematics', history: 'History', anime: 'Anime Series', technology: 'Technology', novel: 'Novels', 'filipino-movies': 'Filipino Movies' };
+                const prettyNames = { general: 'General', science: 'Science', math: 'Mathematics', history: 'History', anime: 'Anime Series', technology: 'Technology', programming: 'Programming', novel: 'Novels', 'filipino-movies': 'Filipino Movies' };
                 const tagBtn = document.getElementById('category-tag-btn');
                 if (tagBtn) tagBtn.innerText = `Category: ${prettyNames[progress.category] || progress.category}`;
             }
@@ -928,10 +943,10 @@ class TeakScrambleGame {
         }
     }
 
-    // The 6 categories backed by the bundled, definition-verified word bank
+    // The 7 categories backed by the bundled, definition-verified word bank
     // (wordbank.js). Anime and Filipino Movies are proper nouns with no
     // dictionary entry and stay on the live-Wikipedia path instead.
-    static BANK_CATEGORIES = ['general', 'science', 'math', 'history', 'technology', 'novel'];
+    static BANK_CATEGORIES = ['general', 'science', 'math', 'history', 'technology', 'programming', 'novel'];
 
     // Pick a random {word, clue} from the bundled bank for a category + level.
     // Difficulty ramps by length (level 1 = 4 letters ... level 5+ = 8). Returns
@@ -1613,6 +1628,35 @@ class TeakScrambleGame {
             // Re-measure snap targets if a drag is in progress (layout just changed)
             if (this.activeDragTile) this.cacheDragTargets();
         });
+
+        // Tiles live on <body> at absolute coords, so any in-page reflow that
+        // isn't a window resize (definition text loading, daily banner, panels
+        // hiding, late web fonts) leaves them stranded off their slots. Re-snap
+        // whenever the page, the board or the rack changes size, once per frame.
+        if (typeof ResizeObserver !== 'undefined') {
+            let pending = false;
+            const resnap = () => {
+                if (pending) return;
+                pending = true;
+                requestAnimationFrame(() => {
+                    pending = false;
+                    // Mid-drag the dragged tile follows the pointer; only refresh snap targets
+                    if (this.activeDragTile) { this.cacheDragTargets(); return; }
+                    this.syncViewPositions(false);
+                });
+            };
+            const ro = new ResizeObserver(resnap);
+            // Body alone isn't enough: the layout is vertically centred, so a
+            // growing clue panel can move the rack without body changing size.
+            // Watch every block in the board column, since any of them growing
+            // shifts the slots below it.
+            const column = document.querySelector('.game-center-column');
+            [document.body, column, ...(column ? column.children : [])]
+                .forEach(el => el && ro.observe(el));
+        }
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(() => this.syncViewPositions(false));
+        }
     }
 
     attachDragMoveListeners() {
@@ -3344,6 +3388,7 @@ class TeakScrambleGame {
                 history: 'History',
                 anime: 'Anime Series',
                 technology: 'Technology',
+                programming: 'Programming',
                 novel: 'Novels',
                 'filipino-movies': 'Filipino Movies'
             };
@@ -4176,9 +4221,99 @@ class TeakScrambleGame {
             }, delay);
         });
     }
+
+    // --- Show / Hide & 1-Page Layout Controls ---
+    initPanelToggles() {
+        const showInstructions = localStorage.getItem('scramble_show_instructions') !== 'false';
+        const showHints = localStorage.getItem('scramble_show_hints') !== 'false';
+        this.applyPanelVisibility('instructions', showInstructions);
+        this.applyPanelVisibility('hints', showHints);
+        this.checkViewportFit();
+    }
+
+    toggleInstructions(forceState) {
+        const instPanel = document.getElementById('instructions-panel');
+        if (!instPanel) return;
+        const isHidden = instPanel.classList.contains('hidden-panel');
+        const nextState = typeof forceState === 'boolean' ? forceState : isHidden;
+        this.applyPanelVisibility('instructions', nextState);
+        localStorage.setItem('scramble_show_instructions', nextState);
+        if (this.sound) this.sound.play('select');
+        this.syncViewPositions(false);
+        this.checkViewportFit();
+    }
+
+    toggleHintGuide(forceState) {
+        const hintPanel = document.getElementById('hint-info-panel');
+        if (!hintPanel) return;
+        const isHidden = hintPanel.classList.contains('hidden-panel');
+        const nextState = typeof forceState === 'boolean' ? forceState : isHidden;
+        this.applyPanelVisibility('hints', nextState);
+        localStorage.setItem('scramble_show_hints', nextState);
+        if (this.sound) this.sound.play('select');
+        this.syncViewPositions(false);
+        this.checkViewportFit();
+    }
+
+    applyPanelVisibility(panel, show) {
+        if (panel === 'instructions') {
+            const instPanel = document.getElementById('instructions-panel');
+            const showBtn = document.getElementById('show-instructions-btn');
+            const menuBtn = document.getElementById('menu-toggle-instructions-btn');
+            if (instPanel) {
+                if (show) {
+                    instPanel.classList.remove('hidden-panel');
+                } else {
+                    instPanel.classList.add('hidden-panel');
+                }
+            }
+            if (showBtn) {
+                if (show) {
+                    showBtn.classList.add('hidden');
+                } else {
+                    showBtn.classList.remove('hidden');
+                }
+            }
+            if (menuBtn) {
+                menuBtn.textContent = `📖 How to Play: ${show ? 'Shown' : 'Hidden'}`;
+            }
+        } else if (panel === 'hints') {
+            const hintPanel = document.getElementById('hint-info-panel');
+            const showBtn = document.getElementById('show-hints-btn');
+            const menuBtn = document.getElementById('menu-toggle-hints-btn');
+            if (hintPanel) {
+                if (show) {
+                    hintPanel.classList.remove('hidden-panel');
+                } else {
+                    hintPanel.classList.add('hidden-panel');
+                }
+            }
+            if (showBtn) {
+                if (show) {
+                    showBtn.classList.add('hidden');
+                } else {
+                    showBtn.classList.remove('hidden');
+                }
+            }
+            if (menuBtn) {
+                menuBtn.textContent = `💡 Hint Guide: ${show ? 'Shown' : 'Hidden'}`;
+            }
+        }
+    }
+
+    checkViewportFit() {
+        // At 75% zoom (or heights >= 800px on desktop), lock to 1-page non-scrollable view.
+        // On smaller viewports (e.g. 100% zoom on short laptop screens), allow scrolling so nothing clips.
+        const fits = window.innerHeight >= 800 || (document.body.scrollHeight <= window.innerHeight + 10);
+        if (fits && window.innerWidth >= 1200) {
+            document.body.classList.add('fit-one-page');
+        } else {
+            document.body.classList.remove('fit-one-page');
+        }
+    }
+
 }
 
-// --- Header MENU dropdown ---
 function toggleHeaderMenu(e) {
     e.stopPropagation();
     const dropdown = document.getElementById('menu-dropdown');

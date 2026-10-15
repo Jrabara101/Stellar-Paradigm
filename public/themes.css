@@ -24,18 +24,20 @@ body[data-theme="nordic"] {
     --theme-h1-color: #333333;
     --theme-h1-shadow: 2px 2px 0px #ffffff, 4px 4px 0px #cbd5e1;
 
+    /* The plate IS the board — slots are routed straight into it, so the grid
+       gets no frame or background of its own (see the carved-slot rules below). */
     --theme-board-plate-bg: #f1ebd9;
     --theme-board-plate-border: 1px solid rgba(255,255,255,0.5);
-    --theme-board-plate-outline: 4px solid #e3dec9;
+    --theme-board-plate-outline: 0;
     --theme-board-plate-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), inset 0 2px 10px rgba(255,255,255,0.9);
 
-    --theme-grid-bg: #e3dec9;
-    --theme-grid-border: 4px solid #e3dec9;
-    --theme-grid-shadow: inset 0 4px 8px rgba(0,0,0,0.1);
-    --theme-cell-shadow: inset 1px 1px 2px rgba(0,0,0,0.05);
+    --theme-grid-bg: transparent;
+    --theme-grid-border: 0;
+    --theme-grid-shadow: none;
+    --theme-cell-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.08), 1px 1px 0px rgba(255, 255, 255, 0.9);
 
-    --theme-slot-border: #90a4ae;
-    --theme-slot-bg: rgba(144, 164, 174, 0.15);
+    --theme-slot-border: #7fb2c4;
+    --theme-slot-bg: rgba(173, 216, 230, 0.3);
 
     --theme-tile-bg: linear-gradient(145deg, #ffffff 0%, #f9f9f9 100%);
     --theme-tile-color: #333333;
@@ -82,9 +84,57 @@ body[data-theme="nordic"] {
     --theme-victory-btn-shadow: 0 5px 0 #1a1a1a;
     --theme-victory-btn-shadow-active: 0 0px 0 #1a1a1a;
 }
+/* Both checkerboard tones collapse to one carved-slot colour — the reference
+   board (Boards Inspired / nordic_oak_board_focus_empty) has no light/dark
+   alternation. Until 2026-09-25 that was ALL this theme did, which left every
+   cell the same colour as --theme-grid-bg behind it and the board rendered as
+   one flat cream slab with no visible grid. The rules below restore the
+   mockup's actual geometry: discrete routed slots separated by wide gaps. */
 body[data-theme="nordic"] .grid-container {
     --teak-light: #e3dec9;
     --teak-base: #e3dec9;
+    gap: 6px;
+    padding: 0;
+    border-radius: 0;
+}
+body[data-theme="nordic"] .board-plate {
+    padding: 22px;
+}
+body[data-theme="nordic"] .grid-cell {
+    border-radius: 6px;
+}
+/* The two rules above out-specify style.css's ≤520px `.board-plate { padding: 10px }`
+   patch (0,2,0 vs 0,1,0), so the narrow-screen values have to be restated here —
+   and the slot gap tightens too, or 10 columns plus 9 wide gaps no longer fit
+   inside the plate at phone widths. */
+@media (max-width: 520px) {
+    body[data-theme="nordic"] .board-plate {
+        padding: 10px;
+    }
+    body[data-theme="nordic"] .grid-container {
+        gap: 3px;
+    }
+}
+/* Pale-blue bonus slots at the corners, the centre 2x2 and four inset spots —
+   the same indices the mockup marks. `!important` is required because
+   buildCheckerboard() writes each cell's background as an inline style. */
+body[data-theme="nordic"] .grid-cell[data-index="0"],
+body[data-theme="nordic"] .grid-cell[data-index="9"],
+body[data-theme="nordic"] .grid-cell[data-index="90"],
+body[data-theme="nordic"] .grid-cell[data-index="99"],
+body[data-theme="nordic"] .grid-cell[data-index="44"],
+body[data-theme="nordic"] .grid-cell[data-index="45"],
+body[data-theme="nordic"] .grid-cell[data-index="54"],
+body[data-theme="nordic"] .grid-cell[data-index="55"],
+body[data-theme="nordic"] .grid-cell[data-index="22"],
+body[data-theme="nordic"] .grid-cell[data-index="27"],
+body[data-theme="nordic"] .grid-cell[data-index="72"],
+body[data-theme="nordic"] .grid-cell[data-index="77"] {
+    background-color: #d0e7ee !important;
+    box-shadow:
+        inset 2px 2px 4px rgba(0, 0, 0, 0.08),
+        inset 0 0 10px rgba(173, 216, 230, 0.4),
+        1px 1px 0px rgba(255, 255, 255, 0.9);
 }
 
 /* ==========================================================================
@@ -112,10 +162,13 @@ body[data-theme="rustic"] {
     --theme-board-plate-outline: 6px solid #20130f;
     --theme-board-plate-shadow: inset 0 10px 20px rgba(0,0,0,0.8), 0 15px 25px rgba(0,0,0,0.6);
 
-    --theme-grid-bg: #20130f;
-    --theme-grid-border: 4px solid #20130f;
-    --theme-grid-shadow: inset 0 8px 20px rgba(0,0,0,0.9);
-    --theme-cell-shadow: inset 2px 2px 4px rgba(0,0,0,0.6);
+    /* Transparent so the barn-wood plate shows through the gaps BETWEEN the
+       routed slots — that contrast is the whole grid. The slots themselves are
+       walnut #20130f, set as --teak-light/--teak-base on .grid-container below. */
+    --theme-grid-bg: transparent;
+    --theme-grid-border: 0;
+    --theme-grid-shadow: none;
+    --theme-cell-shadow: inset 3px 3px 6px rgba(0,0,0,0.9), inset -1px -1px 2px rgba(255,255,255,0.05);
 
     --theme-slot-border: #b08d57;
     --theme-slot-bg: rgba(176, 141, 87, 0.15);
@@ -172,9 +225,94 @@ body[data-theme="rustic"] {
     --theme-victory-btn-shadow: 0 5px 0 #4e381c;
     --theme-victory-btn-shadow-active: 0 0px 0 #4e381c;
 }
+/* Both checkerboard tones collapse to one routed-slot colour — the reference
+   board has no light/dark alternation. Until 2026-09-28 that was ALL this theme
+   did, and because --theme-grid-bg behind the cells was the SAME #20130f, every
+   slot was invisible and the board rendered as one flat dark slab. The rules
+   below restore the mockup's geometry: sunken walnut wells separated by 4px of
+   barn wood. Same failure mode as the 'nordic' theme — see its comment above. */
 body[data-theme="rustic"] .grid-container {
     --teak-light: #20130f;
     --teak-base: #20130f;
+    gap: 4px;
+    padding: 0;
+    border-radius: 0;
+}
+body[data-theme="rustic"] .board-plate {
+    padding: 24px;
+}
+/* Iridescent wash across the slots, matched to the reference render
+   (word scramble 2/.../rustic_reclaimed_board_focus/screen.png). Sampling a 5x5
+   lattice inside that board gives a dusty rose upper-centre (~#53383a), a cool
+   slate-teal lower-left (~#252e37) and a warm amber right (~#523d24), all
+   falling off to near-black at the corners. The rgba stops below were solved
+   backwards from those targets over the #20130f slot colour at these alphas.
+   z-index 1 puts it above the cell backgrounds but below .dashed-slot (2) and
+   .drop-preview (3), and the flash highlight (.grid-cell::after, also z-index 1)
+   still paints over it by tree order — so nothing gameplay-critical is tinted. */
+body[data-theme="rustic"] .grid-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: inherit;
+    background-image:
+        radial-gradient(ellipse 60% 32% at 50% 30%, rgba(160, 112, 123, 0.32) 0%, rgba(160, 112, 123, 0) 74%),
+        radial-gradient(ellipse 50% 50% at 20% 76%, rgba(45, 87, 115, 0.46) 0%, rgba(45, 87, 115, 0) 76%),
+        radial-gradient(ellipse 48% 54% at 82% 66%, rgba(157, 124, 68, 0.42) 0%, rgba(157, 124, 68, 0) 76%),
+        radial-gradient(ellipse 30% 26% at 4% 50%, rgba(107, 105, 54, 0.28) 0%, rgba(107, 105, 54, 0) 78%),
+        radial-gradient(ellipse 38% 28% at 52% 88%, rgba(140, 104, 92, 0.30) 0%, rgba(140, 104, 92, 0) 76%),
+        /* Flat base lift: the reference board averages rgb(51,37,32) overall,
+           which the slot colour alone does not reach. */
+        linear-gradient(rgba(142, 99, 95, 0.10), rgba(142, 99, 95, 0.10));
+}
+/* Corner falloff — the reference board is near-black at every corner. Separate
+   from the plate's own vignette (.board-plate::before), which sits outside the
+   grid and so cannot darken the slots themselves. */
+body[data-theme="rustic"] .grid-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: inherit;
+    background: radial-gradient(ellipse 80% 80% at 50% 50%, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, 0.66) 100%);
+}
+/* The rule above out-specifies style.css's ≤520px `.board-plate { padding: 10px }`
+   patch (0,2,0 vs 0,1,0), so the narrow-screen value has to be restated — and the
+   gap tightens too, or 10 columns plus 9 gaps no longer fit inside the plate. */
+@media (max-width: 520px) {
+    body[data-theme="rustic"] .board-plate {
+        padding: 10px;
+    }
+    body[data-theme="rustic"] .grid-container {
+        gap: 3px;
+    }
+}
+/* Weathering: the mockup's fixed dust layer over the whole viewport, rebuilt as
+   CSS-generated speckle (this theme deliberately carries no remote images so it
+   still works offline/in the PWA). Uses ::before because body::after is already
+   owned by the streak-max ember vignette (style.css:4359) — an ::after here
+   would carry equal specificity, load later, and silently kill that effect. */
+body[data-theme="rustic"]::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 900;
+    opacity: 0.4;
+    background-image:
+        radial-gradient(circle at 15% 22%, rgba(217, 208, 193, 0.18) 0.5px, transparent 1.2px),
+        radial-gradient(circle at 68% 41%, rgba(217, 208, 193, 0.14) 0.5px, transparent 1.2px),
+        radial-gradient(circle at 39% 77%, rgba(176, 141, 87, 0.16) 0.6px, transparent 1.4px),
+        radial-gradient(circle at 86% 88%, rgba(217, 208, 193, 0.12) 0.5px, transparent 1.2px);
+    background-size: 37px 37px, 53px 53px, 71px 71px, 43px 43px;
+}
+/* Performance mode drops the full-viewport overlay along with the other
+   decorative layers. */
+body[data-performance-mode="true"][data-theme="rustic"]::before {
+    display: none;
 }
 body[data-theme="rustic"] .board-plate::before {
     content: '';
@@ -215,10 +353,16 @@ body[data-theme="parchment"] {
     --theme-board-plate-outline: 4px solid #3a1a0b;
     --theme-board-plate-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(92, 46, 22, 0.3), inset 0 2px 5px rgba(255,255,255,0.5);
 
-    --theme-grid-bg: rgba(92, 46, 22, 0.15);
-    --theme-grid-border: 2px solid rgba(92, 46, 22, 0.4);
+    /* Tray deliberately much darker than the slot faces. At the reference's
+       0.15 alpha the channel resolved to rgb(211,194,170) against a slot face
+       of rgb(213,197,173) — 3/255 apart, so the grid carried no colour at all
+       and only an 8px-blur inset shadow suggested it, which reads as smudge
+       rather than structure. 0.40 puts the channel at rgb(176,150,126), a
+       ~50/255 step, and the slot shadow below is tightened to match. */
+    --theme-grid-bg: rgba(92, 46, 22, 0.40);
+    --theme-grid-border: 2px solid rgba(92, 46, 22, 0.55);
     --theme-grid-shadow: inset 0 10px 30px rgba(0,0,0,0.3);
-    --theme-cell-shadow: inset 3px 3px 8px rgba(0,0,0,0.4), inset -2px -2px 4px rgba(255,255,255,0.4);
+    --theme-cell-shadow: inset 2px 2px 3px rgba(92, 46, 22, 0.40), inset -1px -1px 2px rgba(255, 255, 255, 0.6);
 
     --theme-slot-border: #c85a17;
     --theme-slot-bg: rgba(200, 90, 23, 0.15);
@@ -271,9 +415,42 @@ body[data-theme="parchment"] {
     --theme-victory-btn-shadow: 0 5px 0 #9c450f;
     --theme-victory-btn-shadow-active: 0 0px 0 #9c450f;
 }
+/* Both tones are the same translucent beige — but unlike 'nordic' and 'rustic',
+   --theme-grid-bg here is a DIFFERENT colour (a mahogany wash), so the slots
+   stay visible. No invisible-grid bug in this theme; what was missing was the
+   reference board's geometry, below. */
 body[data-theme="parchment"] .grid-container {
-    --teak-light: rgba(220, 205, 180, 0.3);
-    --teak-base: rgba(220, 205, 180, 0.3);
+    /* Opaque, not the reference's 30%-alpha beige: translucent over the tray
+       it landed within 3/255 of the channel colour. Solid keeps the slot faces
+       a clear step lighter than the tray whatever sits behind them. */
+    --teak-light: #dfd2b6;
+    --teak-base: #dfd2b6;
+    /* Reference: 6px channels between slots, inside a 12px recessed tray. */
+    gap: 6px;
+    padding: 12px;
+    border-radius: 6px;
+}
+body[data-theme="parchment"] .grid-cell {
+    border-radius: 4px;
+}
+body[data-theme="parchment"] .board-plate {
+    padding: 24px;
+    border-radius: 8px;
+}
+/* The rules above out-specify style.css's ≤520px `.board-plate { padding: 10px }`
+   patch (0,2,0 vs 0,1,0), so the narrow-screen values are restated — and the
+   channels plus tray padding tighten, or 10 columns no longer fit the plate. */
+@media (max-width: 520px) {
+    body[data-theme="parchment"] .board-plate {
+        padding: 10px;
+    }
+    body[data-theme="parchment"] .grid-container {
+        /* Tray padding goes to 0 rather than the channels shrinking further:
+           at 420px the cell resolves to ~34.8px, so 10 cells + 9x3px channels
+           is already 375.4 against 379px of usable plate. */
+        gap: 3px;
+        padding: 0;
+    }
 }
 
 /* ==========================================================================

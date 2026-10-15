@@ -6,6 +6,20 @@ Word Scramble implements **fee sponsorship end-to-end** — CAP-33 sponsored res
 
 **🔗 Live on mainnet:** https://word-scramble-v1.surge.sh?network=mainnet
 
+### 📦 Hackathon deliverables
+
+| Deliverable | Link |
+|---|---|
+| GitHub repo | https://github.com/Jrabara101/Stellar-Paradigm |
+| Live link | https://word-scramble-v1.surge.sh?network=mainnet |
+| Android app (APK) | [Download](https://github.com/Jrabara101/Stellar-Paradigm/releases/download/android-debug-v1/app-debug.apk) — debug build; in-app: menu → 📱 Get Android App |
+| 1-min pitch | [PITCH_1MIN_HACKATHON.md](PITCH_1MIN_HACKATHON.md) |
+| Pitch deck | [Pitch Deck/html/pitch-deck.html](Pitch%20Deck/html/pitch-deck.html) |
+| Idea | [Project Description](#-project-description) |
+| Stack | [Tech Stack](#️-tech-stack) |
+| Screenshots | [Screenshots](#-screenshots) |
+| Future ideas | [Future Ideas](#-future-ideas) |
+
 ### Verifiable mainnet activity
 
 | Metric | Value | Independent proof |
@@ -662,6 +676,40 @@ This application leverages Stellar's core strengths:
 - **Wallets:** Credential display and sharing in Freighter, Lobstr, and other Stellar wallets
 - **Identity:** Integration with Stellar identity providers for institutional verification
 - **Payments:** Direct fiat-to-XLM conversion for schools and institutions via Stellar Anchors
+
+---
+
+## 🔮 Future Ideas
+
+Scoped but not yet built. Each reuses systems already shipped, so none require
+inventing new player behavior.
+
+### Game modes
+- **Speedrun** — solve as many words as possible against a timer; one on-chain score per run.
+- **Weekly Arena** — a rotating weekly board with a single on-chain settlement at close.
+- **Category Rush** — pick a category, race the clock; leans on the existing 6-category word bank.
+- **Scramble Board Duel** — 1v1 head-to-head on the existing 15x15 two-to-four player board.
+- **Streak Freeze** — spend a badge to protect a daily streak, giving badges a utility beyond display.
+
+### On-chain
+- **Phase 3 seasons** — on-chain daily leaderboards with streaks, seasons, and player profiles.
+- **Vocabulary credentials** — badges evolving into soulbound, verifiable proof of subject mastery
+  that a school or employer could recognize. This is the long-term thesis of the project.
+- **Fee sponsorship expansion** — extend sponsored coverage beyond a player's first transaction.
+
+### Social & growth
+- **Challenge a Friend** — send a scrambled word as a link; both scores settle on-chain.
+- **Ghost Replay** — race a replay of a top player's solve.
+- **Guilds** — team leaderboards with a shared on-chain score.
+- **Daily quests** and **comeback bonuses** to rebuild lapsed habit.
+- **Localization** — the word bank is already category-partitioned, so additional languages
+  are a data problem rather than an engine rewrite.
+
+### Ecosystem (Stellar)
+- **DeFi:** credentials as collateral for education loans and work advances
+- **Wallets:** credential display and sharing in Freighter, Lobstr, and other Stellar wallets
+- **Identity:** integration with Stellar identity providers for institutional verification
+- **Payments:** direct fiat-to-XLM conversion for schools via Stellar Anchors
 
 ---
 

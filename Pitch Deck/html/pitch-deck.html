@@ -247,7 +247,7 @@
 </style>
 
 <div class="brand"><span class="brand-dot"></span> WORD SCRAMBLE — STELLAR</div>
-<div class="slide-index"><b id="slideNum">01</b> / 08</div>
+<div class="slide-index"><b id="slideNum">01</b> / 10</div>
 
 <div class="deck" id="deck">
 
@@ -421,14 +421,15 @@
           <div style="font-size:13px; color:var(--text-soft); margin-top:6px;">on-chain transactions<br>cross-checked on Horizon</div>
         </div>
         <div style="flex:1; min-width:200px; background:var(--surface); border:1.5px solid var(--border); border-radius:14px; padding:24px; box-shadow:0 8px 0 var(--tile-shadow-c);">
-          <div class="stat-mono" style="font-size:44px; font-weight:700; color:var(--accent-deep);">100%</div>
-          <div style="font-size:13px; color:var(--text-soft); margin-top:6px;">cryptographically verified<br>— not self-reported</div>
+          <div class="stat-mono" style="font-size:44px; font-weight:700; color:var(--accent-deep);">21</div>
+          <div style="font-size:13px; color:var(--text-soft); margin-top:6px;">independent mainnet users<br>28 gasless accounts</div>
         </div>
       </div>
 
       <p style="max-width:62ch; margin-top:36px; color:var(--text-soft); font-size:16px; line-height:1.6;">
-        Now onboarding real players onto <b style="color:var(--text);">Stellar mainnet</b> with that same
-        gasless experience. A built-in feedback loop — auto-prompted after every first score — has already
+        Live on <b style="color:var(--text);">Stellar mainnet</b> with that same gasless experience —
+        <b style="color:var(--text);">55 contract events</b>, read live from Horizon and stellar.expert,
+        none self-reported. A built-in feedback loop — auto-prompted after every first score — has already
         shipped real product fixes. Next: Speedrun, Weekly Arena, Category Rush — each reusing systems already built.
       </p>
     </div>
@@ -467,8 +468,55 @@
     </div>
   </section>
 
-  <!-- SLIDE 8 — CLOSE -->
+
+  <!-- SLIDE — DEMO CUE -->
   <section class="slide" data-slide="7" style="align-items:center; justify-content:center; text-align:center;">
+    <div class="eyebrow" style="justify-content:center;">Demo &mdash; Live</div>
+    <h2 style="font-size:clamp(34px,5.5vw,72px); margin-top:20px; max-width:18ch; line-height:1.08;">
+      One word.<br>
+      <em style="color:var(--accent-deep); font-style:italic;">One real mainnet transaction.</em>
+    </h2>
+    <p style="max-width:58ch; margin-top:30px; color:var(--text-soft); font-size:17px; line-height:1.6;">
+      Solve &rarr; submit &rarr; the leaderboard contract auto-calls the reward contract
+      and mints a badge, in the same transaction. Verify it on stellar.expert before I sit down.
+    </p>
+    <div style="margin-top:46px; padding:16px 32px; background:var(--surface); border:1.5px solid var(--border); border-radius:100px; box-shadow:0 6px 0 var(--tile-shadow-c); font-family:'JetBrains Mono',monospace; font-size:15px;">
+      SWITCH TO THE APP
+    </div>
+  </section>
+
+  <!-- SLIDE — WHAT WORKED / WHAT BROKE -->
+  <section class="slide" data-slide="8" style="justify-content:center;">
+    <div class="content-max">
+      <div class="eyebrow">What Worked / What Broke</div>
+      <h2 style="font-size:clamp(30px,4.2vw,56px); margin-top:18px; max-width:22ch; line-height:1.1;">
+        The bug was the feature.
+      </h2>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:36px; margin-top:44px;">
+        <div>
+          <p class="stat-mono" style="color:var(--turquoise); font-size:14px; letter-spacing:.08em; margin:0 0 14px;">WORKED</p>
+          <p style="margin:0 0 12px; line-height:1.6;">Fee sponsorship end-to-end &mdash; CAP-33 sponsored reserves plus <code>FeeBumpTransaction</code> wrapping. A player with an empty wallet writes to a contract.</p>
+          <p style="margin:0 0 12px; line-height:1.6;">Inter-contract auth: one submit call mints a badge atomically.</p>
+          <p style="margin:0; line-height:1.6;"><b>21 mainnet users · 28 gasless accounts · 55 events</b>, independently verifiable.</p>
+        </div>
+        <div>
+          <p class="stat-mono" style="color:var(--accent-deep); font-size:14px; letter-spacing:.08em; margin:0 0 14px;">BROKE</p>
+          <p style="margin:0 0 12px; line-height:1.6;">Sponsored accounts landed with a <b>zero balance</b> &mdash; Freighter refused to sign for them. Fixed by reordering the sponsorship operations.</p>
+          <p style="margin:0 0 12px; line-height:1.6;">Confirmation polling timed out on <b>RPC latency</b>, not dropped transactions. Extended the window instead of retrying.</p>
+          <p style="margin:0; line-height:1.6;">Public word APIs were flaky &mdash; replaced with a bundled 1,020-word bank.</p>
+        </div>
+      </div>
+
+      <p style="max-width:64ch; margin-top:38px; color:var(--text-soft); font-size:15px; line-height:1.6;">
+        Every one of these was found by a real player on a real network. The gasless flow works
+        <em>because</em> it broke first.
+      </p>
+    </div>
+  </section>
+
+  <!-- SLIDE 10 — CLOSE -->
+  <section class="slide" data-slide="9" style="align-items:center; justify-content:center; text-align:center;">
     <div class="eyebrow" style="justify-content:center;">Live Right Now</div>
     <h2 style="font-size:clamp(34px,5.5vw,76px); margin-top:20px; max-width:20ch; line-height:1.08;">
       Come solve a word.<br>

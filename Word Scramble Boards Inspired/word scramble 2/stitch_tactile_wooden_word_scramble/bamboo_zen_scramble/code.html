@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Light Wood Scramble - Staff Architected</title>
+<style>
+        :root {
+            /* Bamboo & Stone Palette */
+            --bg-color: #f4f1ea;
+            --bamboo-light: #dcd0a6;
+            --bamboo-dark: #c4b685;
+            --bamboo-line: rgba(85, 107, 47, 0.15);
+            --stone-light: #9ba4a8;
+            --stone-base: #758187;
+            --stone-dark: #58646a;
+            --text-light: #fdfdfd;
+            --text-dark: #2f4f4f;
+            --zen-green: #6b8e23;
+            --highlight: rgba(255, 255, 255, 0.7);
+            --shadow-deep: rgba(47, 79, 79, 0.4);
+            --shadow-crisp: rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            margin: 0; 
+            background-color: var(--bg-color); 
+            background-image: radial-gradient(var(--bamboo-light) 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: var(--text-dark);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            height: 100vh; overflow: hidden; font-family: 'Georgia', 'Times New Roman', serif;
+            user-select: none; touch-action: none;
+        }
+
+        .header { 
+            text-align: center; margin-bottom: 20px; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .zen-circle {
+            width: 140px; height: 140px;
+            border-radius: 50%;
+            border: 3px solid var(--zen-green);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: inset 0 0 20px rgba(107, 142, 35, 0.1), 0 10px 20px rgba(0,0,0,0.05);
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        h1 { 
+            margin: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; 
+            color: var(--zen-green); font-weight: normal;
+        }
+        .score { 
+            font-size: 1.5rem; color: var(--text-dark); font-weight: normal; margin-top: 5px; 
+            letter-spacing: 1px;
+        }
+
+        /* 12x12 Bamboo Grid Board */
+        .board-plate {
+            background-color: var(--bamboo-light);
+            /* Creating the 12x12 grid and vertical bamboo texture */
+            background-image: 
+                linear-gradient(90deg, var(--bamboo-line) 1px, transparent 1px),
+                linear-gradient(var(--bamboo-line) 1px, transparent 1px),
+                repeating-linear-gradient(90deg, transparent, transparent 15px, rgba(107, 142, 35, 0.05) 15px, rgba(107, 142, 35, 0.05) 30px);
+            background-size: calc(100% / 12) calc(100% / 12), calc(100% / 12) calc(100% / 12), 100% 100%;
+            width: 540px; height: 540px;
+            border-radius: 8px; 
+            border: 12px solid #8b7355;
+            outline: 2px solid #5c4a3d;
+            box-shadow: 
+                0 25px 60px rgba(47, 79, 79, 0.25), 
+                inset 0 0 30px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .board-content-wrapper {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 40px;
+            padding: 20px;
+        }
+
+        /* Slots looking like carved indentations in the bamboo */
+        .slot-row {
+            display: flex; gap: 15px; justify-content: center;
+            background: rgba(0, 0, 0, 0.08); padding: 15px; border-radius: 30px;
+            box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.15); 
+            width: 100%; box-sizing: border-box;
+            backdrop-filter: blur(2px);
+        }
+
+        .carved-slot {
+            width: 50px; height: 50px; background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 40%; /* More rounded like a river stone recess */
+            position: relative;
+            box-shadow: 
+                inset 3px 3px 6px rgba(0, 0, 0, 0.2), 
+                1px 1px 0px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Smooth River Stone Tiles */
+        .wood-tile {
+            position: absolute; width: 50px; height: 50px; 
+            background: radial-gradient(circle at 30% 20%, var(--stone-light) 0%, var(--stone-base) 60%, var(--stone-dark) 100%);
+            border-radius: 40%; /* Organic stone shape */
+            display: flex; justify-content: center; align-items: center;
+            font-size: 1.6rem; font-weight: normal; color: var(--text-light);
+            cursor: pointer; 
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+            
+            /* Skeuomorphic tactile stone shadows */
+            box-shadow: 
+                0 8px 16px var(--shadow-deep), 
+                inset 2px 2px 6px var(--highlight),
+                inset -2px -2px 6px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            
+            transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s;
+            z-index: 100;
+        }
+        
+        .wood-tile:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px var(--shadow-deep), inset 2px 2px 6px var(--highlight);
+        }
+
+        .wood-tile:active {
+            transform: scale(0.95) translateY(2px);
+            box-shadow: 0 4px 8px var(--shadow-deep), inset 2px 2px 6px var(--highlight);
+        }
+        
+        .wood-tile.locked {
+            pointer-events: none;
+            background: radial-gradient(circle at 30% 20%, #aed581 0%, #8bc34a 60%, #689f38 100%);
+            color: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 2px 2px 6px rgba(255,255,255,0.6);
+        }
+
+        .controls { display: flex; gap: 20px; width: 100%; max-width: 400px; margin-top: 20px; position: relative; z-index: 10; }
+        button {
+            flex: 1; background: var(--stone-base); color: #fff; border: none;
+            padding: 14px; font-size: 1rem; font-weight: normal; border-radius: 20px;
+            cursor: pointer; 
+            box-shadow: 0 6px 0 var(--stone-dark), 0 10px 20px rgba(0,0,0,0.2); 
+            transition: all 0.1s;
+            font-family: inherit; text-transform: uppercase; letter-spacing: 2px;
+        }
+        button:hover { background: var(--stone-light); }
+        button:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--stone-dark), 0 4px 8px rgba(0,0,0,0.2); }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake { animation: shake 0.2s ease-in-out 0s 2; }
+    </style>
+</head>
+<body>
+<div class="header">
+<div class="zen-circle">
+<h1>Scramble</h1>
+<div class="score" id="score-text">000</div>
+</div>
+</div>
+<div class="board-plate" id="main-board">
+<div class="board-content-wrapper">
+<div class="slot-row" id="target-row"></div>
+<div class="slot-row" id="source-row" style="min-height: 84px; position: relative;"></div>
+<div class="controls">
+<button onclick="game.resetTray()">Reset</button>
+<button onclick="game.verifySolution()">Submit</button>
+</div>
+</div>
+</div>
+<script>
+class WoodenScrambleGame {
+    constructor() {
+        this.dictionary = ["NATURE", "BAMBOO", "PEBBLE", "GARDEN", "SPIRIT", "TEMPLE", "BONSAI", "STREAM", "FOREST", "TRANQUIL"];
+        this.targetRow = document.getElementById('target-row');
+        this.sourceRow = document.getElementById('source-row');
+        this.scoreText = document.getElementById('score-text');
+        this.mainBoard = document.getElementById('main-board');
+        
+        this.score = 0;
+        this.initLevel();
+    }
+
+    initLevel() {
+        this.targetWord = this.dictionary[Math.floor(Math.random() * this.dictionary.length)];
+        this.scrambledWord = this.targetWord.split('').sort(() => Math.random() - 0.5).join('');
+        
+        if (this.scrambledWord === this.targetWord) {
+            this.initLevel();
+            return;
+        }
+
+        this.tilesData = [];
+        this.targetSlots = Array(this.targetWord.length).fill(null);
+        this.sourceSlots = Array(this.targetWord.length).fill(null);
+
+        this.buildBoardArchetype();
+    }
+
+    buildBoardArchetype() {
+        this.targetRow.innerHTML = '';
+        this.sourceRow.innerHTML = '';
+
+        for (let i = 0; i < this.targetWord.length; i++) {
+            let slot = document.createElement('div');
+            slot.className = 'carved-slot';
+            this.targetRow.appendChild(slot);
+        }
+
+        for (let i = 0; i < this.targetWord.length; i++) {
+            let slot = document.createElement('div');
+            slot.className = 'carved-slot';
+            this.sourceRow.appendChild(slot);
+        }
+
+        this.targetRow.offsetHeight; // Reflow
+
+        this.scrambledWord.split('').forEach((char, index) => {
+            let tile = document.createElement('div');
+            tile.className = 'wood-tile';
+            tile.innerText = char;
+            
+            let dataObject = {
+                element: tile,
+                char: char,
+                currentLocation: 'source',
+                slotIndex: index
+            };
+            
+            this.tilesData.push(dataObject);
+            this.sourceSlots[index] = dataObject;
+
+            tile.addEventListener('click', () => this.handleTileTransition(dataObject));
+            document.body.appendChild(tile);
+        });
+
+        this.syncViewPositions(false);
+    }
+
+    handleTileTransition(tileObj) {
+        if (tileObj.element.classList.contains('locked')) return;
+
+        if (tileObj.currentLocation === 'source') {
+            let openSlotIdx = this.targetSlots.indexOf(null);
+            if (openSlotIdx === -1) return;
+
+            this.sourceSlots[tileObj.slotIndex] = null;
+            tileObj.currentLocation = 'target';
+            tileObj.slotIndex = openSlotIdx;
+            this.targetSlots[openSlotIdx] = tileObj;
+        } else {
+            let openSlotIdx = this.sourceSlots.indexOf(null);
+            if (openSlotIdx === -1) return;
+            
+            this.targetSlots[tileObj.slotIndex] = null;
+            tileObj.currentLocation = 'source';
+            tileObj.slotIndex = openSlotIdx;
+            this.sourceSlots[openSlotIdx] = tileObj;
+        }
+
+        this.syncViewPositions(true);
+    }
+
+    syncViewPositions(animate = true) {
+        this.tilesData.forEach(tileObj => {
+            let parentRow = tileObj.currentLocation === 'target' ? this.targetRow : this.sourceRow;
+            let targetSlotDOM = parentRow.children[tileObj.slotIndex];
+            
+            let rect = targetSlotDOM.getBoundingClientRect();
+
+            if (!animate) tileObj.element.style.transition = 'none';
+
+            // Absolute body positioning based on static layout anchors
+            tileObj.element.style.transform = `translate3d(${rect.left}px, ${rect.top}px, 0px)`;
+
+            if (!animate) {
+                tileObj.element.offsetHeight; // Flush
+                tileObj.element.style.transition = '';
+            }
+        });
+    }
+
+    verifySolution() {
+        let playerWord = this.targetSlots.map(slot => slot ? slot.char : '').join('');
+
+        if (playerWord === this.targetWord) {
+            this.score += 100;
+            this.scoreText.innerText = this.score.toString().padStart(3, '0');
+            
+            this.tilesData.forEach(t => t.element.classList.add('locked'));
+            
+            setTimeout(() => {
+                this.tilesData.forEach(t => t.element.remove());
+                this.initLevel();
+            }, 1000);
+        } else {
+            this.mainBoard.classList.add('shake');
+            setTimeout(() => this.mainBoard.classList.remove('shake'), 400);
+            this.resetTray();
+        }
+    }
+
+    resetTray() {
+        this.targetSlots.fill(null);
+        this.sourceSlots.fill(null);
+        
+        this.tilesData.forEach((tileObj, index) => {
+            tileObj.currentLocation = 'source';
+            tileObj.slotIndex = index;
+            this.sourceSlots[index] = tileObj;
+        });
+
+        this.syncViewPositions(true);
+    }
+}
+
+let game;
+window.addEventListener('load', () => {
+    game = new WoodenScrambleGame();
+    window.addEventListener('resize', () => game.syncViewPositions(false));
+});
+</script>
+</body></html>

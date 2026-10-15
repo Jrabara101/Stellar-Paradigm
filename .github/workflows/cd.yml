@@ -23,11 +23,16 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Build (Vite)
+        run: |
+          npm ci
+          npm run build
+
       - name: Deploy to surge.sh
         env:
           SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
           SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
-        run: npx surge --project . --domain word-scramble-v1.surge.sh
+        run: npx surge --project dist --domain word-scramble-v1.surge.sh
 
   package-contract:
     name: Build & Package Smart Contract

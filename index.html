@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
     <title>Mid-Century Teak Scramble</title>
     
     <!-- Premium Font Families (Asynchronous Non-Blocking Load) -->
@@ -40,23 +40,15 @@
         }
     </script>
 
-    <script type="module" src="stellar.js"></script>
-    <script src="daily-words.js" defer></script>
-    <script src="wordbank.js" defer></script>
-    <script src="script.js" defer></script>
-    <script src="feedback.js" defer></script>
-    <script src="wallet-guide.js" defer></script>
+    <script type="module" src="stellar.js" vite-ignore></script>
+    <script src="daily-words.js" defer vite-ignore></script>
+    <script src="wordbank.js" defer vite-ignore></script>
+    <script src="script.js" defer vite-ignore></script>
+    <script src="feedback.js" defer vite-ignore></script>
+    <script src="wallet-guide.js" defer vite-ignore></script>
 
-    <!-- Register the service worker for instant repeat loads + offline shell -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(() => {
-                    /* non-fatal — the game works fine without it */
-                });
-            });
-        }
-    </script>
+    <!-- React layer (bundled by Vite). Also registers the service worker on web. -->
+    <script type="module" src="/src/main.tsx"></script>
 </head>
 <body>
 
@@ -96,7 +88,40 @@
         </svg>
     </div>
 
-    <div class="header-container">
+    <!-- BEGIN: Game Layout Container (Max-width bounded full-size view) -->
+    <div class="game-layout-wrapper" id="game-layout-wrapper">
+        <!-- Quick-toggle pills when side cards are hidden -->
+        <button id="show-instructions-btn" class="panel-toggle-tab left-tab hidden" onclick="game.toggleInstructions(true)" title="Show How to Play">📖 How to Play</button>
+        <button id="show-hints-btn" class="panel-toggle-tab right-tab hidden" onclick="game.toggleHintGuide(true)" title="Show Hint Guide">💡 Hint Guide</button>
+
+        <!-- How to Play Instructions Board (Desktop Left Column) -->
+        <div class="instructions-panel" id="instructions-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--mustard); padding-bottom: 6px;">
+            <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0; text-shadow: 0.5px 0.5px 0px var(--off-white);">How to Play</h3>
+            <div style="display: flex; gap: 6px; align-items: center;">
+                <button onclick="game.openChangelogModal()" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--mustard); color: var(--teak-dark); font-weight: 900; box-shadow: 0 2px 0 var(--mustard-dark); cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;" onmousedown="this.style.transform='translateY(2px)'; this.style.boxShadow='0 0px 0 var(--mustard-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 2px 0 var(--mustard-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 2px 0 var(--mustard-dark)'">Updates</button>
+                <button class="panel-hide-btn" onclick="game.toggleInstructions(false)" title="Hide How to Play">✕ Hide</button>
+            </div>
+        </div>
+        <ul>
+            <li>
+                <span class="step-num">1</span>
+                <div><strong>Solve the Scramble:</strong> Drag-and-drop or tap tiles to place them on the highlighted grid slots.</div>
+            </li>
+            <li>
+                <span class="step-num">2</span>
+                <div><strong>Get Hints:</strong> Click <em>Definition</em> (free) to reveal the word's meaning, or <em>Hint</em> to lock a correct tile (costs 10 pts).</div>
+            </li>
+            <li>
+                <span class="step-num">3</span>
+                <div><strong>Submit:</strong> Complete the word and click <em>Submit</em> to advance levels! Build a <strong>Win Streak</strong> for bonus points: +10 (1–5), +20 (6–10), +30 (11–15), +50 (16+).</div>
+            </li>
+        </ul>
+    </div>
+
+        <!-- Center Column: Header, Board, Rack -->
+        <div class="game-center-column">
+            <div class="header-container">
         <div style="display: flex; flex-direction: column; gap: 6px;">
             <h1>Word Scramble</h1>
             <div class="menu-dropdown" id="menu-dropdown">
@@ -107,6 +132,8 @@
                     <button class="menu-item" id="category-tag-btn" role="menuitem" onclick="game.openCategoryModal()">Category: General</button>
                     <button class="menu-item" id="customize-tag-btn" role="menuitem" onclick="game.openThemeModal()">Customize Board</button>
                     <button class="menu-item" id="customize-chips-btn" role="menuitem" onclick="game.openChipModal()">Customize Chips</button>
+                    <button class="menu-item" id="menu-toggle-instructions-btn" role="menuitem" onclick="game.toggleInstructions()">📖 How to Play: Shown</button>
+                    <button class="menu-item" id="menu-toggle-hints-btn" role="menuitem" onclick="game.toggleHintGuide()">💡 Hint Guide: Shown</button>
                     <button class="menu-item" id="leaderboard-btn" role="menuitem" onclick="game.openLeaderboardModal()">Leaderboard</button>
                     <button class="menu-item" id="credentials-btn" role="menuitem" onclick="game.openCredentialsModal()">🎓 My Credentials</button>
                     <button class="menu-item" id="effects-btn" role="menuitem" onclick="game.openEffectsModal()">Effects</button>
@@ -152,7 +179,8 @@
     </div>
 
     <!-- Cabinet Board -->
-    <div class="board-plate" id="main-board">
+
+            <div class="board-plate" id="main-board">
         <!-- 10x10 Grid -->
         <div class="grid-container" id="board-grid"></div>
 
@@ -176,7 +204,8 @@
     </div>
 
     <!-- Letter Tray Rack (Bottom-Right) -->
-    <div class="rack-container">
+
+            <div class="rack-container">
         <div class="rack-row">
             <div class="rack-slots" id="rack-slots"></div>
             <button class="btn-shuffle" id="btn-shuffle" onclick="game.shuffleRack()" title="Shuffle your letters">🔀</button>
@@ -184,31 +213,14 @@
         <div class="rack-shelf"></div>
     </div>
 
-    <!-- How to Play Instructions Board (Visible to All) -->
-    <div class="instructions-panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--mustard); padding-bottom: 6px;">
-            <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0; text-shadow: 0.5px 0.5px 0px var(--off-white);">How to Play</h3>
-            <button onclick="game.openChangelogModal()" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--mustard); color: var(--teak-dark); font-weight: 900; box-shadow: 0 2px 0 var(--mustard-dark); cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;" onmousedown="this.style.transform='translateY(2px)'; this.style.boxShadow='0 0px 0 var(--mustard-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 2px 0 var(--mustard-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 2px 0 var(--mustard-dark)'">Updates</button>
-        </div>
-        <ul>
-            <li>
-                <span class="step-num">1</span>
-                <div><strong>Solve the Scramble:</strong> Drag-and-drop or tap tiles to place them on the highlighted grid slots.</div>
-            </li>
-            <li>
-                <span class="step-num">2</span>
-                <div><strong>Get Hints:</strong> Click <em>Definition</em> (free) to reveal the word's meaning, or <em>Hint</em> to lock a correct tile (costs 10 pts).</div>
-            </li>
-            <li>
-                <span class="step-num">3</span>
-                <div><strong>Submit:</strong> Complete the word and click <em>Submit</em> to advance levels! Build a <strong>Win Streak</strong> for bonus points: +10 (1–5), +20 (6–10), +30 (11–15), +50 (16+).</div>
-            </li>
-        </ul>
     </div>
 
-    <!-- Hint Rules Panel (Visible to All) -->
-    <div class="hint-info-panel">
-        <h3>Hint Guide</h3>
+        <!-- Hint Rules Panel (Desktop Right Column) -->
+        <div class="hint-info-panel" id="hint-info-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--theme-panel-h3-border, var(--turquoise)); padding-bottom: 6px;">
+            <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Hint Guide</h3>
+            <button class="panel-hide-btn" onclick="game.toggleHintGuide(false)" title="Hide Hint Guide">✕ Hide</button>
+        </div>
         <ul>
             <li>
                 <span class="step-num">1</span>
@@ -224,6 +236,8 @@
             </li>
         </ul>
     </div>
+    </div>
+    <!-- END: Game Layout Container -->
 
     <!-- Canvas Particle overlay -->
     <canvas id="effects-canvas"></canvas>
@@ -271,6 +285,7 @@
                 <button class="category-btn" id="cat-btn-history" onclick="game.switchCategory('history')">History</button>
                 <button class="category-btn" id="cat-btn-anime" onclick="game.switchCategory('anime')">Anime Series</button>
                 <button class="category-btn" id="cat-btn-technology" onclick="game.switchCategory('technology')">Technology</button>
+                <button class="category-btn" id="cat-btn-programming" onclick="game.switchCategory('programming')">Programming</button>
                 <button class="category-btn" id="cat-btn-novel" onclick="game.switchCategory('novel')">Novels</button>
                 <button class="category-btn" id="cat-btn-filipino-movies" onclick="game.switchCategory('filipino-movies')">Filipino Movies</button>
             </div>
@@ -646,183 +661,7 @@
     </div>
 
     <!-- Changelog Selector Modal -->
-    <div class="modal-backdrop" id="changelog-modal-backdrop" onclick="game.closeChangelogModal(event)">
-        <div class="changelog-modal" onclick="event.stopPropagation()">
-            <h3>Game Updates</h3>
-            <div class="changelog-content">
-                <div class="changelog-version">
-                    <h4>v2.0.0 - Scramble Board, New Themes & Big Polish Update 🎲✨</h4>
-                    <ul>
-                        <li><strong>New Game Mode:</strong> Open ☰ Menu → <em>Scramble Board</em> for a full 15×15 tile-laying board game — a fresh way to play, separate from the classic word scramble.</li>
-                        <li><strong>Colored Premium Board:</strong> A proper 15×15 board with Triple/Double Word and Triple/Double Letter squares and a ★ center start — build words across the grid for big scores.</li>
-                        <li><strong>2–4 Players:</strong> Play against 1, 2, or 3 opponents, and choose Easy, Medium, or Hard before each match.</li>
-                        <li><strong>Roll the Dice:</strong> Every match opens with a dice roll to decide turn order — highest roll plays first.</li>
-                        <li><strong>Opponents From the Leaderboard:</strong> Your AI rivals are drawn from real wallets on the on-chain leaderboard (practice bots fill in as a fallback). Their racks stay hidden — you never see an opponent's letters.</li>
-                        <li><strong>Real Word Validation:</strong> Every word you play is checked against a 168,000-word dictionary built right into the game, so it works fully offline once loaded.</li>
-                        <li><strong>Race to Win:</strong> First player to reach the target score wins. Land all 7 tiles in one turn for a +50 <em>bingo</em> bonus.</li>
-                        <li><strong>In-Game Dictionary:</strong> Look up any word from inside a match — instantly see whether it's playable and read its definition.</li>
-                        <li><strong>Word Finder Helper:</strong> Stuck? Tap <em>Find Word</em> to highlight the best play your rack and the board can make — three hints per match.</li>
-                        <li><strong>Dark Mode:</strong> A new Midnight Walnut theme, a header sun/moon quick-toggle, and a smart first-visit default that follows your device's dark mode setting.</li>
-                        <li><strong>Stellar Cosmos Theme:</strong> A deep-space navy board with a nebula wash, a star-dot field, and glowing turquoise-accented tiles.</li>
-                        <li><strong>Art Deco Lounge Theme:</strong> Emerald felt with a brass fan-ray motif and cream tiles trimmed in gold.</li>
-                        <li><strong>Terrazzo & Cork Chips:</strong> Two new chip materials join the Customize Chips menu.</li>
-                        <li><strong>Aurora Tile Effect:</strong> A shimmering northern-lights ribbon sweep — the game's first LEGEND-exclusive premium effect, unlocked at 1000+ points on the leaderboard.</li>
-                        <li><strong>Streak Escalation:</strong> Hit a 10+ win streak and a warm ember glow spreads across the screen edges.</li>
-                        <li><strong>Idle Tile Shimmer:</strong> A gentle light sweep across your rack after a short pause nudges you toward your next move.</li>
-                        <li><strong>Drop Preview:</strong> See a faint letter preview in the slot you're dragging a tile toward before you let go.</li>
-                        <li><strong>Achievement Badge Stamps:</strong> Unlocking an achievement now stamps a proper badge onto the screen instead of a plain status message.</li>
-                        <li><strong>Smoother Board Scaling:</strong> The board and tiles now resize fluidly to fit your screen, from desktop down to the smallest phones.</li>
-                        <li><strong>Audio Settings:</strong> A new Audio menu with independent Music and Sound Effects toggles and volume sliders.</li>
-                        <li><strong>Redesigned Mobile Menus:</strong> On phones, menus now slide up from the bottom edge for easier one-handed reach.</li>
-                        <li><strong>Haptic Feedback:</strong> A short vibration on tile placement and on winning, on supported devices (toggle in the Effects menu).</li>
-                    </ul>
-                </div>
-                <div class="changelog-version" style="margin-top: 15px;">
-                    <h4>v1.11.0 - Autumn Theme, New Chips & Smarter Feedback</h4>
-                    <ul>
-                        <li><strong>Autumn Harvest Theme:</strong> A warm burnt-orange board with amber tiles joins the theme collection.</li>
-                        <li><strong>New Chip Materials:</strong> Brass, Jade, and Mother-of-Pearl chips are now available in the Customize Chips menu.</li>
-                        <li><strong>Bigger Daily Challenge:</strong> The daily word pool grew from 33 to over 1,100 curated words — years of dailies with no repeats.</li>
-                        <li><strong>Near-Miss Feedback:</strong> Wrong guesses now flash correctly-placed letters amber (with a gentler sound) so you know what to keep.</li>
-                        <li><strong>Golden Cascade:</strong> Solving a word sends a golden ripple across the board cells under the bouncing tiles.</li>
-                        <li><strong>Score Odometer:</strong> Points now count up with a satisfying pulse instead of snapping to the new total.</li>
-                        <li><strong>Streak Glow Tiers:</strong> The streak bubble now glows mustard at 3 wins, orange at 7, and catches fire at 10.</li>
-                        <li><strong>New Sounds:</strong> Combo blips that rise with your multiplier, an achievement fanfare, and a daily-streak bell.</li>
-                        <li><strong>Offline Fix:</strong> The Rustic theme no longer depends on remote images — every theme now works fully offline.</li>
-                    </ul>
-                </div>
-                <div class="changelog-version" style="margin-top: 15px;">
-                    <h4>v1.10.0 - Visual Polish, Achievements & Combo Scoring</h4>
-                    <ul>
-                        <li><strong>Tile Settle Physics:</strong> Tiles now bounce gently into place when dropped onto the board or rack.</li>
-                        <li><strong>Premium Tile Effects:</strong> Volcanic Forge, Holographic, Ice Crystal, and Stained Glass tile effects are now unlockable for players holding a GOLD or LEGEND badge — None and Neon Arcade stay free.</li>
-                        <li><strong>Shareable Victory Card:</strong> Turn any win — regular or Daily Challenge — into a shareable image with your word, score, streak, and badge tier.</li>
-                        <li><strong>Ambient Backgrounds:</strong> Each board theme now has a subtle drifting glow behind the board (respects Performance Mode and reduced-motion settings).</li>
-                        <li><strong>Achievements:</strong> Earn one-time achievements for a no-hint solve and a sub-10-second solve, shown in the victory score breakdown.</li>
-                        <li><strong>Combo Multiplier:</strong> Win two scrambles within 60 seconds of each other to build up to a 3x combo on your base score.</li>
-                    </ul>
-                </div>
-                <div class="changelog-version" style="margin-top: 15px;">
-                    <h4>v1.9.0 - Daily Challenge, Performance Mode & Onboarding</h4>
-                    <ul>
-                        <li><strong>Daily Challenge:</strong> A new word every day, the same for every player — accessible from ☰ Menu. Solve it, then share your result with a Wordle-style emoji grid showing how many hints you needed.</li>
-                        <li><strong>Daily Streak:</strong> Come back each day to build a streak, shown right in the header while a Daily Challenge is active.</li>
-                        <li><strong>Performance Mode:</strong> A new toggle in the Effects menu strips heavy shadows and blur for smoother play on slower devices.</li>
-                        <li><strong>Welcome Onboarding:</strong> First-time visitors now see a quick "how to play" card explaining drag-and-drop and that a wallet is optional — connect anytime to save your score on-chain.</li>
-                    </ul>
-                </div>
-                <div class="changelog-version" style="margin-top: 15px;">
-                    <h4>v1.8.2 - Tile Font Picker</h4>
-                    <ul>
-                        <li><strong>Tile Font Picker:</strong> Choose your letter tile font in the Customize Chips menu — Classic (Jost), Typewriter (Courier Prime), Grotesk (Space Grotesk), and Modern Bold (Montserrat) are free and available immediately.</li>
-                        <li><strong>Easy Read Font:</strong> Added OpenDyslexic as an accessibility-focused tile font option.</li>
-                        <li><strong>Premium Fonts:</strong> Arcade (Bungee) and Retro Pixel (Press Start 2P) are unlockable tile fonts for players holding a GOLD or LEGEND badge on the on-chain leaderboard.</li>
-                        <li><strong>Lazy Font Loading:</strong> Accessibility and premium fonts only download when you open Customize Chips or have one already selected — the initial page load stays untouched.</li>
-                    </ul>
-                </div>
-                <div class="changelog-version" style="margin-top: 15px;">
-                    <h4>v1.8.1 - Speed & Performance Update</h4>
-                    <ul>
-                        <li><strong>Installable App (PWA):</strong> Word Scramble can now be installed to your home screen or desktop, with instant repeat loads and an offline game shell via a service worker.</li>
-                        <li><strong>Smarter Live Updates:</strong> The on-chain event stream now polls every 5s only while the tab is visible, slows to 30s in background tabs, catches up instantly when you return, and stays fully paused until a wallet connects.</li>
-                        <li><strong>Leaderboard Cache:</strong> Leaderboard reads are cached for 15 seconds and refresh automatically the moment any player submits a new score — reopening the leaderboard is now instant.</li>
-                        <li><strong>Faster Wallet Connect:</strong> The connection to the wallet SDK's CDN is pre-warmed at page load, so the first "Connect Wallet" click resolves quicker.</li>
-                    </ul>
-                </div>
-                <div class="changelog-version" style="margin-top: 15px;">
-                    <h4>v1.8.0 - Interface Overhaul & Performance Update</h4>
-                    <ul>
-                        <li><strong>Header Menu Dropdown:</strong> The five header buttons (Category, Customize Board, Customize Chips, Leaderboard, Effects) are now collapsed into a single <em>☰ Menu</em> dropdown on all screen sizes, freeing up space above the board.</li>
-                        <li><strong>Title & Navbar Fix:</strong> The page now grows and scrolls instead of clipping — the Word Scramble title no longer hides underneath the fixed wallet bar on any screen size.</li>
-                        <li><strong>Clue Panel Overflow Fix:</strong> Long dictionary definitions wrap inside the clue card (matched to the board width) and scroll internally past 150px, instead of stretching the whole board sideways.</li>
-                        <li><strong>Letter Rack Relocated:</strong> The tile rack moved from the bottom-right corner to sit centered directly below the board, with tiles enlarged from 38px to 52px (and bigger letters on mobile too).</li>
-                        <li><strong>Readable Side Panels:</strong> "How to Play" and "Hint Guide" cards widened to 340px with larger text (0.95rem), bigger headings, and larger step badges for readability.</li>
-                        <li><strong>Smoother Touch & Drag:</strong> Touch listeners now attach only while dragging a tile (fixing a page-wide scroll-blocking violation), and drag snap-targets are measured once per drag instead of on every mouse move.</li>
-                        <li><strong>Leaner Deployment:</strong> ~87MB of non-runtime files (videos, documents, screenshots) are excluded from the live site deploy.</li>
-                    </ul>
-                </div>
-                <div class="changelog-version" style="margin-top: 15px;">
-                    <h4>v1.7.0 - Hybrid Save System</h4>
-                    <ul>
-                        <li><strong>Address-Keyed Autosave:</strong> In-progress game state (score, level, category, streak) is now saved to <code>localStorage</code> under your wallet address after every correct answer — no fee, instant.</li>
-                        <li><strong>Session Resume:</strong> Reconnecting your wallet automatically restores your last in-progress level and score.</li>
-                        <li><strong>On-Chain Source of Truth:</strong> Your all-time best score remains on the Soroban leaderboard; the personal best panel now uses the on-chain entry as an authoritative baseline.</li>
-                        <li><strong>No Wallet, No Problem:</strong> Anonymous players still get local best-score tracking under a shared anonymous key.</li>
-                    </ul>
-                </div>
-                <div class="changelog-version" style="margin-top: 15px;">
-                    <h4>v1.6.1 - Sound Icon Alignment</h4>
-                    <ul>
-                        <li><strong>Sound Toggle Offset:</strong> Adjusted the fixed mute button down to <code>top: 48px</code>, ensuring it is no longer covered by the Stellar Wallet bar.</li>
-                    </ul>
-                </div>
-                <div class="changelog-version" style="margin-top: 15px;">
-                    <h4>v1.6.0 - Atomic Leaderboards & Personal Best Tracker</h4>
-                    <ul>
-                        <li><strong>On-Chain Leaderboard UI:</strong> View and fetch real-time player high scores directly from the Stellar Testnet (Soroban) smart contract.</li>
-                        <li><strong>Personal Best Storage:</strong> Saves your highest score and maximum level locally using browser <code>localStorage</code>, integrating seamlessly with your connected on-chain identity.</li>
-                        <li><strong>Mock Fallback Mechanics:</strong> Provides high-fidelity local high score rankings if the blockchain ledger is unreachable or empty.</li>
-                        <li><strong>Metallic Rank Badges:</strong> Styled custom gold, silver, and bronze badges to highlight the top three leaderboard performers.</li>
-                    </ul>
-                </div>
-                <div class="changelog-version" style="margin-top: 15px;">
-                    <h4>v1.5.0 - Custom Chips, Background Music & Alignment Fixes</h4>
-                    <ul>
-                        <li><strong>8 Skeuomorphic Chip Materials:</strong> Customize your tiles via the new "Customize Chips" menu. Choose from Bone, Acrylic, Aluminum, Mahogany, Ebony, Vibrant Amber, Malachite, and Smoked Glass!</li>
-                        <li><strong>Dynamic Jazz Loop:</strong> A relaxing, dynamic bossa nova loop synthesized directly in your browser using the Web Audio API, controllable via the mute toggle.</li>
-                        <li><strong>Tile Alignment Fix:</strong> Absolute coordinates are now calculated relative to the main body element, resolving the drift/alignment bug of letters on the board.</li>
-                        <li><strong>Layout Stability:</strong> Fixed the clue panel height to prevent layout shifts when clues change or grow.</li>
-                    </ul>
-                </div>
-                <div class="changelog-version" style="margin-top: 15px;">
-                    <h4>v1.4.0 - Progressive Clue & Letter Lock System</h4>
-                    <ul>
-                        <li><strong>3-Stage Clue System:</strong> Definitions are now active by default as Clue 1. Progress to Clue 2 (first letter lock) and Clue 3 (Trump Card - first & last letter lock) on wrong guesses or hint clicks.</li>
-                        <li><strong>Retro HUD Indicator Dots:</strong> 3 visual glow indicators (green, amber, red/gold with pulse) show active clue levels in the monitored HUD panel.</li>
-                        <li><strong>Point/Streak Mechanics:</strong> Requesting hints costs 10 pts but preserves win streaks. Wrong guesses lock letters for free but reset streaks.</li>
-                        <li><strong>Definition Toggle:</strong> Clicking "Word Hint" toggles the display back to the definition at any time.</li>
-                    </ul>
-                </div>
-                <div class="changelog-version" style="margin-top: 15px;">
-                    <h4>v1.3.0 - Customizable Board & Wallpaper Themes</h4>
-                    <ul>
-                        <li><strong>Custom Board Themes:</strong> Open the "Customize Board" menu in the header to pick between 5 stunning aesthetics: Mid-Century Teak, Nordic Oak, Rustic Reclaimed, Vintage Parchment, and Coastal Driftwood.</li>
-                        <li><strong>Complete Theme Overrides:</strong> Overrides page background wallpapers, board designs, grid cells, locked tiles, and button finishes to match the theme.</li>
-                        <li><strong>Image Previews:</strong> Preview cards with screenshots to preview the design before activating.</li>
-                        <li><strong>Persistent Styling:</strong> The custom board choice is saved in local browser storage to persist across sessions!</li>
-                    </ul>
-                </div>
-                <div class="changelog-version" style="margin-top: 15px;">
-                    <h4>v1.2.0 - Win Streak Update</h4>
-                    <ul>
-                        <li><strong>Win Streak Counter:</strong> A new Streak bubble in the header tracks your consecutive correct answers.</li>
-                        <li><strong>Tiered Streak Bonuses:</strong> Win multiple rounds without a mistake to earn bonus points per solve — +10 (1–5), +20 (6–10), +30 (11–15), +50 (16+ wins).</li>
-                        <li><strong>Score Breakdown:</strong> The victory screen now shows a detailed breakdown of base points, streak tier, and total earned per round.</li>
-                        <li><strong>Streak Reset:</strong> A wrong answer resets your streak. Switching category also resets it.</li>
-                    </ul>
-                </div>
-                <div class="changelog-version" style="margin-top: 15px;">
-                    <h4>v1.1.0 - Challenge & Hints Update</h4>
-                    <ul>
-                        <li><strong>First Letter Hint Lock:</strong> The Hint button now only reveals and locks the first letter to maintain a healthy puzzle challenge.</li>
-                        <li><strong>Persistent Hints:</strong> Correctly placed hints stay locked on the board even if you submit an incorrect word or press Reset.</li>
-                        <li><strong>Hint Guide Sidebar:</strong> A new desktop sidebar detailing point costs and hint rules.</li>
-                        <li><strong>Interactive Changelog:</strong> Added this updates log to keep players informed of new features!</li>
-                    </ul>
-                </div>
-                <div class="changelog-version" style="margin-top: 15px;">
-                    <h4>v1.0.0 - Teak Cabinet Launch</h4>
-                    <ul>
-                        <li><strong>Retro Teak Aesthetic:</strong> Beautiful Mid-Century Modern graphics with starburst pattern and brass accents.</li>
-                        <li><strong>Web Audio Synthesizer:</strong> Immersive retro sounds generated dynamically in your browser.</li>
-                        <li><strong>Canvas Particle Burst:</strong> Spectacular physics explosions on victory.</li>
-                        <li><strong>Categories & APIs:</strong> Wikipedia and Dictionary APIs feed categories like Anime, Novels, and Filipino Movies.</li>
-                    </ul>
-                </div>
-            </div>
-            <button class="changelog-close-btn" onclick="game.closeChangelogModal(null)">Close</button>
-        </div>
-    </div>
+    <!-- Changelog modal: now React — src/components/ChangelogModal.tsx (data: src/data/changelog.ts) -->
 
     <!-- Leaderboard Modal -->
     <div class="modal-backdrop" id="leaderboard-modal-backdrop" onclick="game.closeLeaderboardModal(event)">
@@ -957,6 +796,9 @@
     <div class="modal-backdrop" id="effects-modal-backdrop" onclick="game.closeEffectsModal(event)">
         <div class="theme-modal" onclick="event.stopPropagation()">
             <h3>Visual Effects Menu</h3>
+            <!-- Everything between the title and the close button scrolls, so the
+                 title stays put and "Close Menu" is always reachable. -->
+            <div class="modal-scroll-body">
             <div class="effects-settings-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
 
                 <!-- Performance Mode Toggle -->
@@ -1125,6 +967,7 @@
                 <button class="preview-btn" onclick="game.previewVictoryEffect('victoryGlow')" style="font-size: 0.75rem; padding: 8px; background: #e0f7fa; border: 1.5px solid var(--teak-dark); box-shadow: 0 3px 0 #4dd0e1;">Test Title Glow</button>
                 <button class="preview-btn preview-all-btn" onclick="game.previewVictoryEffect('all')" style="font-size: 0.75rem; padding: 8px; background: var(--mustard); border: 1.5px solid var(--teak-dark); box-shadow: 0 3px 0 var(--mustard-dark);">Test All Effects</button>
             </div>
+            </div><!-- /.modal-scroll-body -->
 
             <button class="theme-close-btn" style="margin-top: 20px;" onclick="game.closeEffectsModal(null)">Close Menu</button>
         </div>
@@ -1135,6 +978,7 @@
     <div class="modal-backdrop" id="audio-modal-backdrop" onclick="game.closeAudioModal(event)">
         <div class="theme-modal" onclick="event.stopPropagation()">
             <h3>🔊 Audio Settings</h3>
+            <div class="modal-scroll-body">
             <div class="effects-settings-container" style="display: flex; flex-direction: column; gap: 16px; margin-top: 15px;">
 
                 <!-- Music -->
@@ -1176,6 +1020,7 @@
                 </div>
 
             </div>
+            </div><!-- /.modal-scroll-body -->
             <button class="theme-close-btn" style="margin-top: 20px;" onclick="game.closeAudioModal(null)">Close Menu</button>
         </div>
     </div>

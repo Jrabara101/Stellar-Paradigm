@@ -1,0 +1,63 @@
+/* Styles for React-owned surfaces. Panels reuse the legacy classes
+   (.changelog-modal, …) so all themes' --teak-* / --mustard / --turquoise
+   tokens apply unchanged; these rules only hand animation over to Motion. */
+
+/* Motion drives opacity/transform inline — stop the legacy CSS transitions
+   from fighting it (inline transform already outranks the stylesheet). */
+.modal-backdrop.rx-backdrop,
+.modal-backdrop .rx-panel {
+    transition: none !important;
+}
+
+.rx-panel:focus, .rx-panel:focus-visible { outline: none; } /* the dialog itself is not a control */
+
+.rx-panel--sheet {
+    touch-action: pan-x; /* vertical drag goes to the dismiss gesture */
+    padding-bottom: calc(30px + var(--rx-inset-bottom, env(safe-area-inset-bottom, 0px)));
+}
+.rx-panel--sheet .changelog-content { touch-action: pan-y; }
+
+.rx-sheet-grip {
+    width: 44px;
+    height: 5px;
+    border-radius: 3px;
+    margin: -14px auto 14px;
+    background: var(--off-white);
+    opacity: 0.45;
+}
+
+/* Changelog — staggered version cards */
+.rx-changelog .changelog-content { max-height: min(52vh, 420px); }
+.rx-changelog .changelog-version + .changelog-version { margin-top: 15px; }
+.rx-changelog .changelog-close-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--turquoise-dark); }
+
+/* ── Native (Capacitor) shell ───────────────────────────────────────────
+   Android 15+/targetSdk 36 is always edge-to-edge: the WebView runs under
+   the status and navigation bars. Capacitor's SystemBars injects the real
+   insets as --safe-area-inset-*; env() is the fallback. */
+html[data-native] {
+    --rx-inset-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+    --rx-inset-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+    padding-top: var(--rx-inset-top);
+    padding-bottom: var(--rx-inset-bottom);
+}
+/* Fixed chrome sits inside the safe area (margin offsets work whatever
+   top/bottom value each legacy breakpoint sets). */
+html[data-native] .stellar-bar { top: var(--rx-inset-top); }
+html[data-native] .sound-toggle,
+html[data-native] .theme-quick-toggle { margin-top: var(--rx-inset-top); }
+html[data-native] .feedback-fab { margin-bottom: var(--rx-inset-bottom); }
+
+/* Paints the status-bar strip in the active theme's dark wood, since the
+   native bar background can no longer be coloured on Android 16. */
+.rx-statusbar-scrim {
+    position: fixed;
+    inset: 0 0 auto 0;
+    height: var(--rx-inset-top);
+    background: var(--teak-dark);
+    z-index: 3000;
+    pointer-events: none;
+}
+
+/* The "Get Android App" item is pointless inside the app. */
+html[data-native] #get-app-btn { display: none; }

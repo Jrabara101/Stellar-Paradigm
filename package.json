@@ -1,10 +1,15 @@
 {
   "name": "word-scramble",
-  "version": "1.0.0",
-  "description": "",
-  "main": "script.js",
+  "version": "2.1.0",
+  "description": "Word Scramble — retro word puzzle with an on-chain Stellar leaderboard (React + Vite + Capacitor)",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "android:sync": "npm run build && cap sync android",
+    "android:open": "cap open android",
+    "android:apk": "npm run android:sync && cd android && gradlew assembleDebug"
   },
   "keywords": [],
   "author": "",
@@ -12,9 +17,23 @@
   "type": "commonjs",
   "dependencies": {
     "@capacitor/android": "^8.5.0",
+    "@capacitor/app": "^8.1.2",
     "@capacitor/cli": "^8.5.0",
     "@capacitor/core": "^8.5.0",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/splash-screen": "^8.0.2",
     "@stellar/freighter-api": "^6.0.1",
-    "@stellar/stellar-sdk": "^15.1.0"
-  }
+    "@stellar/stellar-sdk": "^15.1.0",
+    "motion": "^14.2.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  },
+  "private": true
 }

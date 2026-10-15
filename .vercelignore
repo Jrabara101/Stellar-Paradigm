@@ -3,9 +3,7 @@
 # Dependencies — not needed at runtime (SDK + Wallets Kit load from esm.sh CDN)
 node_modules/
 
-# Build / package metadata
-package.json
-package-lock.json
+# Build / package metadata (Vercel builds from source now — see vercel.json)
 
 # Soroban contract source + Rust target dir (~2.3GB, already deployed on-chain)
 word-scramble-contract/

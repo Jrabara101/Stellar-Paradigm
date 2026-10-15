@@ -1,7 +1,7 @@
 // Word Scramble service worker — network-first with cache fallback.
 // Gives instant repeat loads and lets the game shell open offline,
 // while always preferring fresh files when the network is available.
-const CACHE_NAME = 'word-scramble-v4';
+const CACHE_NAME = 'word-scramble-v9';
 
 const PRECACHE = [
     './',
@@ -10,12 +10,18 @@ const PRECACHE = [
     'script.js',
     'stellar.js',
     'daily-words.js',
+    'wordbank.js',
     'feedback.js',
+    'wallet-guide.js',
     'manifest.json',
     'icons/icon-192.png',
     'icons/icon-512.png',
 ];
 
+// The React layer's Vite bundles (assets/*-<hash>.js) are not listed: their
+// names change every build, so the network-first runtime cache below picks
+// them up on first load instead. Bump CACHE_NAME on every release.
+//
 // NOTE: the Scramble Board assets (scramble-board.js, scramble-board.css, and
 // especially the ~1.8MB scramble-words.js dictionary) are intentionally NOT
 // precached — they stay lazy-loaded on first mode entry and are then picked up

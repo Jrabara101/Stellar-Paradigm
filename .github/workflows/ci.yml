@@ -52,25 +52,25 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Verify required frontend files exist
-        run: |
-          echo "Checking required frontend files..."
-          for f in \
-            index.html style.css script.js stellar.js feedback.js wallet-guide.js \
-            daily-words.js wordbank.js themes.css sw.js manifest.json \
-            scramble-board.js scramble-board.css scramble-words.js qrcode.js; do
-            test -f "$f" && echo "✅ $f" || (echo "❌ $f missing" && exit 1)
-          done
-          echo "All required files present."
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Build-check frontend JS (syntax validation)
+      - name: Syntax-check legacy JS (served as-is from public/)
         run: |
-          for f in \
-            daily-words.js script.js stellar.js feedback.js wallet-guide.js \
-            wordbank.js sw.js scramble-board.js scramble-words.js qrcode.js; do
+          for f in public/*.js; do
             echo "Checking $f..."
             node --check "$f"
           done
+
+      - name: Typecheck + production build (Vite)
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          for f in             index.html style.css script.js stellar.js feedback.js wallet-guide.js             daily-words.js wordbank.js themes.css sw.js manifest.json             scramble-board.js scramble-board.css scramble-words.js qrcode.js; do
+            test -f "dist/$f" && echo "✅ dist/$f" || (echo "❌ dist/$f missing" && exit 1)
+          done
+          ls dist/assets/index-*.js > /dev/null && echo "✅ React bundle" || (echo "❌ React bundle missing" && exit 1)
 
       - name: Cross-check stellar.js calls exist on the contracts
         run: node .github/scripts/check-contract-calls.js
@@ -153,7 +153,7 @@ jobs:
           # serve a stale pre-mainnet config once before. Fail loudly instead.
           node -e "
             const fs = require('fs');
-            const src = fs.readFileSync('stellar.js', 'utf8');
+            const src = fs.readFileSync('public/stellar.js', 'utf8');
             const block = src.slice(src.indexOf('mainnet'));
             for (const key of ['rpcUrl', 'contractId', 'rewardContractId', 'credentialContractId', 'sponsorWorkerUrl']) {
               const m = block.match(new RegExp(key + \"\\\\s*:\\\\s*([^,\\\\n]+)\"));

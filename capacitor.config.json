@@ -1,8 +1,21 @@
 {
   "appId": "com.stellarwordscramble.app",
   "appName": "Word Scramble",
-  "webDir": "www",
+  "webDir": "dist",
   "server": {
     "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false,
+      "launchShowDuration": 3000,
+      "backgroundColor": "#E8E5DF",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false
+    },
+    "SystemBars": {
+      "insetsHandling": "css",
+      "style": "DARK"
+    }
   }
 }

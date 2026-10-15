@@ -4,7 +4,7 @@
 // is a valid contract fn the frontend doesn't happen to call directly).
 const fs = require('fs');
 
-const stellarSrc = fs.readFileSync('stellar.js', 'utf8');
+const stellarSrc = fs.readFileSync('public/stellar.js', 'utf8');
 const calls = new Set();
 const callRe = /\.call\(\s*['"]([a-zA-Z_][a-zA-Z0-9_]*)['"]/g;
 let m;
