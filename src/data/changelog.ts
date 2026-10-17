@@ -5,6 +5,28 @@ export interface ChangelogVersion { version: string; title: string; items: Chang
 
 export const CHANGELOG: ChangelogVersion[] = [
     {
+        "version": "v2.1.0",
+        "title": "Smoother Menus & a Cleaner Board ✨",
+        "items": [
+            {
+                "label": "Cleaner Board",
+                "text": "The How to Play and Hint Guide cards and the Level / Score / Streak bubbles now start hidden, so the board gets all the room. Bring any of them back from the ☰ Menu (or the 📖 / 💡 buttons) and your choice is remembered."
+            },
+            {
+                "label": "Smoother Menus",
+                "text": "Every menu was rebuilt: they spring open on desktop and slide up as sheets on phones (drag the handle down to close), with cards and options that cascade in."
+            },
+            {
+                "label": "Keyboard & Screen Readers",
+                "text": "Theme, chip, font and tile-effect cards are real buttons now, and *Escape* closes the menu on top."
+            },
+            {
+                "label": "Android App",
+                "text": "The back button closes menus one at a time, haptics use the phone's own vibration engine, and the layout stays clear of the status and navigation bars."
+            }
+        ]
+    },
+    {
         "version": "v2.0.0",
         "title": "Scramble Board, New Themes & Big Polish Update 🎲✨",
         "items": [

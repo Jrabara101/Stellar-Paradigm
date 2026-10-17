@@ -1,9 +1,9 @@
-import { Fragment, useCallback } from 'react';
+import { Fragment } from 'react';
 import * as m from 'motion/react-m';
 import { Modal } from './Modal';
 import { CHANGELOG } from '../data/changelog';
-import { ui, useModalOpen } from '../store/ui';
-import { whenGameReady } from '../legacy/bridge';
+import { ui } from '../store/ui';
+import { playSound } from '../legacy/sound';
 
 /** Renders `*emphasis*` spans from the changelog data. */
 function RichText({ text }: { text: string }) {
@@ -16,14 +16,13 @@ function RichText({ text }: { text: string }) {
 }
 
 export function ChangelogModal() {
-    const open = useModalOpen('changelog');
-    const close = useCallback(() => {
-        void whenGameReady().then((g) => g.sound.play('select'));
+    const close = () => {
+        playSound('select');
         ui.close('changelog');
-    }, []);
+    };
 
     return (
-        <Modal open={open} onClose={close} panelClassName="changelog-modal rx-changelog" labelledBy="rx-changelog-title">
+        <Modal id="changelog" panelClassName="changelog-modal rx-changelog" labelledBy="rx-changelog-title">
             <h3 id="rx-changelog-title">Game Updates</h3>
             <div className="changelog-content">
                 {CHANGELOG.map((v, i) => (

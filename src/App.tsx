@@ -1,5 +1,16 @@
 import { LazyMotion, MotionConfig } from 'motion/react';
 import { ChangelogModal } from './components/ChangelogModal';
+import { OnboardingModal } from './modals/OnboardingModal';
+import { CategoryModal } from './modals/CategoryModal';
+import { ThemeModal } from './modals/ThemeModal';
+import { ChipModal } from './modals/ChipModal';
+import { TileEffectsModal } from './modals/TileEffectsModal';
+import { ApiSettingsModal } from './modals/ApiSettingsModal';
+import { LeaderboardModal } from './modals/LeaderboardModal';
+import { CredentialsModal } from './modals/CredentialsModal';
+import { GetAppModal } from './modals/GetAppModal';
+import { EffectsModal } from './modals/EffectsModal';
+import { AudioModal } from './modals/AudioModal';
 
 /**
  * React layer, mounted alongside the legacy game. Surfaces move in here one
@@ -13,7 +24,19 @@ export function App() {
         <MotionConfig reducedMotion="user">
             {/* `strict` makes any stray full `motion.*` import a runtime error. */}
             <LazyMotion features={loadFeatures} strict>
+                <OnboardingModal />
+                <CategoryModal />
                 <ChangelogModal />
+                <ThemeModal />
+                <ChipModal />
+                <EffectsModal />
+                {/* After Effects: it opens on top of the Effects menu. */}
+                <TileEffectsModal />
+                <AudioModal />
+                <LeaderboardModal />
+                <CredentialsModal />
+                <ApiSettingsModal />
+                <GetAppModal />
             </LazyMotion>
         </MotionConfig>
     );

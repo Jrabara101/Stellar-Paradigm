@@ -1,7 +1,7 @@
 // Native (Capacitor / Android) integration. Everything here is a no-op on
 // the web build; plugins are imported lazily so the web bundle stays lean.
 import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core';
-import { callLegacy, whenGameReady, type LegacyGame } from '../legacy/bridge';
+import { whenGameReady, type LegacyGame } from '../legacy/bridge';
 import { ui } from '../store/ui';
 
 export const isNative = Capacitor.isNativePlatform();
@@ -99,14 +99,10 @@ function handleBack(game: LegacyGame): boolean {
         return true;
     }
 
-    // 5. Legacy .modal-backdrop modals — the last one in the DOM is on top.
-    //    "<name>-modal-backdrop" maps to game.close<Name>Modal(null).
-    const open = [...document.querySelectorAll<HTMLElement>('.modal-backdrop.active:not(.rx-backdrop)')];
-    const top = open[open.length - 1];
-    if (top) {
-        const name = top.id.replace(/-modal-backdrop$/, '');
-        const method = name === 'onboarding' ? 'dismissOnboarding' : `close${pascal(name)}Modal`;
-        if (!callLegacy(game, method, null)) top.classList.remove('active');
+    // 5. Feedback form overlay (feedback.js).
+    const feedback = document.getElementById('feedback-modal');
+    if (feedback?.classList.contains('feedback-overlay--open')) {
+        feedback.querySelector<HTMLElement>('.feedback-close')?.click();
         return true;
     }
 
@@ -118,4 +114,3 @@ function handleBack(game: LegacyGame): boolean {
     return false;
 }
 
-const pascal = (s: string) => s.replace(/(^|-)(\w)/g, (_, __, c: string) => c.toUpperCase());

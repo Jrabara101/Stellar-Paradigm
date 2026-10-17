@@ -12,16 +12,22 @@
 .rx-panel:focus, .rx-panel:focus-visible { outline: none; } /* the dialog itself is not a control */
 
 .rx-panel--sheet {
-    touch-action: pan-x; /* vertical drag goes to the dismiss gesture */
     padding-bottom: calc(30px + var(--rx-inset-bottom, env(safe-area-inset-bottom, 0px)));
 }
-.rx-panel--sheet .changelog-content { touch-action: pan-y; }
 
+/* Sheets are dragged down to dismiss from this handle only, so scrolling a
+   long list inside the panel never dismisses it by accident. */
+.rx-sheet-handle {
+    margin: -22px -30px 8px;
+    padding: 12px 0 10px;
+    touch-action: none;
+    cursor: grab;
+}
 .rx-sheet-grip {
     width: 44px;
     height: 5px;
     border-radius: 3px;
-    margin: -14px auto 14px;
+    margin: 0 auto;
     background: var(--off-white);
     opacity: 0.45;
 }
@@ -30,6 +36,130 @@
 .rx-changelog .changelog-content { max-height: min(52vh, 420px); }
 .rx-changelog .changelog-version + .changelog-version { margin-top: 15px; }
 .rx-changelog .changelog-close-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--turquoise-dark); }
+
+/* ── Stage 2 modals ───────────────────────────────────────────────────── */
+
+/* Picker cards are <button>s now (keyboard + screen reader reachable);
+   undo the UA button styles the legacy div cards never had. */
+.rx-card-cell { display: flex; min-width: 0; }
+.theme-card.rx-card {
+    width: 100%;
+    font: inherit;
+    color: inherit;
+    text-align: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+}
+.theme-card.rx-card:focus-visible { outline: 3px solid var(--turquoise); outline-offset: 2px; }
+.theme-card.rx-card .theme-name { display: block; }
+.theme-card.rx-card .theme-preview { position: relative; }
+
+.rx-copy { margin: 14px 0; line-height: 1.6; font-size: 0.9rem; }
+.rx-subheading { margin-top: 10px; }
+
+.rx-settings-list { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+.rx-audio-list { gap: 16px; }
+.rx-fx-divider { border-bottom: 2px solid var(--teak-dark) !important; padding-bottom: 12px; margin-bottom: 4px; }
+.rx-audio-group.rx-fx-divider { padding-bottom: 14px; margin-bottom: 0; }
+.rx-audio-group .toggle-container { margin-bottom: 10px; }
+.rx-toggle-title { font-weight: 900; font-size: 0.95rem; }
+.rx-toggle-desc { font-size: 0.75rem; opacity: 0.85; }
+
+.rx-mustard-btn {
+    font-size: 0.8rem;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1.5px solid var(--teak-dark);
+    background: var(--mustard);
+    color: var(--teak-dark);
+    font-weight: 900;
+    box-shadow: 0 3px 0 var(--mustard-dark);
+    width: fit-content;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-family: inherit;
+    margin-left: 10px;
+}
+
+.rx-section-heading {
+    margin: 20px 0 10px 0;
+    text-transform: uppercase;
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--teak-dark);
+    border-bottom: 2px solid var(--mustard);
+    padding-bottom: 4px;
+    font-weight: 900;
+    text-align: left;
+}
+.rx-preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.rx-preview-btn {
+    font-size: 0.75rem;
+    padding: 8px;
+    background: #e0f7fa;
+    border: 1.5px solid var(--teak-dark);
+    box-shadow: 0 3px 0 #4dd0e1;
+}
+.rx-preview-btn.preview-all-btn { background: var(--mustard); box-shadow: 0 3px 0 var(--mustard-dark); }
+
+.rx-volume-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--teak-dark);
+}
+.rx-volume-val { min-width: 32px; text-align: right; }
+
+.rx-api-intro { font-size: 0.85rem; color: var(--off-white); margin-bottom: 15px; opacity: 0.9; text-align: left; line-height: 1.4; }
+.rx-api-sections { text-align: left; display: flex; flex-direction: column; gap: 15px; }
+.rx-api-divider { border-bottom: 1px dashed rgba(255, 255, 255, 0.15); padding-bottom: 12px; }
+.rx-api-check { display: flex; align-items: center; gap: 8px; font-weight: bold; color: var(--off-white); margin-bottom: 6px; cursor: pointer; }
+.rx-api-check input { cursor: pointer; }
+.rx-api-field { display: flex; flex-direction: column; gap: 4px; }
+.rx-api-input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1.5px solid var(--teak-dark);
+    border-radius: 6px;
+    color: var(--off-white);
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    width: 100%;
+    box-sizing: border-box;
+    user-select: text;
+    -webkit-user-select: text;
+}
+.rx-api-help { font-size: 0.75rem; color: #a5d8ff; }
+.rx-api-help a { color: var(--turquoise); text-decoration: underline; }
+.rx-api-actions { display: flex; gap: 10px; margin-top: 25px; }
+.rx-api-actions .theme-close-btn { flex: 1; margin: 0; }
+.rx-api-actions .rx-api-save { background: var(--turquoise); color: var(--teak-dark); }
+
+/* ── Hidden-by-default HUD pieces (v2.1) ──────────────────────────────────
+   The Level/Score/Streak bubbles start hidden like the side guide panels;
+   ☰ Menu → "📊 Score Bubbles" brings them back. */
+.stats-container.hidden-panel { display: none; }
+
+/* The 📖 / 💡 reveal pills float beside the board on wide screens (where the
+   guides are side columns). Below that they sat on top of the ☰ Menu button,
+   so they get their own centred row above the title instead. */
+.panel-toggle-row { display: contents; }
+@media (max-width: 1199px) {
+    .panel-toggle-row {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 10px 0 2px;
+    }
+    .panel-toggle-row:not(:has(.panel-toggle-tab:not(.hidden))) { display: none; }
+    .panel-toggle-row .panel-toggle-tab {
+        position: static;
+        font-size: 0.7rem;
+        padding: 6px 10px;
+    }
+}
 
 /* ── Native (Capacitor) shell ───────────────────────────────────────────
    Android 15+/targetSdk 36 is always edge-to-edge: the WebView runs under

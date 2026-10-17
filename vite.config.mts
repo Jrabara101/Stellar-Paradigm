@@ -8,9 +8,9 @@ import { dirname, join } from 'node:path';
 // relative paths it always used, so its lazy loaders keep working. New React
 // code lives in src/ and is bundled + hashed by Vite.
 
-// Images the legacy code loads from folders that live outside public/ (theme
-// picker previews, wallet-guide screenshots). Discovered by scanning the
-// legacy sources rather than hard-coded, so a newly added theme preview is
+// Images loaded from folders that live outside public/ (theme picker
+// previews, wallet-guide screenshots). Discovered by scanning the legacy
+// sources and src/ rather than hard-coded, so a newly added theme preview is
 // picked up automatically. Dev needs nothing: Vite serves the project root.
 const EXTERNAL_ASSET_RE = /(?:Word Scramble Boards Inspired|screenshots)\/[^'"`)\n]+?\.(?:png|jpe?g|webp|svg)/g;
 
@@ -23,7 +23,15 @@ function copyLegacyAssets(): Plugin {
             outDir = config.build.outDir;
         },
         closeBundle() {
-            const sources = ['index.html', ...readdirSync('public').filter((f) => /\.(js|css)$/.test(f)).map((f) => join('public', f))];
+            const sources = [
+                'index.html',
+                ...readdirSync('public').filter((f) => /\.(js|css)$/.test(f)).map((f) => join('public', f)),
+                // Ported React surfaces carry their asset paths in src/ (e.g. the
+                // theme picker previews in src/data/pickers.ts).
+                ...(readdirSync('src', { recursive: true }) as string[])
+                    .filter((f) => /\.(ts|tsx|css)$/.test(f))
+                    .map((f) => join('src', f)),
+            ];
             const found = new Set<string>();
             for (const file of sources) {
                 for (const match of readFileSync(file, 'utf8').matchAll(EXTERNAL_ASSET_RE)) found.add(match[0]);

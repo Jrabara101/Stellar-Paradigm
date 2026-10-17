@@ -1752,9 +1752,7 @@ class TeakScrambleGame {
             // Streak fire effect (3+ streak only)
             if (this.winStreak >= 3 && this.effectsSettings.streakFire) {
                 if (streakBubble) {
-                    const rect = streakBubble.getBoundingClientRect();
-                    const startX = rect.left + rect.width / 2;
-                    const startY = rect.top + rect.height / 2;
+                    const { x: startX, y: startY } = this._statAnchor(streakBubble);
                     const count = this.winStreak >= 10 ? 40 : 20;
                     this.particles.streakEmberBurst(startX, startY, count);
                 }
@@ -1763,9 +1761,7 @@ class TeakScrambleGame {
             if (this.effectsSettings.scorePop) {
                 const scoreTextElem = document.getElementById('score-text');
                 if (scoreTextElem) {
-                    const rect = scoreTextElem.getBoundingClientRect();
-                    const startX = rect.left + rect.width / 2;
-                    const startY = rect.top + rect.height / 2;
+                    const { x: startX, y: startY } = this._statAnchor(scoreTextElem);
                     const comboSuffix = this.comboMultiplier > 1 ? ` (${this.comboMultiplier}x)` : '';
                     this.particles.addFloatingText(`+${basePoints} PTS${comboSuffix}`, startX, startY, '#FFFFFF', 0, 'bold 20px Jost');
                     if (streakBonus > 0) {
@@ -2384,36 +2380,36 @@ class TeakScrambleGame {
         this.sound.play('select');
         const subtitle = document.getElementById('category-modal-subtitle');
         if (subtitle) subtitle.style.display = fromOnboarding ? '' : 'none';
-        document.getElementById('category-modal-backdrop').classList.add('active');
+        document.getElementById('category-modal-backdrop')?.classList.add('active');
     }
 
     closeCategoryModal(event) {
         if (!event || event.target === document.getElementById('category-modal-backdrop')) {
             this.sound.play('select');
-            document.getElementById('category-modal-backdrop').classList.remove('active');
+            document.getElementById('category-modal-backdrop')?.classList.remove('active');
         }
     }
 
     openChangelogModal() {
         this.sound.play('select');
-        document.getElementById('changelog-modal-backdrop').classList.add('active');
+        document.getElementById('changelog-modal-backdrop')?.classList.add('active');
     }
 
     closeChangelogModal(event) {
         if (!event || event.target === document.getElementById('changelog-modal-backdrop')) {
             this.sound.play('select');
-            document.getElementById('changelog-modal-backdrop').classList.remove('active');
+            document.getElementById('changelog-modal-backdrop')?.classList.remove('active');
         }
     }
 
     showOnboarding() {
-        document.getElementById('onboarding-modal-backdrop').classList.add('active');
+        document.getElementById('onboarding-modal-backdrop')?.classList.add('active');
     }
 
     dismissOnboarding(event) {
         if (event && event.target !== document.getElementById('onboarding-modal-backdrop')) return;
         this.sound.play('select');
-        document.getElementById('onboarding-modal-backdrop').classList.remove('active');
+        document.getElementById('onboarding-modal-backdrop')?.classList.remove('active');
         localStorage.setItem('ws_onboarding_seen', 'true');
         // Let a brand-new player pick a category right away instead of silently
         // defaulting to General — the category tag is easy to miss inside the
@@ -2425,7 +2421,7 @@ class TeakScrambleGame {
 
     openThemeModal() {
         this.sound.play('select');
-        document.getElementById('theme-modal-backdrop').classList.add('active');
+        document.getElementById('theme-modal-backdrop')?.classList.add('active');
         this._ensureLazyThemeCSS();
 
         // Lazy load theme preview images on modal open
@@ -2445,13 +2441,13 @@ class TeakScrambleGame {
     closeThemeModal(event) {
         if (!event || event.target === document.getElementById('theme-modal-backdrop')) {
             this.sound.play('select');
-            document.getElementById('theme-modal-backdrop').classList.remove('active');
+            document.getElementById('theme-modal-backdrop')?.classList.remove('active');
         }
     }
 
     switchTheme(themeId) {
         if (themeId === this.currentTheme) {
-            document.getElementById('theme-modal-backdrop').classList.remove('active');
+            document.getElementById('theme-modal-backdrop')?.classList.remove('active');
             return;
         }
 
@@ -2474,7 +2470,7 @@ class TeakScrambleGame {
 
         this.applyTheme(themeId, true);
         this.updateQuickToggleIcon();
-        document.getElementById('theme-modal-backdrop').classList.remove('active');
+        document.getElementById('theme-modal-backdrop')?.classList.remove('active');
     }
 
     applyTheme(themeId, animate = true) {
@@ -2515,7 +2511,7 @@ class TeakScrambleGame {
 
     openChipModal() {
         this.sound.play('select');
-        document.getElementById('chip-modal-backdrop').classList.add('active');
+        document.getElementById('chip-modal-backdrop')?.classList.add('active');
 
         // Update active class on the chip cards (scoped to chip-card-* so it
         // doesn't clobber the tile font grid's own .current highlight)
@@ -2534,13 +2530,13 @@ class TeakScrambleGame {
     closeChipModal(event) {
         if (!event || event.target === document.getElementById('chip-modal-backdrop')) {
             this.sound.play('select');
-            document.getElementById('chip-modal-backdrop').classList.remove('active');
+            document.getElementById('chip-modal-backdrop')?.classList.remove('active');
         }
     }
 
     switchChipMaterial(materialId) {
         if (materialId === this.currentChipMaterial) {
-            document.getElementById('chip-modal-backdrop').classList.remove('active');
+            document.getElementById('chip-modal-backdrop')?.classList.remove('active');
             return;
         }
 
@@ -2556,7 +2552,7 @@ class TeakScrambleGame {
         if (activeCard) activeCard.classList.add('current');
 
         this.applyChipMaterial(materialId, true);
-        document.getElementById('chip-modal-backdrop').classList.remove('active');
+        document.getElementById('chip-modal-backdrop')?.classList.remove('active');
     }
 
     applyChipMaterial(materialId, animate = true) {
@@ -2655,7 +2651,7 @@ class TeakScrambleGame {
         }
 
         if (fontId === this.currentTileFont) {
-            document.getElementById('chip-modal-backdrop').classList.remove('active');
+            document.getElementById('chip-modal-backdrop')?.classList.remove('active');
             return;
         }
 
@@ -2665,7 +2661,7 @@ class TeakScrambleGame {
         this.updateTileFontModalUI();
 
         this.applyTileFont(fontId, true);
-        document.getElementById('chip-modal-backdrop').classList.remove('active');
+        document.getElementById('chip-modal-backdrop')?.classList.remove('active');
     }
 
     applyTileFont(fontId, animate = true) {
@@ -2688,14 +2684,14 @@ class TeakScrambleGame {
 
     openTileEffectsModal() {
         this.sound.play('select');
-        document.getElementById('tile-effects-modal-backdrop').classList.add('active');
+        document.getElementById('tile-effects-modal-backdrop')?.classList.add('active');
         this.updateTileEffectsModalHighlight();
     }
 
     closeTileEffectsModal(event) {
         if (!event || event.target === document.getElementById('tile-effects-modal-backdrop')) {
             this.sound.play('select');
-            document.getElementById('tile-effects-modal-backdrop').classList.remove('active');
+            document.getElementById('tile-effects-modal-backdrop')?.classList.remove('active');
         }
     }
 
@@ -2745,7 +2741,7 @@ class TeakScrambleGame {
         }
 
         if (effectId === this.currentTileEffect) {
-            document.getElementById('tile-effects-modal-backdrop').classList.remove('active');
+            document.getElementById('tile-effects-modal-backdrop')?.classList.remove('active');
             return;
         }
 
@@ -2755,7 +2751,7 @@ class TeakScrambleGame {
 
         this.updateTileEffectsModalHighlight();
         this.applyTileEffect(effectId, true);
-        document.getElementById('tile-effects-modal-backdrop').classList.remove('active');
+        document.getElementById('tile-effects-modal-backdrop')?.classList.remove('active');
     }
 
     applyTileEffect(effectId, animate = true) {
@@ -2841,13 +2837,13 @@ class TeakScrambleGame {
         document.getElementById('api-words-key').value = this.apiSettings.wordsKey;
         document.getElementById('api-wordnik-enabled').checked = this.apiSettings.wordnikEnabled;
         document.getElementById('api-wordnik-key').value = this.apiSettings.wordnikKey;
-        document.getElementById('api-settings-modal-backdrop').classList.add('active');
+        document.getElementById('api-settings-modal-backdrop')?.classList.add('active');
     }
 
     closeApiSettingsModal(event) {
         if (!event || event.target === document.getElementById('api-settings-modal-backdrop')) {
             this.sound.play('select');
-            document.getElementById('api-settings-modal-backdrop').classList.remove('active');
+            document.getElementById('api-settings-modal-backdrop')?.classList.remove('active');
         }
     }
 
@@ -2874,7 +2870,7 @@ class TeakScrambleGame {
     openGetAppModal() {
         this.sound.play('select');
         document.getElementById('get-app-download-link').href = TeakScrambleGame.ANDROID_APK_URL;
-        document.getElementById('get-app-modal-backdrop').classList.add('active');
+        document.getElementById('get-app-modal-backdrop')?.classList.add('active');
 
         // Render once and cache — the URL never changes at runtime, so redrawing
         // on every open would just waste CPU for an identical result.
@@ -2914,7 +2910,7 @@ class TeakScrambleGame {
     closeGetAppModal(event) {
         if (!event || event.target === document.getElementById('get-app-modal-backdrop')) {
             this.sound.play('select');
-            document.getElementById('get-app-modal-backdrop').classList.remove('active');
+            document.getElementById('get-app-modal-backdrop')?.classList.remove('active');
         }
     }
 
@@ -2939,7 +2935,7 @@ class TeakScrambleGame {
         // Clear pre-fetched data so that the next level fetches using newly configured APIs immediately
         this.prefetchedData = null;
         
-        document.getElementById('api-settings-modal-backdrop').classList.remove('active');
+        document.getElementById('api-settings-modal-backdrop')?.classList.remove('active');
         window.stellarWallet._showStatus('API Settings saved!', 'success');
     }
 
@@ -3072,7 +3068,7 @@ class TeakScrambleGame {
 
     openLeaderboardModal() {
         this.sound.play('select');
-        document.getElementById('leaderboard-modal-backdrop').classList.add('active');
+        document.getElementById('leaderboard-modal-backdrop')?.classList.add('active');
         this._updateResetUI();
         this.refreshLeaderboard();
     }
@@ -3117,7 +3113,7 @@ class TeakScrambleGame {
     closeLeaderboardModal(event) {
         if (!event || event.target === document.getElementById('leaderboard-modal-backdrop')) {
             this.sound.play('select');
-            document.getElementById('leaderboard-modal-backdrop').classList.remove('active');
+            document.getElementById('leaderboard-modal-backdrop')?.classList.remove('active');
         }
     }
 
@@ -3275,14 +3271,14 @@ class TeakScrambleGame {
 
     openCredentialsModal() {
         this.sound.play('select');
-        document.getElementById('credentials-modal-backdrop').classList.add('active');
+        document.getElementById('credentials-modal-backdrop')?.classList.add('active');
         this.refreshCredentials();
     }
 
     closeCredentialsModal(event) {
         if (!event || event.target === document.getElementById('credentials-modal-backdrop')) {
             this.sound.play('select');
-            document.getElementById('credentials-modal-backdrop').classList.remove('active');
+            document.getElementById('credentials-modal-backdrop')?.classList.remove('active');
         }
     }
 
@@ -3362,7 +3358,7 @@ class TeakScrambleGame {
         // switch must still happen when leaving Daily Challenge mode —
         // currentCategory is left untouched while a daily run is active.
         if (category === this.currentCategory && this.tilesData.length > 0 && !this.isDailyChallenge) {
-            document.getElementById('category-modal-backdrop').classList.remove('active');
+            document.getElementById('category-modal-backdrop')?.classList.remove('active');
             return;
         }
 
@@ -3370,7 +3366,7 @@ class TeakScrambleGame {
         this.updateDailyBanner();
 
         this.sound.play('select');
-        document.getElementById('category-modal-backdrop').classList.remove('active');
+        document.getElementById('category-modal-backdrop')?.classList.remove('active');
 
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.classList.remove('current');
@@ -3873,13 +3869,13 @@ class TeakScrambleGame {
             }
         }
         
-        document.getElementById('effects-modal-backdrop').classList.add('active');
+        document.getElementById('effects-modal-backdrop')?.classList.add('active');
     }
 
     closeEffectsModal(event) {
         if (!event || event.target === document.getElementById('effects-modal-backdrop')) {
             this.sound.play('select');
-            document.getElementById('effects-modal-backdrop').classList.remove('active');
+            document.getElementById('effects-modal-backdrop')?.classList.remove('active');
         }
     }
 
@@ -3954,13 +3950,13 @@ class TeakScrambleGame {
         document.getElementById('audio-slider-music-val').textContent = `${this.sound.musicVolumePct}%`;
         document.getElementById('audio-slider-sfx').value = this.sound.sfxVolumePct;
         document.getElementById('audio-slider-sfx-val').textContent = `${this.sound.sfxVolumePct}%`;
-        document.getElementById('audio-modal-backdrop').classList.add('active');
+        document.getElementById('audio-modal-backdrop')?.classList.add('active');
     }
 
     closeAudioModal(event) {
         if (!event || event.target === document.getElementById('audio-modal-backdrop')) {
             this.sound.play('select');
-            document.getElementById('audio-modal-backdrop').classList.remove('active');
+            document.getElementById('audio-modal-backdrop')?.classList.remove('active');
         }
     }
 
@@ -4009,9 +4005,7 @@ class TeakScrambleGame {
             // Preview embers from the streak bubble
             const streakBubble = document.querySelector('.streak-bubble');
             if (streakBubble) {
-                const rect = streakBubble.getBoundingClientRect();
-                const startX = rect.left + rect.width / 2;
-                const startY = rect.top + rect.height / 2;
+                const { x: startX, y: startY } = this._statAnchor(streakBubble);
                 this.particles.streakEmberBurst(startX, startY, 40); // 40 embers for max streak preview
 
                 // Temporarily add pulse glow class for 3 seconds
@@ -4053,9 +4047,7 @@ class TeakScrambleGame {
         if (type === 'scorePop' || type === 'all') {
             const scoreTextElem = document.getElementById('score-text');
             if (scoreTextElem) {
-                const rect = scoreTextElem.getBoundingClientRect();
-                const startX = rect.left + rect.width / 2;
-                const startY = rect.top + rect.height / 2;
+                const { x: startX, y: startY } = this._statAnchor(scoreTextElem);
                 this.particles.addFloatingText(`+100 PTS`, startX, startY, '#FFFFFF', 0, 'bold 20px Jost');
                 this.particles.addFloatingText(`+20 STREAK`, startX, startY, '#FF9A6C', 120, 'bold 20px Jost');
             }
@@ -4224,11 +4216,47 @@ class TeakScrambleGame {
 
     // --- Show / Hide & 1-Page Layout Controls ---
     initPanelToggles() {
-        const showInstructions = localStorage.getItem('scramble_show_instructions') !== 'false';
-        const showHints = localStorage.getItem('scramble_show_hints') !== 'false';
+        // v2.1: the How to Play / Hint Guide panels and the Level/Score/Streak
+        // bubbles are hidden by default. Everyone is reset to that once (the
+        // flag below); after that each player's own show/hide choice sticks.
+        if (localStorage.getItem('ws_ui_defaults_v2') !== 'done') {
+            localStorage.removeItem('scramble_show_instructions');
+            localStorage.removeItem('scramble_show_hints');
+            localStorage.removeItem('scramble_show_stats');
+            localStorage.setItem('ws_ui_defaults_v2', 'done');
+        }
+        const showInstructions = localStorage.getItem('scramble_show_instructions') === 'true';
+        const showHints = localStorage.getItem('scramble_show_hints') === 'true';
+        const showStats = localStorage.getItem('scramble_show_stats') === 'true';
         this.applyPanelVisibility('instructions', showInstructions);
         this.applyPanelVisibility('hints', showHints);
+        this.applyPanelVisibility('stats', showStats);
         this.checkViewportFit();
+    }
+
+    toggleStats(forceState) {
+        const stats = document.getElementById('stats-container');
+        if (!stats) return;
+        const isHidden = stats.classList.contains('hidden-panel');
+        const nextState = typeof forceState === 'boolean' ? forceState : isHidden;
+        this.applyPanelVisibility('stats', nextState);
+        localStorage.setItem('scramble_show_stats', nextState);
+        if (this.sound) this.sound.play('select');
+        this.syncViewPositions(false);
+        this.checkViewportFit();
+    }
+
+    // Where score/streak pop-ups and embers start from. The stat bubbles can
+    // be hidden (display:none → an all-zero rect), so fall back to the top
+    // centre of the board instead of flying in from the page corner.
+    _statAnchor(el) {
+        const rect = el ? el.getBoundingClientRect() : null;
+        if (rect && rect.width > 0) {
+            return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+        }
+        const board = document.getElementById('main-board');
+        const b = board ? board.getBoundingClientRect() : { left: 0, width: window.innerWidth, top: 80 };
+        return { x: b.left + b.width / 2, y: b.top + 24 };
     }
 
     toggleInstructions(forceState) {
@@ -4297,6 +4325,13 @@ class TeakScrambleGame {
             }
             if (menuBtn) {
                 menuBtn.textContent = `💡 Hint Guide: ${show ? 'Shown' : 'Hidden'}`;
+            }
+        } else if (panel === 'stats') {
+            const stats = document.getElementById('stats-container');
+            const menuBtn = document.getElementById('menu-toggle-stats-btn');
+            if (stats) stats.classList.toggle('hidden-panel', !show);
+            if (menuBtn) {
+                menuBtn.textContent = `📊 Score Bubbles: ${show ? 'Shown' : 'Hidden'}`;
             }
         }
     }
