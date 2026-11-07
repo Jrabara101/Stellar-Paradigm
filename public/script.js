@@ -3496,6 +3496,10 @@ class TeakScrambleGame {
             this.targetCellIndices.push(r * 10 + c);
         }
 
+        // buildLevelArchetype() removes the old tile elements but not their
+        // records; without this the previous word's tiles linger in tilesData
+        // (and Shuffle moves those ghosts into the daily rack).
+        this.tilesData = [];
         this.buildLevelArchetype();
 
         this.clueLevel = 1;
