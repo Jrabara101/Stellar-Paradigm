@@ -282,6 +282,17 @@ body {
 }
 
 /* Ambient Glow behind board */
+/* The 600px glow is wider than a phone screen; clipping it here stops it
+   from widening the page (sideways scroll on narrow viewports). */
+.ambient-glow-clip {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+}
 .ambient-glow {
     position: absolute;
     width: 600px;
