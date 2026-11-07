@@ -4372,6 +4372,10 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// The React layer patches a few prototype methods the constructor itself
+// calls (src/legacy/prototype.ts), so it needs the class before any instance.
+window.TeakScrambleGame = TeakScrambleGame;
+
 // Instantiate game engine on DOMContentLoaded
 let game;
 document.addEventListener('DOMContentLoaded', () => {

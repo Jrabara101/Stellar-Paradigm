@@ -51,6 +51,11 @@
     <script type="module" src="/src/main.tsx"></script>
 </head>
 <body>
+    <!-- Boot cover: the loading overlay's background, present in the very first
+         paint (before any script runs). LoadingScreen.tsx removes it once the
+         React overlay is up; the timer is a fallback if React never loads. -->
+    <div id="boot-cover" aria-hidden="true" style="position:fixed;inset:0;background:#0f1415;z-index:2001"></div>
+    <script>setTimeout(function () { var c = document.getElementById('boot-cover'); if (c) c.remove(); }, 8000);</script>
 
     <div class="ambient-glow-clip"><div class="ambient-glow"></div></div>
 
@@ -255,52 +260,7 @@
         </div>
     </div>
 
-    <!-- Mahogany Board Loading Screen Overlay -->
-    <div class="loading-screen" id="loading-screen">
-        <main>
-            <div class="mahogany-frame">
-                <div class="frame-shadow"></div>
-                
-                <h1 class="loading-title">WORD<br/>SCRAMBLE</h1>
-                
-                <div class="tiles-container">
-                    <div class="loading-tile tile-anim" style="animation-delay: 0s">L</div>
-                    <div class="loading-tile tile-anim" style="animation-delay: 0.1s">O</div>
-                    <div class="loading-tile tile-anim" style="animation-delay: 0.2s">A</div>
-                    <div class="loading-tile tile-anim" style="animation-delay: 0.3s">D</div>
-                    <div class="loading-tile tile-anim" style="animation-delay: 0.4s">I</div>
-                    <div class="loading-tile tile-anim" style="animation-delay: 0.5s">N</div>
-                    <div class="loading-tile tile-anim" style="animation-delay: 0.6s">G</div>
-                </div>
-
-                <div class="orbit-container">
-                    <div class="orbit-1"></div>
-                    <div class="orbit-2"></div>
-                    <div class="orbit-center">
-                        <div class="nucleus"></div>
-                    </div>
-                </div>
-
-                <div class="progress-wrapper">
-                    <div class="progress-track">
-                        <div class="progress-fill" id="loading-progress-bar" style="width: 0%;"></div>
-                    </div>
-                    <div class="progress-info">
-                        <span id="loading-status-text">Synchronizing...</span>
-                        <span id="loading-progress-percent">0%</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="tip-container">
-                <span class="tip-icon">lightbulb</span>
-                <p class="tip-text">
-                    DID YOU KNOW? <br/>
-                    Longer words grant bonus multipliers! Try to bridge multiple grid slots for massive score boosts.
-                </p>
-            </div>
-        </main>
-    </div>
+    <!-- Loading overlay: rendered by React (src/components/LoadingScreen.tsx). -->
 
 </body>
 </html>

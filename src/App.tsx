@@ -3,6 +3,7 @@ import { ChangelogModal } from './components/ChangelogModal';
 import { HeaderMenu } from './components/HeaderMenu';
 import { GuidePanels } from './components/GuidePanels';
 import { VictoryScreen } from './components/VictoryScreen';
+import { LoadingScreen } from './components/LoadingScreen';
 import { OnboardingModal } from './modals/OnboardingModal';
 import { CategoryModal } from './modals/CategoryModal';
 import { ThemeModal } from './modals/ThemeModal';
@@ -30,6 +31,7 @@ export function App() {
                 <HeaderMenu />
                 <GuidePanels />
                 <VictoryScreen />
+                <LoadingScreen />
                 <OnboardingModal />
                 <CategoryModal />
                 <ChangelogModal />
