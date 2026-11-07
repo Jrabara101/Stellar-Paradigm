@@ -140,13 +140,17 @@ window.showWalletGuide = function showWalletGuide(manualOpen = false) {
 //
 // Phase 1: wait for an entrance-load modal to appear at all (skip ahead if
 // none shows up within phase1MaxMs — e.g. no entrance animation this load).
+// The clock only runs once the loading screen is gone: the entrance modal
+// opens right after it, and on a slow phone the load alone can take longer
+// than phase1MaxMs.
 // Phase 2: once one appears, wait for it to close, then show the guide.
+// There is no time limit here: the guide must never open on top of a modal
+// the player is still reading.
 document.addEventListener('DOMContentLoaded', () => {
     if (localStorage.getItem('wallet_guide_seen')) return;
 
     const pollMs = 300;
     const phase1MaxMs = 4000;
-    const phase2MaxMs = 15000;
     // Chained entrance modals (e.g. onboarding handing off to the category
     // picker) close one and open the next a beat later, not instantly — so a
     // single poll landing in that gap must not read as "sequence finished."
@@ -157,13 +161,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let closedStreakMs = 0;
 
     const poll = setInterval(() => {
+        if (document.querySelector('.loading-screen.active')) return;
         waited += pollMs;
         const modalActive = !!document.querySelector('.modal-backdrop.active');
 
         if (!modalSeen) {
             if (modalActive) {
                 modalSeen = true;
-                waited = 0; // reset the clock for phase 2
             } else if (waited >= phase1MaxMs) {
                 clearInterval(poll);
                 window.showWalletGuide(false);
@@ -173,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         closedStreakMs = modalActive ? 0 : closedStreakMs + pollMs;
 
-        if ((!modalActive && closedStreakMs >= stableClosedMs) || waited >= phase2MaxMs) {
+        if (!modalActive && closedStreakMs >= stableClosedMs) {
             clearInterval(poll);
             setTimeout(() => window.showWalletGuide(false), 900);
         }
