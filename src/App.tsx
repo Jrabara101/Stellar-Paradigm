@@ -2,6 +2,7 @@ import { LazyMotion, MotionConfig } from 'motion/react';
 import { ChangelogModal } from './components/ChangelogModal';
 import { HeaderMenu } from './components/HeaderMenu';
 import { GuidePanels } from './components/GuidePanels';
+import { VictoryScreen } from './components/VictoryScreen';
 import { OnboardingModal } from './modals/OnboardingModal';
 import { CategoryModal } from './modals/CategoryModal';
 import { ThemeModal } from './modals/ThemeModal';
@@ -28,6 +29,7 @@ export function App() {
             <LazyMotion features={loadFeatures} strict>
                 <HeaderMenu />
                 <GuidePanels />
+                <VictoryScreen />
                 <OnboardingModal />
                 <CategoryModal />
                 <ChangelogModal />

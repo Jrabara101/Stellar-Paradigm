@@ -183,22 +183,7 @@
     <!-- Canvas Particle overlay -->
     <canvas id="effects-canvas"></canvas>
 
-    <!-- Victory screen overlay -->
-    <div class="victory-screen" id="victory-screen">
-        <div class="victory-box">
-            <h2 id="victory-title">Spectacular!</h2>
-            <p id="victory-subtitle">You have unscrambled the atomic matrix.</p>
-            <div class="victory-score-breakdown" id="victory-breakdown"></div>
-            <div class="daily-share-block" id="daily-share-block">
-                <div class="daily-emoji-grid" id="daily-emoji-grid"></div>
-                <button class="victory-btn" id="daily-share-btn" onclick="game.shareDailyResult()">📤 Share Result</button>
-                <button class="victory-btn" id="daily-card-btn" onclick="game.generateVictoryCard()">🖼️ Share Card</button>
-                <button class="daily-exit-btn" onclick="game.exitDailyChallenge()">Back to Regular Play</button>
-            </div>
-            <button class="victory-btn" id="victory-card-btn" onclick="game.generateVictoryCard()">🖼️ Share Card</button>
-            <button class="victory-btn" id="victory-next-btn" onclick="game.nextLevel()">Next Scramble</button>
-        </div>
-    </div>
+    <!-- Victory overlay: rendered by React (src/components/VictoryScreen.tsx). -->
 
     <!-- All 12 menu modals (onboarding, category, theme, chips, tile effects,
          API settings, changelog, leaderboard, credentials, get-app, effects,

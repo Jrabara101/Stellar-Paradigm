@@ -8,6 +8,7 @@ import { bumpGame } from './useGame';
 import { ui, type ModalId } from '../store/ui';
 import { requestRefresh } from '../store/refresh';
 import { header, type PanelId } from '../store/header';
+import { victory, victoryScreenProxy } from '../store/victory';
 
 /** Legacy open<Name>Modal / close<Name>Modal pairs and the React modal each now opens. */
 const MODALS: [legacyName: string, id: ModalId][] = [
@@ -81,6 +82,8 @@ export function installOverrides(game: LegacyGame) {
         }
     };
 
+    installVictoryOverrides(game, g);
+
     // Data views now fetch and render in React.
     game.refreshLeaderboard = () => requestRefresh('leaderboard');
     game.refreshCredentials = () => requestRefresh('credentials');
@@ -90,4 +93,83 @@ export function installOverrides(game: LegacyGame) {
     for (const name of ['updateTileFontModalUI', 'updateTileEffectsModalHighlight', '_updateResetUI']) {
         g[name] = bumpGame;
     }
+}
+
+interface DailyResult {
+    dayIndex: number;
+    word: string;
+    hintsUsed: number;
+    streak: number;
+}
+
+/**
+ * Victory overlay (Stage 3). script.js keeps the win logic; the overlay's
+ * content moves to the victory store. completeDailyChallenge and
+ * showDailyAlreadyCompleted wrote straight into the old markup, so they are
+ * re-implemented here line for line (minus the DOM writes).
+ */
+function installVictoryOverrides(game: LegacyGame, g: Record<string, unknown>) {
+    const fn = <A extends unknown[], R>(name: string) => (...args: A) => (g[name] as (...a: A) => R).call(game, ...args);
+    const regular = () => victory.setContent({ kind: 'regular' });
+    const addrKey = fn<[], string>('_addrKey');
+    const emojiGrid = fn<[number], string>('buildDailyEmojiGrid');
+    const updateDailyBanner = fn<[], void>('updateDailyBanner');
+
+    g.victoryScreen = victoryScreenProxy;
+    g.resetVictoryScreenUI = regular;
+    g.updateVictoryBreakdown = (basePoints: number, streakBonus: number, combo = 1, achievements: { label: string }[] = []) => {
+        const winStreak = g.winStreak as number;
+        victory.setBreakdown({
+            basePoints,
+            streakBonus,
+            combo,
+            streakLabel: fn<[number], string>('getStreakTierLabel')(winStreak),
+            winStreak,
+            achievements: achievements.map((a) => a.label),
+        });
+    };
+
+    g.completeDailyChallenge = () => {
+        const hintsUsed = Math.min(2, Math.max(0, (g.clueLevel as number) - 1));
+        const key = addrKey();
+        const dayIndex = g.dailyDayIndex as number;
+
+        const streakData = JSON.parse(localStorage.getItem(`ws_daily_streak_${key}`) || 'null') || { count: 0, lastDayIndex: -1 };
+        if (streakData.lastDayIndex === dayIndex - 1) {
+            streakData.count += 1;
+        } else if (streakData.lastDayIndex !== dayIndex) {
+            streakData.count = 1;
+        }
+        streakData.lastDayIndex = dayIndex;
+        localStorage.setItem(`ws_daily_streak_${key}`, JSON.stringify(streakData));
+        g.dailyStreak = streakData.count;
+
+        const result: DailyResult = { dayIndex, word: g.targetWord as string, hintsUsed, streak: streakData.count };
+        localStorage.setItem(`ws_daily_result_${key}`, JSON.stringify(result));
+        g._lastDailyResult = result;
+
+        // Streak bell after the win arpeggio rings out
+        setTimeout(() => game.sound.play('chime'), 800);
+
+        victory.setContent({
+            kind: 'daily',
+            title: 'Daily Challenge Complete!',
+            subtitle: `You solved Day #${result.dayIndex} — "${result.word}"`,
+            emojiGrid: emojiGrid(hintsUsed),
+        });
+        updateDailyBanner();
+    };
+
+    g.showDailyAlreadyCompleted = (stored: DailyResult) => {
+        g.dailyStreak = stored.streak;
+        g._lastDailyResult = stored;
+        victory.setContent({
+            kind: 'daily',
+            title: 'Already Solved Today!',
+            subtitle: `Day #${stored.dayIndex} — "${stored.word}" · Come back tomorrow for a new word.`,
+            emojiGrid: emojiGrid(stored.hintsUsed),
+        });
+        victory.show();
+        updateDailyBanner();
+    };
 }
