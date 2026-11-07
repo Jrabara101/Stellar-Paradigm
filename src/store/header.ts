@@ -53,6 +53,16 @@ export const header = {
     setPanel(panel: PanelId, shown: boolean) {
         if (state.panels[panel] !== shown) setState({ panels: { ...state.panels, [panel]: shown } });
     },
+    /** Re-reads saved visibility after script.js's one-off defaults reset (ws_ui_defaults_v2). */
+    syncFromStorage() {
+        setState({
+            panels: {
+                instructions: saved('scramble_show_instructions'),
+                hints: saved('scramble_show_hints'),
+                stats: saved('scramble_show_stats'),
+            },
+        });
+    },
     setScrambleLoading(loading: boolean) {
         setState({ scrambleLoading: loading });
     },

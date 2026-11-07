@@ -90,36 +90,9 @@
 
     <!-- BEGIN: Game Layout Container (Max-width bounded full-size view) -->
     <div class="game-layout-wrapper" id="game-layout-wrapper">
-        <!-- Quick-toggle pills when side cards are hidden -->
-        <div class="panel-toggle-row">
-            <button id="show-instructions-btn" class="panel-toggle-tab left-tab" onclick="game.toggleInstructions(true)" title="Show How to Play">📖 How to Play</button>
-            <button id="show-hints-btn" class="panel-toggle-tab right-tab" onclick="game.toggleHintGuide(true)" title="Show Hint Guide">💡 Hint Guide</button>
-        </div>
-
-        <!-- How to Play Instructions Board (Desktop Left Column) -->
-        <div class="instructions-panel hidden-panel" id="instructions-panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--mustard); padding-bottom: 6px;">
-            <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0; text-shadow: 0.5px 0.5px 0px var(--off-white);">How to Play</h3>
-            <div style="display: flex; gap: 6px; align-items: center;">
-                <button onclick="game.openChangelogModal()" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; border: 1.5px solid var(--teak-dark); background: var(--mustard); color: var(--teak-dark); font-weight: 900; box-shadow: 0 2px 0 var(--mustard-dark); cursor: pointer; text-transform: uppercase; font-family: inherit; transition: transform 0.1s, box-shadow 0.1s;" onmousedown="this.style.transform='translateY(2px)'; this.style.boxShadow='0 0px 0 var(--mustard-dark)'" onmouseup="this.style.transform=''; this.style.boxShadow='0 2px 0 var(--mustard-dark)'" onmouseleave="this.style.transform=''; this.style.boxShadow='0 2px 0 var(--mustard-dark)'">Updates</button>
-                <button class="panel-hide-btn" onclick="game.toggleInstructions(false)" title="Hide How to Play">✕ Hide</button>
-            </div>
-        </div>
-        <ul>
-            <li>
-                <span class="step-num">1</span>
-                <div><strong>Solve the Scramble:</strong> Drag-and-drop or tap tiles to place them on the highlighted grid slots.</div>
-            </li>
-            <li>
-                <span class="step-num">2</span>
-                <div><strong>Get Hints:</strong> Click <em>Definition</em> (free) to reveal the word's meaning, or <em>Hint</em> to lock a correct tile (costs 10 pts).</div>
-            </li>
-            <li>
-                <span class="step-num">3</span>
-                <div><strong>Submit:</strong> Complete the word and click <em>Submit</em> to advance levels! Build a <strong>Win Streak</strong> for bonus points: +10 (1–5), +20 (6–10), +30 (11–15), +50 (16+).</div>
-            </li>
-        </ul>
-    </div>
+        <!-- Show-panel pills + How to Play card: rendered by React (src/components/GuidePanels.tsx). -->
+        <div id="rx-panel-toggles" class="rx-slot"></div>
+        <div id="rx-instructions-panel" class="rx-slot"></div>
 
         <!-- Center Column: Header, Board, Rack -->
         <div class="game-center-column">
@@ -202,26 +175,8 @@
     </div>
 
         <!-- Hint Rules Panel (Desktop Right Column) -->
-        <div class="hint-info-panel hidden-panel" id="hint-info-panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--theme-panel-h3-border, var(--turquoise)); padding-bottom: 6px;">
-            <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Hint Guide</h3>
-            <button class="panel-hide-btn" onclick="game.toggleHintGuide(false)" title="Hide Hint Guide">✕ Hide</button>
-        </div>
-        <ul>
-            <li>
-                <span class="step-num">1</span>
-                <div><strong>First Letter Only:</strong> The hint only reveals and locks the first letter of the word to keep the scramble challenging.</div>
-            </li>
-            <li>
-                <span class="step-num">2</span>
-                <div><strong>Cost & Logic:</strong> Each hint costs <strong>10 points</strong>. If the word is wrong, the hint stays on the board.</div>
-            </li>
-            <li>
-                <span class="step-num">3</span>
-                <div><strong>Persistence:</strong> Locked hints will not return to the rack on a Reset or wrong submission.</div>
-            </li>
-        </ul>
-    </div>
+        <!-- Hint Guide card: rendered by React (src/components/GuidePanels.tsx). -->
+        <div id="rx-hint-panel" class="rx-slot"></div>
     </div>
     <!-- END: Game Layout Container -->
 

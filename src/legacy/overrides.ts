@@ -2,6 +2,7 @@
 // replaces an instance method, so every existing caller — inline onclick
 // handlers in index.html (the ☰ menu items), the entrance-load sequence in
 // runLoadingScreen(), other legacy methods — reaches the React version.
+import { flushSync } from 'react-dom';
 import type { LegacyGame } from './bridge';
 import { bumpGame } from './useGame';
 import { ui, type ModalId } from '../store/ui';
@@ -49,13 +50,27 @@ export function installOverrides(game: LegacyGame) {
         ui.open('category', fromOnboarding === true);
     };
 
-    // Header ☰ menu (Stage 3): its labels come from React state, so report
-    // panel visibility and the Scramble Board lazy-load to the header store.
+    // Header ☰ menu + guide panels (Stage 3) read panel visibility from the
+    // header store. The How to Play / Hint Guide panels are React-owned, so
+    // only the stat bubbles still need the legacy DOM update. flushSync makes
+    // the panels re-render before the caller re-measures tile positions.
+    header.syncFromStorage();
     const applyPanelVisibility = game.applyPanelVisibility as (panel: PanelId, show: boolean) => void;
     g.applyPanelVisibility = (panel: PanelId, show: boolean) => {
-        applyPanelVisibility.call(game, panel, show);
-        header.setPanel(panel, show);
+        if (panel === 'stats') applyPanelVisibility.call(game, panel, show);
+        flushSync(() => header.setPanel(panel, show));
     };
+    // The legacy toggles read the panels' hidden-panel class; use the store.
+    const togglePanel = (panel: PanelId, storageKey: string) => (forceState?: boolean) => {
+        const next = typeof forceState === 'boolean' ? forceState : !header.getState().panels[panel];
+        (g.applyPanelVisibility as (p: PanelId, s: boolean) => void)(panel, next);
+        localStorage.setItem(storageKey, String(next));
+        game.sound?.play('select');
+        (g.syncViewPositions as (animate: boolean) => void).call(game, false);
+        (g.checkViewportFit as () => void).call(game);
+    };
+    g.toggleInstructions = togglePanel('instructions', 'scramble_show_instructions');
+    g.toggleHintGuide = togglePanel('hints', 'scramble_show_hints');
     const startScrambleBoard = game.startScrambleBoard as () => Promise<void>;
     g.startScrambleBoard = async () => {
         header.setScrambleLoading(true);
