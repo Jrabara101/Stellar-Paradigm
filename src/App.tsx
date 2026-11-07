@@ -1,5 +1,6 @@
 import { LazyMotion, MotionConfig } from 'motion/react';
 import { ChangelogModal } from './components/ChangelogModal';
+import { HeaderMenu } from './components/HeaderMenu';
 import { OnboardingModal } from './modals/OnboardingModal';
 import { CategoryModal } from './modals/CategoryModal';
 import { ThemeModal } from './modals/ThemeModal';
@@ -24,6 +25,7 @@ export function App() {
         <MotionConfig reducedMotion="user">
             {/* `strict` makes any stray full `motion.*` import a runtime error. */}
             <LazyMotion features={loadFeatures} strict>
+                <HeaderMenu />
                 <OnboardingModal />
                 <CategoryModal />
                 <ChangelogModal />

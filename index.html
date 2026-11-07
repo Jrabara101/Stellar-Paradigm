@@ -126,25 +126,8 @@
             <div class="header-container">
         <div style="display: flex; flex-direction: column; gap: 6px;">
             <h1>Word Scramble</h1>
-            <div class="menu-dropdown" id="menu-dropdown">
-                <button class="menu-toggle-btn" id="menu-toggle-btn" onclick="toggleHeaderMenu(event)" aria-haspopup="true" aria-expanded="false">☰ Menu <span class="menu-caret">▾</span></button>
-                <div class="menu-panel" id="menu-panel" role="menu">
-                    <button class="menu-item" id="daily-challenge-btn" role="menuitem" onclick="game.startDailyChallenge()">📅 Daily Challenge</button>
-                    <button class="menu-item" id="scramble-board-btn" role="menuitem" onclick="game.startScrambleBoard()">🎲 Scramble Board</button>
-                    <button class="menu-item" id="category-tag-btn" role="menuitem" onclick="game.openCategoryModal()">Category: General</button>
-                    <button class="menu-item" id="customize-tag-btn" role="menuitem" onclick="game.openThemeModal()">Customize Board</button>
-                    <button class="menu-item" id="customize-chips-btn" role="menuitem" onclick="game.openChipModal()">Customize Chips</button>
-                    <button class="menu-item" id="menu-toggle-instructions-btn" role="menuitem" onclick="game.toggleInstructions()">📖 How to Play: Hidden</button>
-                    <button class="menu-item" id="menu-toggle-hints-btn" role="menuitem" onclick="game.toggleHintGuide()">💡 Hint Guide: Hidden</button>
-                    <button class="menu-item" id="menu-toggle-stats-btn" role="menuitem" onclick="game.toggleStats()">📊 Score Bubbles: Hidden</button>
-                    <button class="menu-item" id="leaderboard-btn" role="menuitem" onclick="game.openLeaderboardModal()">Leaderboard</button>
-                    <button class="menu-item" id="credentials-btn" role="menuitem" onclick="game.openCredentialsModal()">🎓 My Credentials</button>
-                    <button class="menu-item" id="effects-btn" role="menuitem" onclick="game.openEffectsModal()">Effects</button>
-                    <button class="menu-item" id="audio-settings-btn" role="menuitem" onclick="game.openAudioModal()">🔊 Audio</button>
-                    <button class="menu-item" id="api-settings-btn" role="menuitem" onclick="game.openApiSettingsModal()">⚙️ API Settings</button>
-                    <button class="menu-item" id="get-app-btn" role="menuitem" onclick="game.openGetAppModal()">📱 Get Android App</button>
-                </div>
-            </div>
+            <!-- ☰ Menu: rendered by React (src/components/HeaderMenu.tsx). -->
+            <div id="rx-header-menu" class="rx-slot"></div>
             <div class="daily-banner" id="daily-banner" onclick="game.exitDailyChallenge()" title="Click to exit Daily Challenge and return to regular play">
                 <span id="daily-banner-text"></span>
                 <span class="daily-banner-exit">✕</span>

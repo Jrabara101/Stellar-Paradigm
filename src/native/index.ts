@@ -3,6 +3,7 @@
 import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core';
 import { whenGameReady, type LegacyGame } from '../legacy/bridge';
 import { ui } from '../store/ui';
+import { header } from '../store/header';
 
 export const isNative = Capacitor.isNativePlatform();
 
@@ -70,9 +71,8 @@ function handleBack(game: LegacyGame): boolean {
     if (ui.closeTop()) return true;
 
     // 2. Header ☰ menu dropdown.
-    const menu = document.getElementById('menu-dropdown');
-    if (menu?.classList.contains('open')) {
-        document.getElementById('menu-toggle-btn')?.click();
+    if (header.getState().menuOpen) {
+        header.setMenuOpen(false);
         return true;
     }
 

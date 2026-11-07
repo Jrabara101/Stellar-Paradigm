@@ -191,3 +191,9 @@ html[data-native] .feedback-fab { margin-bottom: var(--rx-inset-bottom); }
 
 /* The "Get Android App" item is pointless inside the app. */
 html[data-native] #get-app-btn { display: none; }
+
+/* Mount points React renders into inside the legacy layout; they must not
+   add a box of their own, so the legacy flex/grid rules see the children. */
+.rx-slot {
+    display: contents;
+}

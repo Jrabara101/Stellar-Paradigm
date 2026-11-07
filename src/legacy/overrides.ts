@@ -6,6 +6,7 @@ import type { LegacyGame } from './bridge';
 import { bumpGame } from './useGame';
 import { ui, type ModalId } from '../store/ui';
 import { requestRefresh } from '../store/refresh';
+import { header, type PanelId } from '../store/header';
 
 /** Legacy open<Name>Modal / close<Name>Modal pairs and the React modal each now opens. */
 const MODALS: [legacyName: string, id: ModalId][] = [
@@ -46,6 +47,23 @@ export function installOverrides(game: LegacyGame) {
         game.sound.play('select');
         bumpGame();
         ui.open('category', fromOnboarding === true);
+    };
+
+    // Header ☰ menu (Stage 3): its labels come from React state, so report
+    // panel visibility and the Scramble Board lazy-load to the header store.
+    const applyPanelVisibility = game.applyPanelVisibility as (panel: PanelId, show: boolean) => void;
+    g.applyPanelVisibility = (panel: PanelId, show: boolean) => {
+        applyPanelVisibility.call(game, panel, show);
+        header.setPanel(panel, show);
+    };
+    const startScrambleBoard = game.startScrambleBoard as () => Promise<void>;
+    g.startScrambleBoard = async () => {
+        header.setScrambleLoading(true);
+        try {
+            await startScrambleBoard.call(game);
+        } finally {
+            header.setScrambleLoading(false);
+        }
     };
 
     // Data views now fetch and render in React.
