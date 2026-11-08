@@ -1,6 +1,6 @@
 {
   "name": "word-scramble",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Word Scramble — retro word puzzle with an on-chain Stellar leaderboard (React + Vite + Capacitor)",
   "scripts": {
     "dev": "vite",

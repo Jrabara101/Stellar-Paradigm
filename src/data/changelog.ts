@@ -5,6 +5,32 @@ export interface ChangelogVersion { version: string; title: string; items: Chang
 
 export const CHANGELOG: ChangelogVersion[] = [
     {
+        "version": "v2.1.1",
+        "title": "Fresh Icon & Smoother Effects 🎨⚡",
+        "items": [
+            {
+                "label": "New App Icon",
+                "text": "The W tile icon now has a clean transparent background, so it sits neatly on any home screen or browser tab."
+            },
+            {
+                "label": "Smoother Effects",
+                "text": "Shockwave Ring, Confetti Burst, Bounce Cascade, Grid Flash Wave, Streak Fire and the Victory Title Glow were rebuilt to run on the graphics chip — much smoother on phones, with confetti that moves at the same speed on every screen."
+            },
+            {
+                "label": "Guides as Pop-ups",
+                "text": "📖 How to Play and 💡 Hint Guide now open as pop-ups and close with *Got it*, so the board never shifts around."
+            },
+            {
+                "label": "Feedback Moved Up",
+                "text": "The 💬 Feedback button now sits next to ☰ Menu instead of floating over the Shuffle and Submit buttons."
+            },
+            {
+                "label": "Smoother Wins & Startup",
+                "text": "The victory screen slides in without stutter, and the loading screen stays up until the board is ready."
+            }
+        ]
+    },
+    {
         "version": "v2.1.0",
         "title": "Smoother Menus & a Cleaner Board ✨",
         "items": [
