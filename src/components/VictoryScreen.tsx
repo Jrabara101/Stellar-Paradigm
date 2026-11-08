@@ -53,7 +53,8 @@ export function VictoryScreen() {
             {/* Each open bumps seq, remounting the box so the sequence replays;
                 on close the content stays put while the overlay fades out. */}
             <m.div key={seq} className="victory-box" variants={sequence} initial="hidden" animate="shown">
-                <m.h2 id="victory-title" variants={title}>
+                {/* data-text feeds the opacity-only glow layer (h2::after in style.css). */}
+                <m.h2 id="victory-title" variants={title} data-text={daily ? content.title : 'Spectacular!'}>
                     {daily ? content.title : 'Spectacular!'}
                 </m.h2>
                 <m.p variants={rise}>{daily ? content.subtitle : 'You have unscrambled the atomic matrix.'}</m.p>

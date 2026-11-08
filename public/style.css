@@ -754,13 +754,25 @@ body[data-performance-mode="true"] .drop-preview { animation: none !important; }
 }
 
 /* Glow pulse when a new clue unlocks, so players notice the hint list grew */
-.clue-panel.clue-flash {
+/* The amber halo sits on ::after and only its opacity animates, so the
+   panel (and the board around it) is not repainted on every frame. */
+.clue-panel {
+    position: relative;
+}
+.clue-panel.clue-flash::after {
+    content: '';
+    position: absolute;
+    inset: -2.5px;
+    border-radius: inherit;
+    box-shadow: 0 0 18px rgba(255, 183, 77, 0.85);
+    opacity: 0;
+    pointer-events: none;
     animation: clue-flash-pulse 0.9s ease-out;
 }
 @keyframes clue-flash-pulse {
-    0%   { box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 0 0 rgba(255, 183, 77, 0); }
-    35%  { box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 0 18px rgba(255, 183, 77, 0.85); }
-    100% { box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 0 0 rgba(255, 183, 77, 0); }
+    0%   { opacity: 0; }
+    35%  { opacity: 1; }
+    100% { opacity: 0; }
 }
 
 /* Clue Progress HUD Indicators (Vacuum Tube Aesthetic) */
@@ -844,11 +856,27 @@ body[data-performance-mode="true"] .drop-preview { animation: none !important; }
         inset 0 2px 4px rgba(255, 255, 255, 0.5);
     animation: clue-pulse 1.5s infinite ease-in-out;
 }
+/* The pulse runs until the word is solved, so it must stay cheap: only
+   transform (dot) and opacity (the brighter halo on ::before) animate.
+   Animating box-shadow repainted every frame (~30 fps of redraw at idle). */
+.clue-dot.active[data-clue="3"]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 0 20px #ff8a80;
+    opacity: 0;
+    pointer-events: none;
+    animation: clue-pulse-halo 1.5s infinite ease-in-out;
+}
 
 @keyframes clue-pulse {
-    0% { transform: scale(1); box-shadow: 0 0 12px #ef5350, inset 0 2px 4px rgba(255, 255, 255, 0.5); }
-    50% { transform: scale(1.1); box-shadow: 0 0 20px #ff8a80, inset 0 2px 4px rgba(255, 255, 255, 0.7); }
-    100% { transform: scale(1); box-shadow: 0 0 12px #ef5350, inset 0 2px 4px rgba(255, 255, 255, 0.5); }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+@keyframes clue-pulse-halo {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
 }
 
 /* High-contrast Wooden Blocks */
@@ -1746,11 +1774,20 @@ button:active {
     background: #0f1415;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
     opacity: 0; pointer-events: none;
-    transition: opacity 0.3s ease;
+    /* Once faded out, drop out of rendering entirely: the overlay stays in
+       the DOM between loads, and its looping animations otherwise keep the
+       page repainting (~475 paints/s idle; heavy on phones and emulators). */
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     z-index: 2000;
 }
 .loading-screen.active {
     opacity: 1; pointer-events: auto;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s;
+}
+.loading-screen:not(.active) * {
+    animation-play-state: paused !important;
 }
 
 .loading-screen main {
@@ -2982,10 +3019,32 @@ input:checked + .retro-slider:before {
 }
 
 /* --- VICTORY TITLE GLOW PULSE --- */
+/* The soft glow lives on its own layer (::after, a transparent copy of the
+   title that only carries the blurred shadow) and only its opacity animates.
+   Animating text-shadow itself repainted the whole victory box every frame,
+   which was by far the most expensive effect on phones and emulators. */
 .victory-screen.active.victory-glow-active .victory-box h2 {
-    animation: victory-title-glow 1.8s ease-in-out infinite;
+    position: relative;
+}
+.victory-screen.active.victory-glow-active .victory-box h2[data-text]::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    color: transparent;
+    text-shadow:
+        0 0 20px var(--victory-glow-color1),
+        0 0 40px var(--victory-glow-color2);
+    pointer-events: none;
+    opacity: 0;
+    will-change: opacity;
+    animation: victory-title-glow-fade 1.8s ease-in-out infinite;
+}
+@keyframes victory-title-glow-fade {
+    0%, 45%, 85%, 100% { opacity: 0; }
+    25%, 65% { opacity: 1; }
 }
 
+/* Older text-shadow pulse, still used by the Scramble Board mini title. */
 @keyframes victory-title-glow {
     0% {
         text-shadow: 
