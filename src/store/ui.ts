@@ -15,7 +15,9 @@ export type ModalId =
     | 'credentials'
     | 'getApp'
     | 'effects'
-    | 'audio';
+    | 'audio'
+    | 'howToPlay'
+    | 'hintGuide';
 
 interface UIState {
     modals: ModalId[];

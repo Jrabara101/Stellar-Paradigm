@@ -198,29 +198,101 @@ html[data-native] #get-app-btn { display: none; }
     display: contents;
 }
 
-/* How to Play / Hint Guide cards (GuidePanels.tsx). Motion animates the
-   entrance, so drop the desktop opacity/transform transition. */
-.rx-guide-panel {
-    transition: none !important;
+/* How to Play / Hint Guide pop-ups (GuidePanels.tsx). Same paper card and
+   theme tokens as the old side cards, but inside the shared Modal, so opening
+   one never moves the board. Mustard accent = How to Play, turquoise = Hints. */
+.rx-guide-modal {
+    --rx-guide-accent: var(--mustard);
+    background: var(--theme-panel-bg, rgba(245, 245, 240, 0.98));
+    border: var(--theme-panel-border, 3.5px solid var(--teak-dark));
+    border-radius: 16px;
+    padding: 22px;
+    color: var(--theme-panel-color, var(--teak-dark));
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+    width: 90%;
+    max-width: 420px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    text-align: left;
+}
+.rx-guide-modal--hint {
+    --rx-guide-accent: var(--turquoise);
+}
+.rx-guide-modal.rx-panel--sheet {
+    width: 100%;
+    max-width: none;
+    border-radius: 20px 20px 0 0;
+    border-bottom: none;
 }
 .rx-guide-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
-    padding-bottom: 6px;
-    border-bottom: 2px solid var(--mustard);
-}
-.hint-info-panel .rx-guide-head {
-    border-bottom-color: var(--theme-panel-h3-border, var(--turquoise));
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--theme-panel-h3-border, var(--rx-guide-accent));
 }
 .rx-guide-head h3 {
-    margin-bottom: 0;
-    border-bottom: none;
-    padding-bottom: 0;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--theme-panel-h3-color, var(--teak-dark));
+    text-shadow: var(--theme-panel-h3-shadow, 0.5px 0.5px 0 var(--off-white));
 }
-.instructions-panel .rx-guide-head h3 {
-    text-shadow: 0.5px 0.5px 0 var(--off-white);
+.rx-guide-steps {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0;
+    margin: 0 0 18px;
+}
+.rx-guide-steps li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 0.95rem;
+    line-height: 1.55;
+}
+.rx-guide-steps li strong {
+    color: var(--theme-panel-h3-color, var(--teak-dark));
+}
+.rx-guide-steps .step-num {
+    background: var(--rx-guide-accent);
+    color: var(--teak-dark);
+    font-weight: 900;
+    font-size: 1rem;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1.5px solid var(--teak-dark);
+    box-shadow: 0 2px 0 var(--teak-dark);
+    box-sizing: border-box;
+}
+.rx-guide-close {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 2px solid var(--teak-dark);
+    background: var(--rx-guide-accent);
+    color: var(--teak-dark);
+    font-family: inherit;
+    font-weight: 900;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 3px 0 var(--teak-dark);
+    cursor: pointer;
 }
 .rx-guide-actions {
     display: flex;
@@ -244,4 +316,14 @@ html[data-native] #get-app-btn { display: none; }
 .rx-updates-btn:active {
     transform: translateY(2px);
     box-shadow: 0 0 0 var(--mustard-dark);
+}
+
+/* Touch screens keep :hover after a tap, which left a guide pill stuck
+   yellow and raised once its pop-up closed. Hover styling is for mice only. */
+@media (hover: none) {
+    .panel-toggle-tab:hover {
+        background: var(--theme-panel-bg, rgba(245, 245, 240, 0.96));
+        transform: none;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18), 0 2px 0 var(--teak-dark, #5C3A21);
+    }
 }

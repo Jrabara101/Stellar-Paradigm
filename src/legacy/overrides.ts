@@ -61,17 +61,16 @@ export function installOverrides(game: LegacyGame) {
         if (panel === 'stats') applyPanelVisibility.call(game, panel, show);
         flushSync(() => header.setPanel(panel, show));
     };
-    // The legacy toggles read the panels' hidden-panel class; use the store.
-    const togglePanel = (panel: PanelId, storageKey: string) => (forceState?: boolean) => {
-        const next = typeof forceState === 'boolean' ? forceState : !header.getState().panels[panel];
-        (g.applyPanelVisibility as (p: PanelId, s: boolean) => void)(panel, next);
-        localStorage.setItem(storageKey, String(next));
+    // How to Play / Hint Guide are pop-ups now (GuidePanels.tsx): they open on
+    // demand, start closed every visit and never move the board.
+    const toggleGuide = (id: 'howToPlay' | 'hintGuide') => (forceState?: boolean) => {
+        const next = typeof forceState === 'boolean' ? forceState : !ui.isOpen(id);
         game.sound?.play('select');
-        (g.syncViewPositions as (animate: boolean) => void).call(game, false);
-        (g.checkViewportFit as () => void).call(game);
+        if (next) ui.open(id);
+        else ui.close(id);
     };
-    g.toggleInstructions = togglePanel('instructions', 'scramble_show_instructions');
-    g.toggleHintGuide = togglePanel('hints', 'scramble_show_hints');
+    g.toggleInstructions = toggleGuide('howToPlay');
+    g.toggleHintGuide = toggleGuide('hintGuide');
     const startScrambleBoard = game.startScrambleBoard as () => Promise<void>;
     g.startScrambleBoard = async () => {
         header.setScrambleLoading(true);
