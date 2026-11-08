@@ -25,7 +25,20 @@ interface VictoryState {
     seq: number;
 }
 
-let state: VictoryState = { open: false, glow: false, content: { kind: 'regular' }, breakdown: null, seq: 0 };
+// The closed overlay starts with a representative breakdown already laid out
+// (it is invisible and inert until a win). The first layout of this text in
+// a session is ~25x slower than later ones (font + text-shaping caches); doing
+// it at startup, behind the loading screen, keeps the first victory smooth.
+const WARMUP_BREAKDOWN: Breakdown = {
+    basePoints: 300,
+    streakBonus: 10,
+    combo: 3,
+    streakLabel: 'HOT STREAK (+10/win)',
+    winStreak: 1,
+    achievements: [],
+};
+
+let state: VictoryState = { open: false, glow: false, content: { kind: 'regular' }, breakdown: WARMUP_BREAKDOWN, seq: 0 };
 const listeners = new Set<() => void>();
 
 function setState(patch: Partial<VictoryState>) {
@@ -51,11 +64,17 @@ export const victory = {
     setGlow(glow: boolean) {
         if (state.glow !== glow) setState({ glow });
     },
+    // While the overlay is closed, content changes are stored without a
+    // render: script.js fills them in at the moment of the win (the busiest
+    // frame of the celebration) and the overlay only opens ~1.2s later.
+    // show() renders with whatever is stored by then.
     setContent(content: VictoryContent) {
-        setState({ content });
+        if (state.open) setState({ content });
+        else state = { ...state, content };
     },
     setBreakdown(breakdown: Breakdown | null) {
-        setState({ breakdown });
+        if (state.open) setState({ breakdown });
+        else state = { ...state, breakdown };
     },
 };
 

@@ -561,131 +561,205 @@ class ParticleSystem {
 
     stop() {
         this.active = false;
+        if (this._raf) cancelAnimationFrame(this._raf);
+        this._raf = 0;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
+    // One requestAnimationFrame loop per canvas. burst(), addFloatingText()
+    // and streakEmberBurst() all call animate(); each call used to start
+    // another loop, so a win (confetti + 2 score pops) stepped and drew every
+    // particle up to 3x per frame: triple speed and triple cost. Motion is
+    // also scaled by real frame time, so particles keep the same speed on
+    // 60/90/120 Hz screens and do not slow down when a frame runs late.
     animate() {
-        if (!this.active) return;
+        if (!this.active || this._raf) return;
+        this._lastFrame = performance.now();
+        const step = (now) => {
+            this._raf = 0;
+            if (!this.active) return;
+            const k = Math.min(3, Math.max(0, (now - this._lastFrame) / 16.667));
+            this._lastFrame = now;
+            if (this._tick(k)) this._raf = requestAnimationFrame(step);
+        };
+        this._raf = requestAnimationFrame(step);
+    }
+
+    // Particle sprite atlas. Each look (shape + colour + size bucket, with its
+    // glow/shadow baked in) is drawn once into ONE shared canvas, and every
+    // particle is then a single drawImage of a sub-rectangle of it. One
+    // texture batches well on the GPU; drawing paths with canvas shadowBlur
+    // per particle per frame was the most expensive part of the effects.
+    // Sizes snap to a few buckets and are scaled at draw time, so a whole
+    // confetti burst needs only a handful of sprites.
+    static SIZE_BUCKETS = [8, 13, 18];
+
+    _bucket(size) {
+        const b = ParticleSystem.SIZE_BUCKETS;
+        for (const v of b) if (size <= v) return v;
+        return Math.ceil(size);
+    }
+
+    _atlasCtx() {
+        if (!this._atlas) {
+            const c = document.createElement('canvas');
+            c.width = 512;
+            c.height = 512;
+            this._atlas = { canvas: c, ctx: c.getContext('2d'), x: 0, y: 0, rowH: 0, map: new Map() };
+        }
+        return this._atlas;
+    }
+
+    _spriteFor(p) {
+        const A = this._atlasCtx();
+        const isText = p.type === 'text';
+        const base = isText ? 0 : this._bucket(Math.max(1, p.size || 0));
+        const key = isText ? `t|${p.font}|${p.color}|${p.text}`
+            : p.type === 'ghost' ? `g|${base}|${p.color}|${p.letter}`
+            : `${p.type}|${base}|${p.color}`;
+        let spr = A.map.get(key);
+        if (spr) return spr;
+
+        const pad = 14; // room for strokes, glows and shadows
+        let w, h, fontPx = 20;
+        if (isText) {
+            fontPx = parseFloat(/(\d+(?:\.\d+)?)px/.exec(p.font)?.[1] || 20);
+            A.ctx.font = p.font;
+            w = Math.ceil(A.ctx.measureText(p.text).width) + pad * 2;
+            h = Math.ceil(fontPx * 1.6) + pad * 2;
+        } else {
+            w = h = base * 2 + pad * 2;
+        }
+        // Shelf packing; start over if the atlas is full (rare: themes x texts).
+        if (A.x + w > A.canvas.width) { A.x = 0; A.y += A.rowH; A.rowH = 0; }
+        if (A.y + h > A.canvas.height) {
+            A.ctx.clearRect(0, 0, A.canvas.width, A.canvas.height);
+            A.map.clear(); A.x = 0; A.y = 0; A.rowH = 0;
+        }
+        spr = { sx: A.x, sy: A.y, w, h, cx: w / 2, cy: h / 2, base };
+        A.x += w; A.rowH = Math.max(A.rowH, h);
+
+        const ctx = A.ctx;
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(spr.sx, spr.sy, w, h);
+        ctx.clip();
+        ctx.translate(spr.sx + w / 2, spr.sy + h / 2);
+        if (isText) {
+            ctx.font = p.font;
+            ctx.fillStyle = p.color;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetX = 1;
+            ctx.shadowOffsetY = 1;
+            ctx.fillText(p.text, 0, 0);
+            // The old renderer put the alphabetic baseline at the particle's y.
+            spr.cy = h / 2 + fontPx * 0.35;
+        } else if (p.type === 'ember') {
+            ctx.beginPath();
+            ctx.arc(0, 0, base / 2, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.shadowColor = p.color;
+            ctx.shadowBlur = 6;
+            ctx.fill();
+        } else if (p.type === 'ghost') {
+            const half = base / 2;
+            ctx.beginPath();
+            ctx.roundRect(-half, -half, base, base, 4);
+            ctx.strokeStyle = p.color;
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = p.color;
+            ctx.shadowBlur = 10;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.font = `bold ${base * 0.55}px Jost`;
+            ctx.fillStyle = p.color;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(p.letter, 0, 0);
+        } else if (p.type === 'glow') {
+            const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, base / 2);
+            grad.addColorStop(0, p.color);
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.beginPath();
+            ctx.arc(0, 0, base / 2, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+        } else if (p.type === 'atom') {
+            ctx.beginPath();
+            ctx.arc(0, 0, base / 4, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.fill();
+            ctx.strokeStyle = p.color;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, base, base / 3, Math.PI / 4, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.ellipse(0, 0, base, base / 3, -Math.PI / 4, 0, Math.PI * 2);
+            ctx.stroke();
+        } else {
+            ctx.beginPath();
+            for (let j = 0; j < 4; j++) {
+                ctx.rotate(Math.PI / 4);
+                ctx.rect(-base / 2, -1, base, 2);
+                ctx.rect(-1, -base / 2, 2, base);
+            }
+            ctx.fillStyle = p.color;
+            ctx.fill();
+        }
+        ctx.restore();
+        A.map.set(key, spr);
+        return spr;
+    }
+
+    /** Advances every particle by k frames' worth (k = 1 at 60 FPS) and draws it. */
+    _tick(k) {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         let alive = false;
 
         this.particles.forEach(p => {
             if (p.type === 'text') {
-                p.y += p.vy;
-                p.alpha -= p.decay;
+                p.y += p.vy * k;
+                p.alpha -= p.decay * k;
             } else if (p.type === 'ember') {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vx += (Math.random() - 0.5) * 0.1; // slight sway
-                p.alpha -= p.decay;
+                p.x += p.vx * k;
+                p.y += p.vy * k;
+                p.vx += (Math.random() - 0.5) * 0.1 * k; // slight sway
+                p.alpha -= p.decay * k;
             } else if (p.type === 'ghost' || p.type === 'glow') {
-                p.alpha -= p.decay;
+                p.alpha -= p.decay * k;
             } else {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += 0.15;
-                p.alpha -= p.decay;
-                p.rotation += p.rotationSpeed;
+                p.x += p.vx * k;
+                p.y += p.vy * k;
+                p.vy += 0.15 * k;
+                p.alpha -= p.decay * k;
+                p.rotation += p.rotationSpeed * k;
             }
 
             if (p.alpha > 0) {
                 alive = true;
-                this.ctx.save();
-                this.ctx.translate(p.x, p.y);
-                this.ctx.rotate(p.rotation);
-                this.ctx.globalAlpha = p.alpha;
-
-                if (p.type === 'text') {
-                    this.ctx.font = p.font;
-                    this.ctx.fillStyle = p.color;
-                    this.ctx.textAlign = 'center';
-                    
-                    // High contrast Jost shadow
-                    this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-                    this.ctx.shadowBlur = 4;
-                    this.ctx.shadowOffsetX = 1;
-                    this.ctx.shadowOffsetY = 1;
-                    
-                    this.ctx.fillText(p.text, 0, 0);
-                } else if (p.type === 'ember') {
-                    this.ctx.beginPath();
-                    this.ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
-                    this.ctx.fillStyle = p.color;
-                    
-                    // Ember glow
-                    this.ctx.shadowColor = p.color;
-                    this.ctx.shadowBlur = 6;
-                    this.ctx.shadowOffsetX = 0;
-                    this.ctx.shadowOffsetY = 0;
-                    
-                    this.ctx.fill();
-                } else if (p.type === 'ghost') {
-                    // Draw neon arcade ghost tile outline
-                    this.ctx.beginPath();
-                    const radius = 4;
-                    const halfSize = p.size / 2;
-                    
-                    // Simple rounded rectangle path
-                    this.ctx.roundRect(-halfSize, -halfSize, p.size, p.size, radius);
-                    
-                    this.ctx.strokeStyle = p.color;
-                    this.ctx.lineWidth = 2.5;
-                    
-                    this.ctx.shadowColor = p.color;
-                    this.ctx.shadowBlur = 10;
-                    this.ctx.shadowOffsetX = 0;
-                    this.ctx.shadowOffsetY = 0;
-                    this.ctx.stroke();
-                    
-                    // Draw the letter
-                    this.ctx.font = `bold ${p.size * 0.55}px Jost`;
-                    this.ctx.fillStyle = p.color;
-                    this.ctx.textAlign = 'center';
-                    this.ctx.textBaseline = 'middle';
-                    this.ctx.fillText(p.letter, 0, 0);
-                } else if (p.type === 'glow') {
-                    // Draw soft colored glow circle (radial gradient)
-                    const grad = this.ctx.createRadialGradient(0, 0, 0, 0, 0, p.size / 2);
-                    grad.addColorStop(0, p.color);
-                    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                    
-                    this.ctx.beginPath();
-                    this.ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
-                    this.ctx.fillStyle = grad;
-                    this.ctx.fill();
-                } else if (p.type === 'atom') {
-                    this.ctx.beginPath();
-                    this.ctx.arc(0, 0, p.size / 4, 0, Math.PI * 2);
-                    this.ctx.fillStyle = p.color;
-                    this.ctx.fill();
-
-                    this.ctx.strokeStyle = p.color;
-                    this.ctx.lineWidth = 1.5;
-                    
-                    this.ctx.beginPath();
-                    this.ctx.ellipse(0, 0, p.size, p.size / 3, Math.PI / 4, 0, Math.PI * 2);
-                    this.ctx.stroke();
-
-                    this.ctx.beginPath();
-                    this.ctx.ellipse(0, 0, p.size, p.size / 3, -Math.PI / 4, 0, Math.PI * 2);
-                    this.ctx.stroke();
-                } else {
-                    this.ctx.beginPath();
-                    for (let j = 0; j < 4; j++) {
-                        this.ctx.rotate(Math.PI / 4);
-                        this.ctx.rect(-p.size / 2, -1, p.size, 2);
-                        this.ctx.rect(-1, -p.size / 2, 2, p.size);
-                    }
-                    this.ctx.fillStyle = p.color;
-                    this.ctx.fill();
-                }
-                this.ctx.restore();
+                const spr = this._spriteFor(p);
+                const rot = p.rotation || 0;
+                // Scale from the size bucket the sprite was drawn at.
+                const sc = spr.base ? (p.size || spr.base) / spr.base : 1;
+                const c = Math.cos(rot) * sc, sn = Math.sin(rot) * sc;
+                // One transform per particle instead of save/translate/rotate/restore.
+                this.ctx.setTransform(c, sn, -sn, c, p.x, p.y);
+                this.ctx.globalAlpha = Math.min(1, p.alpha);
+                this.ctx.drawImage(this._atlas.canvas, spr.sx, spr.sy, spr.w, spr.h, -spr.cx, -spr.cy, spr.w, spr.h);
             }
         });
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.globalAlpha = 1;
 
-        if (alive) {
-            requestAnimationFrame(() => this.animate());
+        if (!alive) {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.particles = [];
         }
+        return alive;
     }
 }
 
@@ -2115,9 +2189,12 @@ class TeakScrambleGame {
         // Brief glow pulse so a freshly unlocked clue catches the eye
         const cluePanel = panel.closest('.clue-panel');
         if (cluePanel && this.clueLevel >= 2) {
-            cluePanel.classList.remove('clue-flash');
-            void cluePanel.offsetWidth; // restart the animation
-            cluePanel.classList.add('clue-flash');
+            // Restart without a forced layout (the halo animates on ::after).
+            if (cluePanel.classList.contains('clue-flash')) {
+                cluePanel.getAnimations({ subtree: true }).forEach(a => { a.currentTime = 0; a.play(); });
+            } else {
+                cluePanel.classList.add('clue-flash');
+            }
         }
         this.syncViewPositions(true);
     }
@@ -2196,9 +2273,14 @@ class TeakScrambleGame {
         const labelEl = document.getElementById('achievement-toast-label');
         if (!toast || !labelEl) return;
         labelEl.textContent = label;
-        toast.classList.remove('active');
-        void toast.offsetWidth; // restart the animation if one is already mid-flight
-        toast.classList.add('active');
+        // Restart a stamp already mid-flight through the Web Animations API;
+        // the old remove/offsetWidth/add trick forced a full-page layout
+        // (~10ms on a phone) right in the middle of the win celebration.
+        if (toast.classList.contains('active')) {
+            toast.getAnimations().forEach(a => { a.currentTime = 0; a.play(); });
+        } else {
+            toast.classList.add('active');
+        }
         if (this._achievementToastTimer) clearTimeout(this._achievementToastTimer);
         this._achievementToastTimer = setTimeout(() => toast.classList.remove('active'), 2600);
     }
@@ -2224,12 +2306,15 @@ class TeakScrambleGame {
         const start = performance.now();
         const bubble = document.querySelector('.score-bubble');
         if (bubble) {
-            bubble.classList.remove('score-counting');
-            void bubble.offsetWidth; // restart the pulse if one is mid-flight
-            bubble.classList.add('score-counting');
-            bubble.addEventListener('animationend', () => {
-                bubble.classList.remove('score-counting');
-            }, { once: true });
+            if (bubble.classList.contains('score-counting')) {
+                // Restart a pulse already mid-flight without forcing a layout.
+                bubble.getAnimations().forEach(a => { a.currentTime = 0; a.play(); });
+            } else {
+                bubble.classList.add('score-counting');
+                bubble.addEventListener('animationend', () => {
+                    bubble.classList.remove('score-counting');
+                }, { once: true });
+            }
         }
 
         const step = (now) => {
@@ -3840,9 +3925,15 @@ class TeakScrambleGame {
         const board = document.getElementById('main-board');
         if (!board) return;
 
+        // A fixed ring on <body>, centred on the board once. Nested inside the
+        // board (position:absolute) it made Chrome repaint the whole page on
+        // every frame of the expansion; fixed, it is a pure GPU layer.
+        const rect = board.getBoundingClientRect();
         const ring = document.createElement('div');
         ring.className = 'shockwave-ring';
-        board.appendChild(ring);
+        ring.style.left = `${rect.left + rect.width / 2}px`;
+        ring.style.top = `${rect.top + rect.height / 2}px`;
+        document.body.appendChild(ring);
 
         // Remove after animation completes (600ms)
         setTimeout(() => {
@@ -4205,17 +4296,64 @@ class TeakScrambleGame {
             return { element: cell, dist: dist };
         });
 
-        const maxDist = Math.max(...cellData.map(c => c.dist));
+        const maxDist = Math.max(...cellData.map(c => c.dist)) || 1;
 
-        cellData.forEach(item => {
-            const delay = (item.dist / maxDist) * 350; // max delay 350ms
-            setTimeout(() => {
-                item.element.classList.add('flash-active');
-                setTimeout(() => {
-                    item.element.classList.remove('flash-active');
-                }, 50);
-            }, delay);
+        // Drawn on one small canvas laid over the grid (under the tiles, which
+        // live on <body>): ~100 rects per frame on a single layer. Flashing
+        // each cell's ::after instead restyled all 100 cells every frame, and
+        // the original fired ~200 timers on top of that.
+        const grid = this.boardGrid;
+        const plate = grid.parentElement;
+        let canvas = this._waveCanvas;
+        if (!canvas || !canvas.isConnected) {
+            canvas = document.createElement('canvas');
+            canvas.className = 'grid-wave-canvas';
+            canvas.setAttribute('aria-hidden', 'true');
+            plate.appendChild(canvas);
+            this._waveCanvas = canvas;
+        }
+        // Geometry is read once per wave (one layout), never per frame.
+        const g = grid.getBoundingClientRect();
+        const p = plate.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.style.left = `${g.left - p.left - plate.clientLeft}px`;
+        canvas.style.top = `${g.top - p.top - plate.clientTop}px`;
+        canvas.style.width = `${g.width}px`;
+        canvas.style.height = `${g.height}px`;
+        canvas.width = Math.round(g.width * dpr);
+        canvas.height = Math.round(g.height * dpr);
+        canvas.hidden = false;
+        // The theme's flash colour (themes may restyle .grid-cell::after).
+        const color = getComputedStyle(cells[0], '::after').backgroundColor || 'rgba(64, 224, 208, 0.45)';
+        const rects = cellData.map(item => {
+            const r = item.element.getBoundingClientRect();
+            return { x: r.left - g.left, y: r.top - g.top, w: r.width, h: r.height, delay: (item.dist / maxDist) * 350 };
         });
+
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.fillStyle = color;
+        const HOLD = 50, FADE = 400, END = 350 + HOLD + FADE;
+        cancelAnimationFrame(this._waveFrame);
+        const start = performance.now();
+        const draw = (now) => {
+            const t = now - start;
+            ctx.clearRect(0, 0, g.width, g.height);
+            if (t >= END) {
+                canvas.hidden = true;
+                return;
+            }
+            for (const c of rects) {
+                const local = t - c.delay;
+                if (local < 0 || local >= HOLD + FADE) continue;
+                const k = local < HOLD ? 0 : (local - HOLD) / FADE;
+                ctx.globalAlpha = (1 - k) * (1 - k); // ease-out fade, like the old CSS transition
+                ctx.fillRect(c.x, c.y, c.w, c.h);
+            }
+            ctx.globalAlpha = 1;
+            this._waveFrame = requestAnimationFrame(draw);
+        };
+        this._waveFrame = requestAnimationFrame(draw);
     }
 
     // --- Show / Hide & 1-Page Layout Controls ---

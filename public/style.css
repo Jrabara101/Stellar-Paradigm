@@ -1572,22 +1572,16 @@ button:active {
 }
 
 /* Sequential letter bounce animation */
+/* GPU-only: the separate `translate`/`scale` properties stack on top of the
+   inline transform that positions each tile, so the hop never fights
+   placement. (Was `top` + box-shadow: a layout and a repaint every frame.) */
 @keyframes bounce-tile {
-    0%, 100% {
-        top: 0;
-        box-shadow: 
-            0 2px 0 var(--mustard-dark),
-            0 4px 6px rgba(0,0,0,0.25);
-    }
-    50% {
-        top: -25px;
-        box-shadow: 
-            0 15px 0 var(--mustard-dark),
-            0 20px 25px var(--shadow-deep);
-    }
+    0%, 100% { translate: 0 0; scale: 1; }
+    50% { translate: 0 -25px; scale: 1.06; }
 }
 .bounce-active {
     animation: bounce-tile 0.5s ease-in-out;
+    will-change: translate, scale;
 }
 
 /* Category Modal backdrop */
@@ -2814,36 +2808,29 @@ body[data-chip-material="glass"] .wood-tile {
 
 /* --- SHOCKWAVE RING EFFECT --- */
 .shockwave-ring {
-    position: absolute;
+    position: fixed; /* left/top set to the board centre by triggerShockwave */
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    border: 4px solid var(--shockwave-color);
+        border: 6px solid var(--shockwave-color);
     border-radius: 50%;
     pointer-events: none;
     z-index: 999;
-    width: 0;
-    height: 0;
+    /* Drawn once at full size, then only scaled + faded on the GPU (the old
+       version animated width/height/border/box-shadow: layout + repaint
+       every frame). */
+    width: 800px;
+    height: 800px;
     box-sizing: border-box;
     box-shadow: 0 0 20px var(--shockwave-glow), inset 0 0 12px var(--shockwave-inner);
+    transform: translate(-50%, -50%) scale(0);
+    will-change: transform, opacity;
     animation: shockwave-ring-expand 600ms cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
 }
 
 @keyframes shockwave-ring-expand {
-    0% {
-        width: 0;
-        height: 0;
-        border-color: var(--shockwave-color);
-        border-width: 8px;
-        box-shadow: 0 0 20px var(--shockwave-glow), inset 0 0 12px var(--shockwave-inner);
-    }
-    100% {
-        width: 800px; /* Expands to ~400px radius (800px diameter) */
-        height: 800px;
-        border-color: transparent;
-        border-width: 1px;
-        box-shadow: 0 0 0px transparent, inset 0 0 0px transparent;
-    }
+    0% { transform: translate(-50%, -50%) scale(0.02); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
 }
 
 /* --- RETRO TOGGLE SWITCHES & PREVIEW BUTTONS --- */
@@ -2985,37 +2972,29 @@ input:checked + .retro-slider:before {
     opacity: 1;
     transition: none;
 }
+/* Grid Flash Wave canvas (script.js triggerGridFlashWave): one layer over
+   the grid, under the tiles and above the cell flash highlight order. */
+.grid-wave-canvas {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1;
+}
+.grid-wave-canvas[hidden] {
+    display: none;
+}
 
 /* --- STREAK FIRE HIGH-STREAK GLOW PULSE --- */
 .streak-bubble.streak-glow-active {
     border-color: #ef5350 !important;
     animation: streak-glow-pulse-anim 1.5s infinite ease-in-out !important;
 }
-
+.streak-bubble.streak-glow-active::before {
+    box-shadow: 0 0 25px rgba(239, 83, 80, 1), 0 0 35px rgba(239, 83, 80, 0.6);
+    animation: streak-halo-fade 1.5s infinite ease-in-out;
+}
 @keyframes streak-glow-pulse-anim {
-    0% {
-        box-shadow: 
-            0 8px 16px var(--shadow-deep),
-            inset 0 3px 6px rgba(255,255,255,0.4),
-            inset 0 -3px 6px rgba(0,0,0,0.2),
-            0 0 10px rgba(239, 83, 80, 0.6);
-    }
-    50% {
-        box-shadow: 
-            0 8px 24px var(--shadow-deep),
-            inset 0 3px 6px rgba(255,255,255,0.4),
-            inset 0 -3px 6px rgba(0,0,0,0.2),
-            0 0 25px rgba(239, 83, 80, 1),
-            0 0 35px rgba(239, 83, 80, 0.6);
-        transform: rotate(7deg) scale(1.1); /* pulsate scale */
-    }
-    100% {
-        box-shadow: 
-            0 8px 16px var(--shadow-deep),
-            inset 0 3px 6px rgba(255,255,255,0.4),
-            inset 0 -3px 6px rgba(0,0,0,0.2),
-            0 0 10px rgba(239, 83, 80, 0.6);
-    }
+    0%, 100% { transform: rotate(7deg) scale(1); }
+    50% { transform: rotate(7deg) scale(1.1); }
 }
 
 /* --- VICTORY TITLE GLOW PULSE --- */
@@ -3160,32 +3139,22 @@ input:checked + .retro-slider:before {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    border: 3px solid var(--shockwave-color);
+        border: 4px solid var(--shockwave-color);
     border-radius: 50%;
     pointer-events: none;
     z-index: 999;
-    width: 0;
-    height: 0;
+    width: 180px;
+    height: 180px;
     box-sizing: border-box;
     box-shadow: 0 0 15px var(--shockwave-glow), inset 0 0 8px var(--shockwave-inner);
+    transform: translate(-50%, -50%) scale(0);
+    will-change: transform, opacity;
     animation: mini-shockwave-ring-expand 600ms cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
 }
 
 @keyframes mini-shockwave-ring-expand {
-    0% {
-        width: 0;
-        height: 0;
-        border-color: var(--shockwave-color);
-        border-width: 6px;
-        box-shadow: 0 0 15px var(--shockwave-glow), inset 0 0 8px var(--shockwave-inner);
-    }
-    100% {
-        width: 180px;
-        height: 180px;
-        border-color: transparent;
-        border-width: 1px;
-        box-shadow: 0 0 0px transparent, inset 0 0 0px transparent;
-    }
+    0% { transform: translate(-50%, -50%) scale(0.04); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
 }
 
 .mini-victory-title.active {
@@ -4344,23 +4313,16 @@ body[data-tile-effect="aurora"] .wood-tile.inlaid::after { animation-play-state:
 /* ==========================================================================
    WIN CASCADE GOLD RIPPLE (rides the bounce cascade stagger)
    ========================================================================== */
+/* The gold and its inner glow are painted once; only opacity animates. */
 .grid-cell.cascade-gold::after {
+    background-color: rgba(253, 187, 17, 0.75);
+    box-shadow: inset 0 0 14px rgba(255, 214, 90, 0.9);
     animation: cascade-gold-flash 0.55s ease-out;
 }
 @keyframes cascade-gold-flash {
-    0% {
-        opacity: 0;
-        background-color: rgba(253, 187, 17, 0);
-    }
-    30% {
-        opacity: 1;
-        background-color: rgba(253, 187, 17, 0.75);
-        box-shadow: inset 0 0 14px rgba(255, 214, 90, 0.9);
-    }
-    100% {
-        opacity: 0;
-        background-color: rgba(253, 187, 17, 0);
-    }
+    0% { opacity: 0; }
+    30% { opacity: 1; }
+    100% { opacity: 0; }
 }
 
 /* ==========================================================================
@@ -4378,47 +4340,46 @@ body[data-tile-effect="aurora"] .wood-tile.inlaid::after { animation-play-state:
 /* ==========================================================================
    STREAK GLOW TIERS (3+ mustard, 7+ orange; 10+ keeps the red pulse)
    ========================================================================== */
+/* Glow halos live on ::before and only fade (opacity); the bubble itself
+   only rotates/scales (transform). Animating box-shadow repainted the
+   bubble every frame for as long as the streak lasted. */
+.streak-bubble {
+    position: relative;
+}
+.streak-bubble.streak-tier-1::before,
+.streak-bubble.streak-tier-2::before,
+.streak-bubble.streak-glow-active::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0;
+    will-change: opacity;
+}
 .streak-bubble.streak-tier-1 {
     border-color: var(--mustard) !important;
-    animation: streak-tier1-glow 2.4s infinite ease-in-out;
 }
-@keyframes streak-tier1-glow {
-    0%, 100% {
-        box-shadow:
-            0 8px 16px var(--shadow-deep),
-            inset 0 3px 6px rgba(255,255,255,0.4),
-            inset 0 -3px 6px rgba(0,0,0,0.2),
-            0 0 6px rgba(225, 173, 1, 0.45);
-    }
-    50% {
-        box-shadow:
-            0 8px 20px var(--shadow-deep),
-            inset 0 3px 6px rgba(255,255,255,0.4),
-            inset 0 -3px 6px rgba(0,0,0,0.2),
-            0 0 14px rgba(225, 173, 1, 0.85);
-    }
+.streak-bubble.streak-tier-1::before {
+    box-shadow: 0 0 14px rgba(225, 173, 1, 0.85);
+    animation: streak-halo-fade 2.4s infinite ease-in-out;
 }
 .streak-bubble.streak-tier-2 {
     border-color: #ff9800 !important;
     animation: streak-tier2-glow 1.9s infinite ease-in-out;
 }
+.streak-bubble.streak-tier-2::before {
+    box-shadow: 0 0 22px rgba(255, 152, 0, 0.95), 0 0 30px rgba(255, 152, 0, 0.4);
+    animation: streak-halo-fade 1.9s infinite ease-in-out;
+}
+@keyframes streak-halo-fade {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+}
 @keyframes streak-tier2-glow {
-    0%, 100% {
-        box-shadow:
-            0 8px 16px var(--shadow-deep),
-            inset 0 3px 6px rgba(255,255,255,0.4),
-            inset 0 -3px 6px rgba(0,0,0,0.2),
-            0 0 10px rgba(255, 152, 0, 0.6);
-    }
-    50% {
-        box-shadow:
-            0 8px 22px var(--shadow-deep),
-            inset 0 3px 6px rgba(255,255,255,0.4),
-            inset 0 -3px 6px rgba(0,0,0,0.2),
-            0 0 22px rgba(255, 152, 0, 0.95),
-            0 0 30px rgba(255, 152, 0, 0.4);
-        transform: rotate(7deg) scale(1.06);
-    }
+    0%, 100% { transform: rotate(7deg) scale(1); }
+    50% { transform: rotate(7deg) scale(1.06); }
 }
 
 /* ==========================================================================
@@ -4560,11 +4521,20 @@ body[data-performance-mode="true"] .score-bubble.score-counting,
 body[data-performance-mode="true"] .grid-cell.cascade-gold::after {
     animation: none !important;
 }
+body[data-performance-mode="true"] .streak-bubble.streak-tier-1::before,
+body[data-performance-mode="true"] .streak-bubble.streak-tier-2::before {
+    display: none;
+}
 @media (prefers-reduced-motion: reduce) {
     .streak-bubble.streak-tier-1,
     .streak-bubble.streak-tier-2,
     .score-bubble.score-counting,
     .grid-cell.cascade-gold::after {
+        animation: none !important;
+    }
+    .streak-bubble.streak-tier-1::before,
+    .streak-bubble.streak-tier-2::before,
+    .streak-bubble.streak-glow-active::before {
         animation: none !important;
     }
     .category-modal, .theme-modal, .leaderboard-modal, .changelog-modal, .api-settings-modal, .get-app-modal,
