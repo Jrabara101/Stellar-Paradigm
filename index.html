@@ -104,7 +104,11 @@
         <div style="display: flex; flex-direction: column; gap: 6px;">
             <h1>Word Scramble</h1>
             <!-- ☰ Menu: rendered by React (src/components/HeaderMenu.tsx). -->
-            <div id="rx-header-menu" class="rx-slot"></div>
+            <div class="header-actions-row">
+                <div id="rx-header-menu" class="rx-slot"></div>
+                <!-- Feedback button (feedback.js) sits beside the menu, away from the board controls. -->
+                <div id="feedback-slot"></div>
+            </div>
             <div class="daily-banner" id="daily-banner" onclick="game.exitDailyChallenge()" title="Click to exit Daily Challenge and return to regular play">
                 <span id="daily-banner-text"></span>
                 <span class="daily-banner-exit">✕</span>

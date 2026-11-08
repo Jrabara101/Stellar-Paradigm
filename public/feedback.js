@@ -90,16 +90,20 @@ window.showFeedbackPrompt = function showFeedbackPrompt() {
     setTimeout(showFeedbackModal, 2500);
 };
 
-// Persistent floating button so anyone can leave feedback anytime, not just
-// right after a score submission.
+// Persistent button so anyone can leave feedback anytime, not just right
+// after a score submission. It sits in the header next to the Menu button
+// (#feedback-slot); as a floating corner button it covered Submit/Shuffle
+// on phones. Pages without the slot still get the floating version.
 function buildFeedbackButton() {
     const btn = document.createElement('button');
     btn.id = 'feedback-fab';
-    btn.className = 'feedback-fab';
+    btn.type = 'button';
     btn.title = 'Give feedback';
-    btn.textContent = 'Feedback';
+    btn.textContent = '💬 Feedback';
     btn.addEventListener('click', showFeedbackModal);
-    document.body.appendChild(btn);
+    const slot = document.getElementById('feedback-slot');
+    btn.className = slot ? 'feedback-fab feedback-fab--inline' : 'feedback-fab';
+    (slot || document.body).appendChild(btn);
 }
 
 document.addEventListener('DOMContentLoaded', buildFeedbackButton);

@@ -176,7 +176,7 @@ html[data-native] {
 html[data-native] .stellar-bar { top: var(--rx-inset-top); }
 html[data-native] .sound-toggle,
 html[data-native] .theme-quick-toggle { margin-top: var(--rx-inset-top); }
-html[data-native] .feedback-fab { margin-bottom: var(--rx-inset-bottom); }
+html[data-native] .feedback-fab:not(.feedback-fab--inline) { margin-bottom: var(--rx-inset-bottom); }
 
 /* Paints the status-bar strip in the active theme's dark wood, since the
    native bar background can no longer be coloured on Android 16. */
